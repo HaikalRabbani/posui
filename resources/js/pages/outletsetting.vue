@@ -57,6 +57,7 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">ID Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Owner ID</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
@@ -64,12 +65,13 @@
                         </thead>
                         <tbody>
                             <tr v-if="isLoadingData" class="border-b border-[#EBF3FB]">
-                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Memuat data outlet...</td>
+                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Memuat data outlet...</td>
                             </tr>
                             <tr v-else-if="paginatedOutlets.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Belum ada outlet.</td>
+                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Belum ada outlet.</td>
                             </tr>
-                            <tr v-else v-for="outlet in paginatedOutlets" :key="outlet.id" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
+                            <tr v-else v-for="outlet in paginatedOutlets" :key="resolveOutletId(outlet) ?? outlet.name" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
+                                <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ resolveOutletId(outlet) ?? '-' }}</td>
                                 <td class="px-5 py-3 text-[14px] text-[#1A2332] font-semibold">{{ outlet.name }}</td>
                                 <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ outlet.owner_id ?? '-' }}</td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
@@ -187,6 +189,28 @@ const showAlert = (message, type = 'success') => {
     alert.type = type;
 };
 
+const resolveOutletId = (outlet) => outlet?.id ?? null;
+
+const resolveOwnerId = (outlet) => outlet?.owner_id ?? null;
+
+const resolveOutletName = (outlet) => outlet?.name ?? '-';
+
+const extractOutletRows = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.data?.data)) return payload.data.data;
+    if (Array.isArray(payload?.outlets)) return payload.outlets;
+    if (Array.isArray(payload?.result)) return payload.result;
+    return [];
+};
+
+const normalizeOutlet = (raw) => ({
+    ...raw,
+    id: resolveOutletId(raw),
+    owner_id: resolveOwnerId(raw),
+    name: resolveOutletName(raw),
+});
+
 const authHeaders = () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
@@ -198,9 +222,7 @@ const authHeaders = () => {
 };
 
 const normalizedOutlets = computed(() => {
-    if (Array.isArray(outlets.value)) return outlets.value;
-    if (Array.isArray(outlets.value?.data)) return outlets.value.data;
-    return [];
+    return Array.isArray(outlets.value) ? outlets.value : [];
 });
 
 const filteredOutlets = computed(() => {
@@ -208,9 +230,10 @@ const filteredOutlets = computed(() => {
     if (!query) return normalizedOutlets.value;
 
     return normalizedOutlets.value.filter((outlet) => {
+        const id = String(resolveOutletId(outlet) ?? '');
         const name = (outlet.name || '').toLowerCase();
         const owner = String(outlet.owner_id ?? '');
-        return name.includes(query) || owner.includes(query);
+        return id.includes(query) || name.includes(query) || owner.includes(query);
     });
 });
 
@@ -237,7 +260,7 @@ const fetchOutlets = async () => {
             headers: authHeaders()
         });
 
-        outlets.value = response.data;
+        outlets.value = extractOutletRows(response.data).map(normalizeOutlet);
     } catch (error) {
         const status = error.response?.status;
         if (status === 401) {
@@ -257,8 +280,9 @@ const openModal = (outlet = null) => {
     formError.value = '';
 
     if (outlet) {
+        const outletId = resolveOutletId(outlet);
         isEditMode.value = true;
-        selectedOutletId.value = outlet.id;
+        selectedOutletId.value = outletId;
         form.name = outlet.name || '';
     } else {
         isEditMode.value = false;
@@ -320,8 +344,9 @@ const submitForm = async () => {
 };
 
 const confirmDelete = (outlet) => {
+    const outletId = resolveOutletId(outlet);
     deleteModal.show = true;
-    deleteModal.id = outlet.id;
+    deleteModal.id = outletId;
     deleteModal.name = outlet.name;
     deleteModal.isDeleting = false;
 };
