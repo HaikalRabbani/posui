@@ -1,14 +1,14 @@
 <template>
     <div class="flex h-screen bg-[#F0F4F8] font-['Poppins'] text-[#1A2332]">
-        
-        <aside 
+
+        <aside
             :class="[
                 'bg-white border-r border-[#D4E4F4] transition-all duration-300 flex flex-col z-20 relative',
                 isSidebarMinimized ? 'w-[80px]' : 'w-[260px]'
             ]"
         >
-            <button 
-                @click="toggleSidebar" 
+            <button
+                @click="toggleSidebar"
                 class="absolute -right-3.5 top-10 w-7 h-7 bg-white border border-[#D4E4F4] rounded-full shadow-sm flex items-center justify-center text-[#5A7A9A] hover:text-[#1B4F8A] hover:border-[#1B4F8A] transition-colors focus:outline-none z-30"
             >
                 <svg v-if="!isSidebarMinimized" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
@@ -32,10 +32,10 @@
             <nav class="flex-1 overflow-y-auto py-8 px-3">
                 <ul class="space-y-2">
                     <li class="text-[11px] font-semibold text-[#8AAFCC] uppercase tracking-wider px-3 mb-2" v-if="!isSidebarMinimized">Main Menu</li>
-                    
+
                     <li>
-                        <router-link 
-                            to="/dashboard" 
+                        <router-link
+                            to="/dashboard"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -45,8 +45,8 @@
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Dashboard</span>
                         </router-link>
 
-                        <router-link 
-                            to="/analytics" 
+                        <router-link
+                            to="/analytics"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -58,8 +58,8 @@
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Laporan & Analitik</span>
                         </router-link>
 
-                        <router-link 
-                            to="/users" 
+                        <router-link
+                            to="/users"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -69,8 +69,8 @@
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen User</span>
                         </router-link>
 
-                        <router-link 
-                            to="/menu" 
+                        <router-link
+                            to="/menu"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -80,6 +80,19 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Menu</span>
+                        </router-link>
+
+                        <router-link
+                            to="/outlet-setting"
+                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            :class="[$route.path === '/outlet-setting' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/outlet-setting' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 10l9 4 9-4M3 12l9 4 9-4" />
+                            </svg>
+                            <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Outlet Setting</span>
                         </router-link>
                     </li>
                 </ul>
@@ -94,7 +107,7 @@
         </aside>
 
         <div class="flex-1 flex flex-col overflow-hidden">
-            
+
             <header class="h-16 bg-white border-b border-[#D4E4F4] flex items-center justify-between px-6 z-10">
                 <div class="flex flex-col">
                     <h2 class="text-[16px] font-semibold text-[#1A2332] leading-tight">{{ $route.meta.title || 'Panel Admin' }}</h2>
@@ -109,7 +122,7 @@
                             <span v-else>{{ currentOutlet }}</span>
                         </p>
                     </div>
-                    
+
                     <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block"></div>
 
                     <div class="relative">
@@ -182,7 +195,7 @@ const fetchUserProfile = async () => {
         const userData = response.data.user;
         user.value.name = userData.name || 'Admin';
         user.value.email = userData.email || 'admin@pos.com';
-        
+
         if (userData.outlet && userData.outlet.name) {
             currentOutlet.value = userData.outlet.name;
         } else if (userData.outlet_id) {
@@ -203,7 +216,10 @@ const fetchUserProfile = async () => {
 
 const toggleSidebar = () => { isSidebarMinimized.value = !isSidebarMinimized.value; };
 const toggleProfileMenu = () => { isProfileMenuOpen.value = !isProfileMenuOpen.value; };
-const openProfileSetting = () => { isProfileMenuOpen.value = false; alert('Fitur Profile Setting akan segera hadir!'); };
+const openProfileSetting = () => {
+    isProfileMenuOpen.value = false;
+    router.push('/outlet-setting');
+};
 
 const handleLogout = async () => {
     isProfileMenuOpen.value = false;
@@ -212,7 +228,7 @@ const handleLogout = async () => {
         await axios.post('https://api.etres.my.id/api/v1/logout', {}, {
             headers: { Authorization: `Bearer ${token}` }
         });
-    } catch (e) { console.error('Logout API gagal', e); } 
+    } catch (e) { console.error('Logout API gagal', e); }
     finally {
         localStorage.removeItem('auth_token');
         router.push('/');

@@ -7,6 +7,7 @@ import Dashboard from '../pages/dashboard.vue';
 import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
 import Analytics from '../pages/analytics.vue';
+import OutletSetting from '../pages/outletsetting.vue';
 
 const routes = [
     {
@@ -37,7 +38,7 @@ const routes = [
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard,
-        meta: { 
+        meta: {
             title: 'Dashboard',
             desc: 'Pantau performa dan ringkasan bisnismu hari ini.'
         }
@@ -46,7 +47,7 @@ const routes = [
         path: '/users',
         name: 'UserManagement',
         component: UserManagement,
-        meta: { 
+        meta: {
             title: 'Manajemen User',
             desc: 'Kelola data akun manager dan karyawan kasir dengan mudah.'
         }
@@ -55,7 +56,7 @@ const routes = [
         path: '/menu',
         name: 'MenuManagement',
         component: MenuManagement,
-        meta: { 
+        meta: {
             title: 'Manajemen Menu',
             desc: 'Kelola daftar produk, harga, dan ketersediaan menu.'
         }
@@ -64,9 +65,18 @@ const routes = [
         path: '/analytics',
         name: 'Analytics',
         component: Analytics,
-        meta: { 
+        meta: {
             title: 'Laporan & Analitik',
             desc: 'Pantau grafik pendapatan dan performa penjualan menu.'
+        }
+    },
+    {
+        path: '/outlet-setting',
+        name: 'OutletSetting',
+        component: OutletSetting,
+        meta: {
+            title: 'Outlet Setting',
+            desc: 'Kelola outlet Anda dan lakukan perubahan data outlet.'
         }
     }
 ];
