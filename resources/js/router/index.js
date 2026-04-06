@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../pages/login.vue';
-import Register from '../pages/register.vue'; // <-- Import halaman register
+import Register from '../pages/register.vue';
+import ForgotPassword from '../pages/forgotpassword.vue';
+import ResetPassword from '../pages/resetpassword.vue';
 import Dashboard from '../pages/dashboard.vue';
 import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
@@ -14,10 +16,22 @@ const routes = [
         meta: { title: 'Login' }
     },
     {
-        path: '/register', // <-- Rute Register
+        path: '/register',
         name: 'Register',
         component: Register,
         meta: { title: 'Pendaftaran Akun' }
+    },
+    {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: ForgotPassword,
+        meta: { title: 'Lupa Password' }
+    },
+    {
+        path: '/reset-password',
+        name: 'ResetPassword',
+        component: ResetPassword,
+        meta: { title: 'Reset Password' }
     },
     {
         path: '/dashboard',

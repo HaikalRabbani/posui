@@ -74,9 +74,9 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <a href="#" class="text-[12px] text-[#2E7DD6] hover:text-[#1B4F8A] font-medium transition-colors">
-                        Lupa kata sandi?
-                    </a>
+                    <router-link to="/forgot-password" class="text-[12px] text-[#2E7DD6] hover:text-[#1B4F8A] font-medium transition-colors">
+                    Lupa kata sandi?
+                    </router-link>
                 </div>
 
                 <button 
