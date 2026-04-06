@@ -28,12 +28,13 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                        
                         <div class="relative w-full sm:w-48 flex-shrink-0">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             </div>
                             <input 
-                                type="text" v-model="searchQuery" placeholder="Cari nama menu..." 
+                                type="text" v-model="searchQuery" placeholder="Cari menu..." 
                                 class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC]"
                             >
                         </div>
@@ -42,6 +43,7 @@
                             <option value="">Semua Kategori</option>
                             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                         </select>
+
                         <select v-model="filterStation" class="px-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white flex-shrink-0">
                             <option value="">Semua Station</option>
                             <option v-for="st in stations" :key="st.id" :value="st.id">{{ st.name }}</option>
@@ -53,6 +55,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                             Kategori
                         </button>
+                        
                         <button @click="openStationModal" class="bg-white border border-[#D4E4F4] text-[#5A7A9A] hover:bg-[#F0F4F8] hover:text-[#1B4F8A] px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                             Station
@@ -290,6 +293,12 @@
                 </div>
                 
                 <form @submit.prevent="submitForm" class="p-6 space-y-4 overflow-y-auto">
+                    
+                    <div v-if="modalAlert.show" class="p-3 mb-2 rounded-lg border bg-red-50 border-[#B83B2A] text-[#B83B2A] text-[13px] font-medium flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ modalAlert.message }}</span>
+                    </div>
+
                     <div>
                         <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Nama Menu</label>
                         <input type="text" v-model="form.name" @input="formErrors.name = false" maxlength="100" placeholder="Contoh: Nasi Goreng" 
@@ -409,13 +418,12 @@ const searchQuery = ref('');
 const filterCategory = ref('');
 const filterStation = ref('');
 
-// State Modals
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedProductId = ref(null);
 const imagePreview = ref(null);
 
-const viewModal = reactive({ show: false, data: {} }); // <-- Modal Baru untuk Lihat Detail
+const viewModal = reactive({ show: false, data: {} }); 
 const crudModals = reactive({ category: false, station: false });
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
@@ -472,18 +480,29 @@ const validateForm = () => {
     return !formErrors.name && !formErrors.category_id && !formErrors.cost_price && !formErrors.stock && !formErrors.price;
 };
 
-// ================= PAGINATION =================
+// ================= PAGINATION & FILTER =================
 const currentPage = ref(1);
 const itemsPerPage = ref(5); 
 
 const sortedAndFilteredProducts = computed(() => {
-    let filtered = products.value;
+    // FIX: Gunakan array pengecekan biar bebas error "filtered.sort is not a function"
+    let filtered = Array.isArray(products.value) ? [...products.value] : [];
+    
+    // Fitur 1: Filter Pencarian Text
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(q));
+        filtered = filtered.filter(p => p?.name?.toLowerCase().includes(q));
     }
-    if (filterCategory.value !== '') filtered = filtered.filter(p => p.category_id === filterCategory.value);
-    if (filterStation.value !== '') filtered = filtered.filter(p => p.station_id === filterStation.value);
+    
+    // Fitur 2: Filter Kategori
+    if (filterCategory.value !== '') {
+        filtered = filtered.filter(p => p.category_id === filterCategory.value);
+    }
+    
+    // Fitur 3: Filter Station
+    if (filterStation.value !== '') {
+        filtered = filtered.filter(p => p.station_id === filterStation.value);
+    }
 
     return filtered.sort((a, b) => {
         if (a.is_active === b.is_active) return 0;
@@ -496,6 +515,7 @@ const paginatedProducts = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     return sortedAndFilteredProducts.value.slice(start, start + itemsPerPage.value);
 });
+
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
@@ -505,9 +525,19 @@ const fetchProducts = async () => {
     try {
         const token = localStorage.getItem('auth_token');
         const res = await axios.get('https://api.etres.my.id/api/v1/products?limit=1000', { headers: { Authorization: `Bearer ${token}` } });
-        products.value = res.data.data || [];
-    } catch (error) { showAlert('Gagal mengambil data menu.', 'error'); } 
-    finally { isLoadingData.value = false; }
+        
+        // Cek struktur array dari response laravel yang bervariasi
+        if (Array.isArray(res.data.data)) products.value = res.data.data;
+        else if (Array.isArray(res.data)) products.value = res.data;
+        else if (res.data && Array.isArray(res.data.data?.data)) products.value = res.data.data.data;
+        else products.value = [];
+        
+    } catch (error) { 
+        showAlert('Gagal mengambil data menu.', 'error'); 
+        products.value = [];
+    } finally { 
+        isLoadingData.value = false; 
+    }
 };
 
 const submitForm = async () => {
@@ -567,9 +597,15 @@ const executeDelete = async () => {
 // ================= KATEGORI & STATION CRUD =================
 const fetchCategories = async () => {
     try {
-        const res = await axios.get('https://api.etres.my.id/api/v1/categories?limit=1000', { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
-        categories.value = res.data.data || res.data;
-    } catch (error) { console.error('Gagal memuat kategori'); }
+        const token = localStorage.getItem('auth_token');
+        const res = await axios.get('https://api.etres.my.id/api/v1/categories?limit=1000', { headers: { Authorization: `Bearer ${token}` } });
+        
+        if (Array.isArray(res.data.data)) categories.value = res.data.data;
+        else if (Array.isArray(res.data)) categories.value = res.data;
+        else if (res.data && Array.isArray(res.data.data?.data)) categories.value = res.data.data.data;
+        else categories.value = [];
+        
+    } catch (error) { console.error('Kategori gagal dimuat', error); categories.value = []; }
 };
 const openCategoryModal = () => { crudErrors.categoryName = false; newCategoryName.value = ''; crudModals.category = true; };
 const addCategory = async () => {
@@ -590,9 +626,15 @@ const deleteCategory = async (id) => {
 
 const fetchStations = async () => {
     try {
-        const res = await axios.get('https://api.etres.my.id/api/v1/stations?limit=1000', { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
-        stations.value = res.data.data || res.data;
-    } catch (error) { console.error('Gagal memuat station'); }
+        const token = localStorage.getItem('auth_token');
+        const res = await axios.get('https://api.etres.my.id/api/v1/stations?limit=1000', { headers: { Authorization: `Bearer ${token}` } });
+        
+        if (Array.isArray(res.data.data)) stations.value = res.data.data;
+        else if (Array.isArray(res.data)) stations.value = res.data;
+        else if (res.data && Array.isArray(res.data.data?.data)) stations.value = res.data.data.data;
+        else stations.value = [];
+        
+    } catch (error) { console.error('Gagal memuat station'); stations.value = []; }
 };
 const openStationModal = () => { crudErrors.stationName = false; newStationName.value = ''; crudModals.station = true; };
 const addStation = async () => {
@@ -612,11 +654,7 @@ const deleteStation = async (id) => {
 };
 
 // ================= MODAL UTILS =================
-const openViewModal = (item) => {
-    viewModal.data = item;
-    viewModal.show = true;
-};
-
+const openViewModal = (item) => { viewModal.data = item; viewModal.show = true; };
 const showAlert = (msg, type) => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 const openModal = (item = null) => {
     formErrors.name = false; formErrors.category_id = false; formErrors.cost_price = false; formErrors.price = false; formErrors.stock = false; modalAlert.show = false;
@@ -641,6 +679,9 @@ onMounted(async () => {
         const response = await axios.get('https://api.etres.my.id/api/v1/me', { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
         currentUserOutletId.value = response.data.user.outlet_id || (response.data.user.outlet?.id);
     } catch (e) {}
-    await fetchCategories(); await fetchStations(); await fetchProducts();
+    
+    await fetchCategories(); 
+    await fetchStations(); 
+    await fetchProducts();
 });
 </script>
