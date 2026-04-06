@@ -4,6 +4,7 @@ import Register from '../pages/register.vue';
 import ForgotPassword from '../pages/forgotpassword.vue';
 import ResetPassword from '../pages/resetpassword.vue';
 import Dashboard from '../pages/dashboard.vue';
+import ProfileSetting from '../pages/profilesetting.vue';
 import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
 import Analytics from '../pages/analytics.vue';
@@ -41,6 +42,15 @@ const routes = [
         meta: {
             title: 'Dashboard',
             desc: 'Pantau performa dan ringkasan bisnismu hari ini.'
+        }
+    },
+    {
+        path: '/profile-setting',
+        name: 'ProfileSetting',
+        component: ProfileSetting,
+        meta: {
+            title: 'Profile Setting',
+            desc: 'Kelola informasi profil dan keamanan akun Anda.'
         }
     },
     {

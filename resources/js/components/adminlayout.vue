@@ -169,7 +169,8 @@ import axios from 'axios';
 
 const router = useRouter();
 
-const isSidebarMinimized = ref(false);
+// Cek apakah di local storage sebelumnya sudah di-minimize
+const isSidebarMinimized = ref(localStorage.getItem('sidebar_minimized') === 'true');
 const isProfileMenuOpen = ref(false);
 const isLoading = ref(true);
 
@@ -214,11 +215,15 @@ const fetchUserProfile = async () => {
     }
 };
 
-const toggleSidebar = () => { isSidebarMinimized.value = !isSidebarMinimized.value; };
+const toggleSidebar = () => { 
+    isSidebarMinimized.value = !isSidebarMinimized.value; 
+    // Simpan status terbaru ke local storage tiap kali tombol diklik
+    localStorage.setItem('sidebar_minimized', isSidebarMinimized.value.toString());
+};
 const toggleProfileMenu = () => { isProfileMenuOpen.value = !isProfileMenuOpen.value; };
 const openProfileSetting = () => {
     isProfileMenuOpen.value = false;
-    router.push('/outlet-setting');
+    router.push('/profile-setting');
 };
 
 const handleLogout = async () => {
