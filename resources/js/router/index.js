@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../pages/login.vue';
 import Dashboard from '../pages/dashboard.vue';
 import UserManagement from '../pages/usermanagement.vue';
-import MenuManagement from '../pages/menumanagement.vue'; // <-- Tambahan
+import MenuManagement from '../pages/menumanagement.vue';
+import Analytics from '../pages/analytics.vue';
 
 const routes = [
     {
@@ -36,6 +37,15 @@ const routes = [
         meta: { 
             title: 'Manajemen Menu',
             desc: 'Kelola daftar produk, harga, dan ketersediaan menu.'
+        }
+    },
+    {
+        path: '/analytics', // <-- Tambahan rute analitik
+        name: 'Analytics',
+        component: Analytics,
+        meta: { 
+            title: 'Laporan & Analitik',
+            desc: 'Pantau grafik pendapatan dan performa penjualan menu.'
         }
     }
 ];

@@ -44,8 +44,20 @@
                             <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/dashboard' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Dashboard</span>
                         </router-link>
-                    </li>
-                    <li>
+
+                        <router-link 
+                            to="/analytics" 
+                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            :class="[$route.path === '/analytics' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/analytics' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Laporan & Analitik</span>
+                        </router-link>
+
                         <router-link 
                             to="/users" 
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
