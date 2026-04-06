@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-[#F0F4F8] font-['Poppins'] py-10 px-4">
         <div class="bg-[#F7FAFD] p-8 rounded-xl shadow-sm border border-[#D4E4F4] w-full max-w-md">
-            
+
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-12 h-12 bg-[#1B4F8A] rounded-xl mb-3 shadow-sm">
                     <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,10 +13,10 @@
             </div>
 
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-                <div v-if="alert.show" :class="[ 
+                <div v-if="alert.show" :class="[
                     'mb-5 p-3 rounded-lg border text-[13px] font-medium flex items-center gap-2',
-                    alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 
-                    alert.type === 'success' ? 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' : 
+                    alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' :
+                    alert.type === 'success' ? 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' :
                     'bg-[#EBF3FB] border-[#2E7DD6] text-[#1B4F8A]'
                 ]">
                     <svg v-if="alert.type === 'error'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -35,13 +35,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             v-model="form.email"
                             placeholder="admin@pos.com"
                             :disabled="isLoading"
                             @input="clearError('email')"
-                            :class="[ 
+                            :class="[
                                 'w-full pl-10 pr-4 py-2.5 text-[14px] rounded-lg border focus:outline-none transition-colors disabled:opacity-50',
                                 errors.email ? 'border-[#B83B2A] focus:border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] bg-white'
                             ]"
@@ -58,13 +58,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
-                        <input 
-                            type="password" 
+                        <input
+                            type="password"
                             v-model="form.password"
                             placeholder="••••••••"
                             :disabled="isLoading"
                             @input="clearError('password')"
-                            :class="[ 
+                            :class="[
                                 'w-full pl-10 pr-4 py-2.5 text-[14px] rounded-lg border focus:outline-none transition-colors disabled:opacity-50',
                                 errors.password ? 'border-[#B83B2A] focus:border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] bg-white'
                             ]"
@@ -79,8 +79,8 @@
                     </router-link>
                 </div>
 
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     :disabled="isLoading"
                     class="w-full bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:bg-[#8AAFCC] text-white text-[15px] font-semibold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2"
                 >
@@ -93,7 +93,7 @@
             </form>
 
             <div class="mt-6 text-center text-[13px] text-[#5A7A9A]">
-                Belum punya akun? 
+                Belum punya akun?
                 <router-link to="/register" class="text-[#2E7DD6] hover:text-[#1B4F8A] font-semibold transition-colors">
                     Daftar di sini
                 </router-link>
@@ -107,6 +107,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { API_BASE_URL, fetchCurrentUser, resolvePostLoginRoute } from '../utils/auth';
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -151,20 +152,22 @@ const handleLogin = async () => {
 
     isLoading.value = true;
     showAlert('Sedang memverifikasi kredensial...', 'info');
-    
+
     try {
-        const response = await axios.post('https://api.etres.my.id/api/v1/login', {
+        const response = await axios.post(`${API_BASE_URL}/login`, {
             email: form.email,
             password: form.password
         });
 
         localStorage.setItem('auth_token', response.data.token || response.data.access_token);
         localStorage.setItem('last_login_email', form.email);
-        
+
         showAlert('Login berhasil! Mengalihkan...', 'success');
-        
+
+        const user = response.data.user || await fetchCurrentUser(true);
+
         setTimeout(() => {
-            router.push('/dashboard');
+            router.push(resolvePostLoginRoute(user));
         }, 800);
 
     } catch (error) {
