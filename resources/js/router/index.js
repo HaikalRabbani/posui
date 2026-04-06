@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../pages/login.vue';
+import Register from '../pages/register.vue'; // <-- Import halaman register
 import Dashboard from '../pages/dashboard.vue';
 import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
@@ -11,6 +12,12 @@ const routes = [
         name: 'Login',
         component: Login,
         meta: { title: 'Login' }
+    },
+    {
+        path: '/register', // <-- Rute Register
+        name: 'Register',
+        component: Register,
+        meta: { title: 'Pendaftaran Akun' }
     },
     {
         path: '/dashboard',
@@ -31,7 +38,7 @@ const routes = [
         }
     },
     {
-        path: '/menu', // <-- Tambahan rute
+        path: '/menu',
         name: 'MenuManagement',
         component: MenuManagement,
         meta: { 
@@ -40,7 +47,7 @@ const routes = [
         }
     },
     {
-        path: '/analytics', // <-- Tambahan rute analitik
+        path: '/analytics',
         name: 'Analytics',
         component: Analytics,
         meta: { 

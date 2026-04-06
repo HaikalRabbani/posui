@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-[#F0F4F8] font-['Poppins']">
+    <div class="min-h-screen flex items-center justify-center bg-[#F0F4F8] font-['Poppins'] py-10 px-4">
         <div class="bg-[#F7FAFD] p-8 rounded-xl shadow-sm border border-[#D4E4F4] w-full max-w-md">
             
             <div class="text-center mb-8">
@@ -91,6 +91,14 @@
                     </template>
                 </button>
             </form>
+
+            <div class="mt-6 text-center text-[13px] text-[#5A7A9A]">
+                Belum punya akun? 
+                <router-link to="/register" class="text-[#2E7DD6] hover:text-[#1B4F8A] font-semibold transition-colors">
+                    Daftar di sini
+                </router-link>
+            </div>
+
         </div>
     </div>
 </template>
@@ -125,7 +133,6 @@ const clearError = (field) => {
     errors[field] = false; alert.show = false;
 };
 
-// Ambil last login pas halaman di-load
 onMounted(() => {
     const savedEmail = localStorage.getItem('last_login_email');
     if (savedEmail) {
@@ -151,7 +158,6 @@ const handleLogin = async () => {
             password: form.password
         });
 
-        // Simpan token dan email terakhir yang sukses login
         localStorage.setItem('auth_token', response.data.token || response.data.access_token);
         localStorage.setItem('last_login_email', form.email);
         
