@@ -24,7 +24,7 @@
                     </div>
                     <div v-if="!isSidebarMinimized" class="flex flex-col">
                         <span class="text-[16px] font-bold text-[#1B4F8A] leading-tight">POS F&B</span>
-                        <span class="text-[10px] text-[#5A7A9A] font-medium uppercase tracking-wider">Admin Panel</span>
+                        <span class="text-[10px] text-[#5A7A9A] font-medium uppercase tracking-wider">{{ userRole === 'developer' ? 'Super Admin' : 'Admin Panel' }}</span>
                     </div>
                 </div>
             </div>
@@ -46,6 +46,7 @@
                         </router-link>
 
                         <router-link
+                            v-if="userRole !== 'developer'"
                             to="/analytics"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -59,6 +60,7 @@
                         </router-link>
 
                         <router-link
+                            v-if="userRole === 'developer' || userRole === 'manager'"
                             to="/users"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -70,6 +72,7 @@
                         </router-link>
 
                         <router-link
+                            v-if="userRole !== 'developer'"
                             to="/menu"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -83,6 +86,7 @@
                         </router-link>
 
                         <router-link
+                            v-if="userRole === 'developer' || userRole === 'manager'"
                             to="/outlet-setting"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -92,15 +96,14 @@
                             <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/outlet-setting' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 10l9 4 9-4M3 12l9 4 9-4" />
                             </svg>
-                            <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Outlet Setting</span>
+                            <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Outlet</span>
                         </router-link>
                     </li>
                 </ul>
             </nav>
 
             <div class="mt-auto flex flex-col">
-                
-                <div class="px-3 pb-2">
+                <div class="px-3 pb-2" v-if="userRole !== 'developer'">
                     <router-link
                         to="/transactions"
                         class="flex items-center w-full px-3 py-2.5 rounded-lg transition-colors group"
@@ -121,7 +124,6 @@
                         <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] font-medium whitespace-nowrap">Logout</span>
                     </button>
                 </div>
-                
             </div>
         </aside>
 
@@ -134,7 +136,7 @@
                 </div>
 
                 <div class="flex items-center gap-5">
-                    <div class="hidden sm:flex items-center gap-2 bg-[#F0F4F8] border border-[#D4E4F4] px-3 py-1.5 rounded-lg">
+                    <div class="hidden sm:flex items-center gap-2 bg-[#F0F4F8] border border-[#D4E4F4] px-3 py-1.5 rounded-lg" v-if="userRole !== 'developer'">
                         <div class="w-2 h-2 rounded-full" :class="isLoading ? 'bg-[#8AAFCC] animate-pulse' : 'bg-[#2A7A4B]'"></div>
                         <p class="text-[13px] font-semibold text-[#1A2332]">
                             <span v-if="isLoading" class="text-[#8AAFCC]">Memuat...</span>
@@ -142,7 +144,7 @@
                         </p>
                     </div>
 
-                    <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block"></div>
+                    <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block" v-if="userRole !== 'developer'"></div>
 
                     <div class="relative">
                         <button @click="toggleProfileMenu" class="flex items-center gap-3 focus:outline-none rounded-lg p-1 hover:bg-[#F7FAFD] transition-colors text-left">
@@ -152,7 +154,7 @@
                             </div>
                             <div class="hidden md:block">
                                 <p class="text-[14px] font-semibold text-[#1A2332] leading-none mb-1">{{ isLoading ? 'Loading...' : user.name }}</p>
-                                <p class="text-[12px] text-[#5A7A9A] leading-none">{{ isLoading ? '...' : user.email }}</p>
+                                <p class="text-[12px] text-[#5A7A9A] leading-none">{{ isLoading ? '...' : userRole }}</p>
                             </div>
                             <svg class="w-4 h-4 text-[#8AAFCC] ml-1 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </button>
@@ -161,7 +163,7 @@
                             <div v-if="isProfileMenuOpen" class="absolute right-0 mt-2 w-56 bg-white border border-[#D4E4F4] rounded-lg shadow-lg py-1 z-50">
                                 <div class="px-4 py-3 border-b border-[#D4E4F4] md:hidden">
                                     <p class="text-[14px] font-semibold text-[#1A2332] truncate">{{ user.name }}</p>
-                                    <p class="text-[12px] text-[#5A7A9A] truncate mt-0.5">{{ user.email }}</p>
+                                    <p class="text-[12px] text-[#5A7A9A] truncate mt-0.5">{{ userRole }}</p>
                                 </div>
                                 <a href="#" @click.prevent="openProfileSetting" class="flex items-center gap-2 px-4 py-2 text-[14px] text-[#1A2332] hover:bg-[#EBF3FB] hover:text-[#1B4F8A] transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -181,19 +183,18 @@
 </template>
 
 <script setup>
-// Bagian script ini persis SAMA persis kaya yang terakhir lu copas, gak ada yang diubah.
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const router = useRouter();
 
-// Cek apakah di local storage sebelumnya sudah di-minimize
 const isSidebarMinimized = ref(localStorage.getItem('sidebar_minimized') === 'true');
 const isProfileMenuOpen = ref(false);
 const isLoading = ref(true);
 
 const currentOutlet = ref('');
+const userRole = ref('');
 const user = ref({ name: '', email: '' });
 
 const userInitials = computed(() => {
@@ -204,6 +205,28 @@ const userInitials = computed(() => {
 });
 
 const fetchUserProfile = async () => {
+    // 1. Cek apakah ada data di Cache (Local Storage)
+    const cachedUser = localStorage.getItem('user_profile_cache');
+    
+    if (cachedUser) {
+        // Jika ada, langsung tampilkan secara instan (Bypass Loading)
+        const parsedData = JSON.parse(cachedUser);
+        user.value.name = parsedData.name;
+        user.value.email = parsedData.email;
+        userRole.value = parsedData.role;
+        currentOutlet.value = parsedData.outlet;
+        isLoading.value = false;
+        
+        // Lakukan sinkronisasi ke server secara diam-diam di background
+        silentFetchProfile();
+        return;
+    }
+
+    // Jika cache kosong (baru login), jalankan loading normal
+    await silentFetchProfile();
+};
+
+const silentFetchProfile = async () => {
     try {
         const token = localStorage.getItem('auth_token');
         if (!token) return router.push('/');
@@ -214,7 +237,10 @@ const fetchUserProfile = async () => {
 
         const userData = response.data.user;
         user.value.name = userData.name || 'Admin';
-        user.value.email = userData.email || 'admin@pos.com';
+        user.value.email = userData.email || '';
+        userRole.value = userData.role || 'karyawan';
+        
+        localStorage.setItem('user_role', userRole.value);
 
         if (userData.outlet && userData.outlet.name) {
             currentOutlet.value = userData.outlet.name;
@@ -224,9 +250,18 @@ const fetchUserProfile = async () => {
             currentOutlet.value = 'Belum Ada Outlet';
         }
 
+        // 2. Simpan / Perbarui Cache agar perpindahan halaman selanjutnya instan
+        localStorage.setItem('user_profile_cache', JSON.stringify({
+            name: user.value.name,
+            email: user.value.email,
+            role: userRole.value,
+            outlet: currentOutlet.value
+        }));
+
     } catch (error) {
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_profile_cache');
             router.push('/');
         }
     } finally {
@@ -236,7 +271,6 @@ const fetchUserProfile = async () => {
 
 const toggleSidebar = () => { 
     isSidebarMinimized.value = !isSidebarMinimized.value; 
-    // Simpan status terbaru ke local storage tiap kali tombol diklik
     localStorage.setItem('sidebar_minimized', isSidebarMinimized.value.toString());
 };
 const toggleProfileMenu = () => { isProfileMenuOpen.value = !isProfileMenuOpen.value; };
@@ -255,6 +289,8 @@ const handleLogout = async () => {
     } catch (e) { console.error('Logout API gagal', e); }
     finally {
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_profile_cache'); // Hapus cache profil saat logout
         router.push('/');
     }
 };
@@ -265,12 +301,20 @@ const closeDropdown = (e) => {
     }
 };
 
+// Fungsi untuk menangkap event jika user update nama di halaman Profile
+const handleProfileUpdate = () => {
+    localStorage.removeItem('user_profile_cache');
+    silentFetchProfile();
+};
+
 onMounted(() => {
     fetchUserProfile();
     document.addEventListener('click', closeDropdown);
+    window.addEventListener('profile-updated', handleProfileUpdate);
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', closeDropdown);
+    window.removeEventListener('profile-updated', handleProfileUpdate);
 });
 </script>
