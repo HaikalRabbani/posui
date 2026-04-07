@@ -9,6 +9,7 @@ import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
 import Analytics from '../pages/analytics.vue';
 import OutletSetting from '../pages/outletsetting.vue';
+import TransactionHistory from '../pages/transactionhistory.vue';
 
 const routes = [
     {
@@ -88,7 +89,16 @@ const routes = [
             title: 'Outlet Setting',
             desc: 'Kelola outlet Anda dan lakukan perubahan data outlet.'
         }
-    }
+    },
+    {
+        path: '/transactions',
+        name: 'TransactionHistory',
+        component: TransactionHistory,
+        meta: {
+            title: 'Riwayat Transaksi',
+            desc: 'Pantau riwayat pesanan dan nota transaksi outlet Anda.'
+        }
+    },
 ];
 
 const router = createRouter({
