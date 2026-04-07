@@ -2,19 +2,35 @@
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
             
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-[24px] font-semibold text-[#1A2332]">Laporan & Analitik</h1>
-                    <p class="text-[14px] text-[#5A7A9A] mt-1">Pantau performa penjualan dan tren pesanan.</p>
-                </div>
-                <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] p-1.5 rounded-lg shadow-sm">
-                    <span class="pl-2 text-[13px] text-[#5A7A9A] font-medium">Periode:</span>
-                    <select v-model="selectedPeriod" class="border-none bg-transparent text-[#1A2332] text-[13px] font-semibold focus:outline-none cursor-pointer pr-4">
-                        <option value="today">Hari Ini</option>
-                        <option value="7days">7 Hari Terakhir</option>
-                        <option value="30days">30 Hari Terakhir</option>
-                        <option value="this_month">Bulan Ini</option>
-                    </select>
+            <div class="flex flex-col sm:flex-row items-end justify-end gap-3">
+                <div class="flex items-center gap-2">
+                    <button 
+                        @click="exportData('csv')" 
+                        :disabled="isExporting"
+                        class="px-3 py-1.5 bg-[#2A7A4B] hover:bg-green-700 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        CSV
+                    </button>
+
+                    <button 
+                        @click="exportData('pdf')" 
+                        :disabled="isExporting"
+                        class="px-3 py-1.5 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        PDF
+                    </button>
+
+                    <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] p-1.5 rounded-lg shadow-sm ml-2">
+                        <span class="pl-2 text-[13px] text-[#5A7A9A] font-medium">Periode:</span>
+                        <select v-model="selectedPeriod" @change="fetchAnalytics" class="border-none bg-transparent text-[#1A2332] text-[13px] font-semibold focus:outline-none cursor-pointer pr-4">
+                            <option value="today">Hari Ini</option>
+                            <option value="7days">7 Hari Terakhir</option>
+                            <option value="30days">30 Hari Terakhir</option>
+                            <option value="this_month">Bulan Ini</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -25,7 +41,7 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Total Pendapatan</p>
-                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp 12.450.000</p>
+                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp {{ formatRupiah(summary.total_revenue) }}</p>
                     </div>
                 </div>
 
@@ -35,7 +51,7 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Order Selesai</p>
-                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">342</p>
+                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ summary.completed_orders }}</p>
                     </div>
                 </div>
 
@@ -45,7 +61,7 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Avg. Order Value</p>
-                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp 36.400</p>
+                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp {{ formatRupiah(summary.avg_order_value) }}</p>
                     </div>
                 </div>
 
@@ -55,13 +71,12 @@
                     </div>
                     <div>
                         <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Jam Tersibuk</p>
-                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">19:00 - 20:00</p>
+                        <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ summary.busiest_hour }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
                 <div class="lg:col-span-2 bg-white border border-[#D4E4F4] rounded-xl shadow-sm p-5">
                     <div class="mb-6">
                         <h3 class="text-[16px] font-semibold text-[#1A2332]">Grafik Pendapatan</h3>
@@ -87,7 +102,6 @@
                         </div>
                     </div>
                 </div>
-                
             </div>
 
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
@@ -104,7 +118,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in topMenus" :key="index" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD]">
+                            <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
+                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse">Memuat data API...</td>
+                            </tr>
+                            <tr v-else-if="topMenus.length === 0" class="border-b border-[#EBF3FB]">
+                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC]">Belum ada data penjualan.</td>
+                            </tr>
+                            <tr v-else v-for="(item, index) in topMenus" :key="index" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD]">
                                 <td class="px-5 py-3 text-[13px] font-medium text-[#1A2332] flex items-center gap-3">
                                     <span class="w-6 h-6 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center text-[11px] font-bold">{{ index + 1 }}</span>
                                     {{ item.name }}
@@ -123,18 +143,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 // Import komponen ChartJS
 import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  ArcElement
+  Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement
 } from 'chart.js';
 import { Bar, Pie } from 'vue-chartjs';
 
@@ -142,45 +156,43 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 ChartJS.defaults.font.family = "'Poppins', sans-serif";
 ChartJS.defaults.color = '#5A7A9A';
 
+// Pastikan base URL ini sesuai dengan URL backend lokal/live Anda
+const apiBase = 'https://api.etres.my.id/api/v1';
+
 const isLoading = ref(true);
-const selectedPeriod = ref('7days'); // Default filter
+const isExporting = ref(false);
+const selectedPeriod = ref('7days'); 
 
-// ================= KONFIGURASI BAR CHART (PENDAPATAN) =================
-const barChartData = ref({
-    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
-    datasets: [
-        {
-            label: 'Pendapatan (Rp)',
-            backgroundColor: '#2E7DD6', // Blue primary
-            hoverBackgroundColor: '#1B4F8A', // Navy
-            borderRadius: 4,
-            data: [1200000, 1500000, 900000, 2100000, 2400000, 3200000, 2800000]
-        }
-    ]
+// Variabel data dinamis
+const summary = ref({
+    total_revenue: 0,
+    completed_orders: 0,
+    avg_order_value: 0,
+    busiest_hour: '-'
 });
+const topMenus = ref([]);
 
+// Variabel Chart
+const barChartData = ref({ labels: [], datasets: [] });
+const paymentChartData = ref({ labels: [], datasets: [] });
+
+// Opsi Chart (sama dengan sebelumnya)
 const barChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
         legend: { display: false },
         tooltip: {
-            backgroundColor: '#1A2332',
-            titleFont: { family: 'Poppins', size: 13 },
+            backgroundColor: '#1A2332', titleFont: { family: 'Poppins', size: 13 },
             bodyFont: { family: 'JetBrains Mono', size: 14, weight: 'bold' },
-            padding: 12,
-            cornerRadius: 8,
+            padding: 12, cornerRadius: 8,
             callbacks: {
-                label: function(context) {
-                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
-                }
+                label: function(context) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw); }
             }
         }
     },
     scales: {
         y: {
-            beginAtZero: true,
-            grid: { color: '#EBF3FB', drawBorder: false },
+            beginAtZero: true, grid: { color: '#EBF3FB', drawBorder: false },
             ticks: {
                 font: { family: 'JetBrains Mono', size: 11 },
                 callback: function(value) {
@@ -190,70 +202,111 @@ const barChartOptions = {
                 }
             }
         },
-        x: {
-            grid: { display: false },
-            ticks: { font: { size: 12 } }
-        }
+        x: { grid: { display: false }, ticks: { font: { size: 12 } } }
     }
 };
-
-// ================= KONFIGURASI PIE CHART (METODE PEMBAYARAN) =================
-const paymentChartData = ref({
-    labels: ['QRIS', 'Tunai', 'Transfer'],
-    datasets: [
-        {
-            // Menyesuaikan warna: Navy (QRIS), Blue (Tunai), Sky (Transfer)
-            backgroundColor: ['#1B4F8A', '#2E7DD6', '#6BAEE8'],
-            borderWidth: 2,
-            borderColor: '#FFFFFF',
-            hoverOffset: 4,
-            data: [65, 25, 10] // Persentase Dummy
-        }
-    ]
-});
 
 const paymentChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                usePointStyle: true,
-                padding: 20,
-                font: { size: 12 }
-            }
-        },
+        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
         tooltip: {
-            backgroundColor: '#1A2332',
-            titleFont: { family: 'Poppins', size: 13 },
-            bodyFont: { family: 'Poppins', size: 13 },
-            callbacks: {
-                label: function(context) {
-                    return ` ${context.label}: ${context.raw}%`;
-                }
-            }
+            backgroundColor: '#1A2332', titleFont: { family: 'Poppins', size: 13 }, bodyFont: { family: 'Poppins', size: 13 },
+            callbacks: { label: function(context) { return ` ${context.label}: ${context.raw}%`; } }
         }
     }
 };
 
-// ================= DATA TOP MENU (DUMMY) =================
-const topMenus = ref([
-    { name: 'Nasi Goreng Spesial', qty: 145, revenue: 3625000 },
-    { name: 'Kopi Susu Gula Aren', qty: 120, revenue: 2160000 },
-    { name: 'Ayam Geprek Sambal Matah', qty: 98, revenue: 2450000 },
-    { name: 'Kentang Goreng', qty: 85, revenue: 1275000 },
-    { name: 'Es Teh Manis', qty: 76, revenue: 380000 }
-]);
+const authHeaders = () => {
+    const token = localStorage.getItem('auth_token');
+    return { Authorization: `Bearer ${token}` };
+};
 
 const formatRupiah = (angka) => {
     return new Intl.NumberFormat('id-ID').format(angka || 0);
 };
 
-onMounted(() => {
-    // Simulasi loading API
-    setTimeout(() => {
+// ================= FUNGSI MENGAMBIL DATA DARI API (LIVE) =================
+const fetchAnalytics = async () => {
+    isLoading.value = true;
+    try {
+        const response = await axios.get(`${apiBase}/analytics?period=${selectedPeriod.value}`, {
+            headers: authHeaders()
+        });
+        const data = response.data;
+        
+        // Memasukkan data dari API dengan fallback '|| 0' jika value kosong/undefined
+        summary.value = {
+            total_revenue: data?.summary?.total_revenue || 0,
+            completed_orders: data?.summary?.completed_orders || 0,
+            avg_order_value: data?.summary?.avg_order_value || 0,
+            busiest_hour: data?.summary?.busiest_hour || '-'
+        };
+        
+        topMenus.value = data?.top_menus || [];
+
+        barChartData.value = {
+            labels: data?.chart_bar?.labels || [],
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                backgroundColor: '#2E7DD6', hoverBackgroundColor: '#1B4F8A', borderRadius: 4,
+                data: data?.chart_bar?.values || []
+            }]
+        };
+
+        paymentChartData.value = {
+            labels: data?.chart_pie?.labels || [],
+            datasets: [{
+                backgroundColor: ['#1B4F8A', '#2E7DD6', '#6BAEE8'],
+                borderWidth: 2, borderColor: '#FFFFFF', hoverOffset: 4,
+                data: data?.chart_pie?.values || []
+            }]
+        };
+
+    } catch (error) {
+        console.error("Gagal mengambil data analitik atau Endpoint belum ada:", error);
+        
+        // Jika API error (misal 404 karena belum dibikin di backend), kosongkan state grafik & angka jadi 0.
+        summary.value = { total_revenue: 0, completed_orders: 0, avg_order_value: 0, busiest_hour: '-' };
+        topMenus.value = [];
+        barChartData.value = { labels: [], datasets: [{ data: [] }] };
+        paymentChartData.value = { labels: [], datasets: [{ data: [] }] };
+        
+    } finally {
         isLoading.value = false;
-    }, 600);
+    }
+};
+
+// ================= FUNGSI EXPORT =================
+const exportData = async (format) => {
+    isExporting.value = true;
+    try {
+        const response = await axios.get(`${apiBase}/analytics/export`, {
+            params: { period: selectedPeriod.value, format: format },
+            headers: authHeaders(),
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        
+        const dateStr = new Date().toISOString().slice(0,10);
+        link.setAttribute('download', `Report_Analitik_${dateStr}.${format}`);
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error(`Gagal melakukan export ${format}:`, error);
+        alert(`Gagal mengekspor data ke ${format.toUpperCase()}. Pastikan API export sudah disiapkan di backend.`);
+    } finally {
+        isExporting.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchAnalytics();
 });
 </script>
