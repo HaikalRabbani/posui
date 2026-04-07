@@ -108,7 +108,7 @@
                                 
                                 <td class="px-5 py-3">
                                     <div class="flex flex-col items-start gap-1">
-                                        <span class="text-[13px] text-[#1A2332] font-semibold font-['JetBrains_Mono']">Sisa: {{ item.stock || 0 }}</span>
+                                        <span class="text-[13px] text-[#1A2332] font-semibold font-['JetBrains_Mono']">Sisa: {{ formatRupiah(item.stock || 0) }}</span>
                                         <span :class="[ 
                                             'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
                                             item.is_active ? 'bg-green-50 text-[#2A7A4B] border-green-200' : 'bg-red-50 text-[#B83B2A] border-red-200'
@@ -126,7 +126,7 @@
                                     <button @click="openModal(item)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors mr-1" title="Edit Menu">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                     </button>
-                                    <button @click="confirmDelete(item)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors" title="Hapus Menu">
+                                    <button @click="confirmDelete(item, 'product')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors" title="Hapus Menu">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </td>
@@ -196,7 +196,7 @@
                             </div>
                             <div class="pt-2 border-t border-[#D4E4F4]">
                                 <p class="text-[11px] font-medium text-[#5A7A9A] mb-0.5">Sisa Stok</p>
-                                <p class="text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ viewModal.data.stock || 0 }}</p>
+                                <p class="text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ formatRupiah(viewModal.data.stock || 0) }}</p>
                             </div>
                         </div>
 
@@ -238,7 +238,7 @@
                         <li v-if="categories.length === 0" class="p-4 text-center text-[13px] text-[#8AAFCC]">Belum ada kategori.</li>
                         <li v-else v-for="cat in categories" :key="cat.id" class="p-3 flex items-center justify-between hover:bg-[#F7FAFD]">
                             <span class="text-[14px] text-[#1A2332] font-medium">{{ cat.name }}</span>
-                            <button @click="deleteCategory(cat.id)" class="text-[#B83B2A] hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus">
+                            <button @click="confirmDelete(cat, 'category')" class="text-[#B83B2A] hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                         </li>
@@ -274,7 +274,7 @@
                         <li v-if="stations.length === 0" class="p-4 text-center text-[13px] text-[#8AAFCC]">Belum ada station.</li>
                         <li v-else v-for="st in stations" :key="st.id" class="p-3 flex items-center justify-between hover:bg-[#F7FAFD]">
                             <span class="text-[14px] text-[#1A2332] font-medium">{{ st.name }}</span>
-                            <button @click="deleteStation(st.id)" class="text-[#B83B2A] hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus">
+                            <button @click="confirmDelete(st, 'station')" class="text-[#B83B2A] hover:bg-red-50 p-1.5 rounded transition-colors" title="Hapus">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                         </li>
@@ -327,7 +327,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Stok Menu</label>
-                            <input type="text" v-model="form.stock" @input="enforceNumeric('stock'); formErrors.stock = false;" placeholder="0" 
+                            <input type="text" v-model="form.stock" @input="formatInputNumber('stock')" placeholder="0" 
                                 :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.stock ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
                             <span v-if="formErrors.stock" class="text-[#B83B2A] text-[11px] mt-1 block">Stok wajib diisi (isi 0 jika habis).</span>
                         </div>
@@ -343,13 +343,13 @@
                     <div class="grid grid-cols-2 gap-4 p-4 bg-[#F0F4F8] rounded-lg border border-[#D4E4F4]">
                         <div>
                             <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Harga Modal (Rp)</label>
-                            <input type="text" v-model="form.cost_price" @input="enforceNumeric('cost_price'); formErrors.cost_price = false;" placeholder="10000" 
+                            <input type="text" v-model="form.cost_price" @input="formatInputNumber('cost_price')" placeholder="10.000" 
                                 :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.cost_price ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
                             <span v-if="formErrors.cost_price" class="text-[#B83B2A] text-[11px] mt-1 block">Modal wajib diisi.</span>
                         </div>
                         <div>
                             <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Harga Jual (Rp)</label>
-                            <input type="text" v-model="form.price" @input="enforceNumeric('price'); formErrors.price = false;" placeholder="15000" 
+                            <input type="text" v-model="form.price" @input="formatInputNumber('price')" placeholder="15.000" 
                                 :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] font-semibold rounded-lg border focus:outline-none transition-colors text-[#1B4F8A] placeholder-[#8AAFCC]', formErrors.price ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
                             <span v-if="formErrors.price" class="text-[#B83B2A] text-[11px] mt-1 block">Harga jual kosong/kurang dari modal.</span>
                         </div>
@@ -379,12 +379,12 @@
             </div>
         </div>
 
-        <div v-if="deleteModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
+        <div v-if="deleteModal.show" class="fixed inset-0 z-[80] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-sm overflow-hidden border border-[#D4E4F4] text-center p-6">
                 <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Menu?</h3>
+                <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Data?</h3>
                 <p class="text-[14px] text-[#5A7A9A] mb-6">
                     Yakin ingin menghapus <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Data tidak dapat dikembalikan.
                 </p>
@@ -425,7 +425,8 @@ const imagePreview = ref(null);
 
 const viewModal = reactive({ show: false, data: {} }); 
 const crudModals = reactive({ category: false, station: false });
-const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
+// Tambahan 'type' pada deleteModal untuk membedakan target hapus (product/category/station)
+const deleteModal = reactive({ show: false, id: null, name: '', type: '', isDeleting: false });
 
 const newCategoryName = ref('');
 const newStationName = ref('');
@@ -441,22 +442,36 @@ const crudErrors = reactive({ categoryName: false, stationName: false });
 
 // ================= WATCHER & COMPUTED =================
 watch(() => form.stock, (newVal) => {
-    const stockNum = parseInt(newVal) || 0;
+    // Menghapus titik sebelum konversi ke Integer
+    const stockNum = parseInt(newVal.toString().replace(/\./g, '')) || 0;
     form.is_active = stockNum > 0;
 });
 watch([searchQuery, filterCategory, filterStation], () => { currentPage.value = 1; });
 
 const calculatedMargin = computed(() => {
-    const jual = parseInt(form.price) || 0;
-    const modal = parseInt(form.cost_price) || 0;
+    const jual = parseInt(form.price.toString().replace(/\./g, '')) || 0;
+    const modal = parseInt(form.cost_price.toString().replace(/\./g, '')) || 0;
     return Math.max(0, jual - modal);
 });
 
-// ================= FUNGSI UX =================
+// ================= FUNGSI UX (FORMAT ANGKA) =================
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
 
-const enforceNumeric = (field) => {
-    form[field] = form[field].toString().replace(/[^0-9]/g, '');
+// Fungsi untuk format ribuan secara realtime di form input
+const formatInputNumber = (field) => {
+    // 1. Ambil nilai asli dan hapus semua karakter selain angka
+    let rawValue = form[field].toString().replace(/[^0-9]/g, '');
+    
+    // 2. Jika kosong, biarkan kosong
+    if (!rawValue) {
+        form[field] = '';
+    } else {
+        // 3. Format menggunakan locale id-ID (otomatis nambahin titik)
+        form[field] = new Intl.NumberFormat('id-ID').format(rawValue);
+    }
+    
+    // Matikan warning merah kalau user udah ngetik angka
+    formErrors[field] = false;
 };
 
 const handleFileUpload = (event) => {
@@ -473,8 +488,8 @@ const validateForm = () => {
     formErrors.cost_price = form.cost_price === '';
     formErrors.stock = form.stock === '';
 
-    const jual = parseInt(form.price) || 0;
-    const modal = parseInt(form.cost_price) || 0;
+    const jual = parseInt(form.price.toString().replace(/\./g, '')) || 0;
+    const modal = parseInt(form.cost_price.toString().replace(/\./g, '')) || 0;
     formErrors.price = !form.price || jual < modal;
 
     return !formErrors.name && !formErrors.category_id && !formErrors.cost_price && !formErrors.stock && !formErrors.price;
@@ -485,21 +500,15 @@ const currentPage = ref(1);
 const itemsPerPage = ref(5); 
 
 const sortedAndFilteredProducts = computed(() => {
-    // FIX: Gunakan array pengecekan biar bebas error "filtered.sort is not a function"
     let filtered = Array.isArray(products.value) ? [...products.value] : [];
     
-    // Fitur 1: Filter Pencarian Text
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
         filtered = filtered.filter(p => p?.name?.toLowerCase().includes(q));
     }
-    
-    // Fitur 2: Filter Kategori
     if (filterCategory.value !== '') {
         filtered = filtered.filter(p => p.category_id === filterCategory.value);
     }
-    
-    // Fitur 3: Filter Station
     if (filterStation.value !== '') {
         filtered = filtered.filter(p => p.station_id === filterStation.value);
     }
@@ -519,14 +528,13 @@ const paginatedProducts = computed(() => {
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
-// ================= API CALLS =================
+// ================= API CALLS (PRODUK) =================
 const fetchProducts = async () => {
     isLoadingData.value = true;
     try {
         const token = localStorage.getItem('auth_token');
         const res = await axios.get('https://api.etres.my.id/api/v1/products?limit=1000', { headers: { Authorization: `Bearer ${token}` } });
         
-        // Cek struktur array dari response laravel yang bervariasi
         if (Array.isArray(res.data.data)) products.value = res.data.data;
         else if (Array.isArray(res.data)) products.value = res.data;
         else if (res.data && Array.isArray(res.data.data?.data)) products.value = res.data.data.data;
@@ -547,12 +555,17 @@ const submitForm = async () => {
         const token = localStorage.getItem('auth_token');
         const formData = new FormData();
         
+        // Menghapus format titik sebelum di-push ke Backend (API butuh integer murni)
+        const rawCostPrice = form.cost_price.toString().replace(/\./g, '');
+        const rawPrice = form.price.toString().replace(/\./g, '');
+        const rawStock = form.stock.toString().replace(/\./g, '');
+
         formData.append('name', form.name);
         formData.append('category_id', form.category_id);
         if (form.station_id) formData.append('station_id', form.station_id);
-        formData.append('cost_price', form.cost_price || 0);
-        formData.append('price', form.price);
-        formData.append('stock', form.stock || 0); 
+        formData.append('cost_price', rawCostPrice || 0);
+        formData.append('price', rawPrice);
+        formData.append('stock', rawStock || 0); 
         formData.append('description', form.description || '');
         formData.append('is_active', form.is_active ? 1 : 0);
         
@@ -580,21 +593,51 @@ const submitForm = async () => {
     }
 };
 
-const confirmDelete = (item) => { deleteModal.id = item.id; deleteModal.name = item.name; deleteModal.show = true; };
-const closeDeleteModal = () => { deleteModal.show = false; deleteModal.id = null; deleteModal.name = ''; deleteModal.isDeleting = false; };
+// ================= GLOBAL DELETE MODAL =================
+const confirmDelete = (item, type = 'product') => { 
+    deleteModal.id = item.id; 
+    deleteModal.name = item.name; 
+    deleteModal.type = type; // Menandai target API
+    deleteModal.show = true; 
+};
+const closeDeleteModal = () => { 
+    deleteModal.show = false; 
+    deleteModal.id = null; 
+    deleteModal.name = ''; 
+    deleteModal.type = '';
+    deleteModal.isDeleting = false; 
+};
+
+// Fungsi dinamis untuk menghapus produk, kategori, atau station via Modal Custom
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
         const token = localStorage.getItem('auth_token');
-        await axios.delete(`https://api.etres.my.id/api/v1/products/${deleteModal.id}`, { headers: { Authorization: `Bearer ${token}` } });
-        showAlert('Menu berhasil dihapus!', 'success');
-        if (paginatedProducts.value.length === 1 && currentPage.value > 1) currentPage.value--;
-        await fetchProducts();
+        const baseUrl = 'https://api.etres.my.id/api/v1';
+
+        if (deleteModal.type === 'product') {
+            await axios.delete(`${baseUrl}/products/${deleteModal.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            showAlert('Menu berhasil dihapus!', 'success');
+            if (paginatedProducts.value.length === 1 && currentPage.value > 1) currentPage.value--;
+            await fetchProducts();
+        } 
+        else if (deleteModal.type === 'category') {
+            await axios.delete(`${baseUrl}/categories/${deleteModal.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await fetchCategories();
+        } 
+        else if (deleteModal.type === 'station') {
+            await axios.delete(`${baseUrl}/stations/${deleteModal.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await fetchStations();
+        }
+
         closeDeleteModal();
-    } catch (error) { showAlert('Gagal menghapus menu.', 'error'); deleteModal.isDeleting = false; }
+    } catch (error) { 
+        showAlert(`Gagal menghapus data.`, 'error'); 
+        deleteModal.isDeleting = false; 
+    }
 };
 
-// ================= KATEGORI & STATION CRUD =================
+// ================= API CALLS (KATEGORI & STATION) =================
 const fetchCategories = async () => {
     try {
         const token = localStorage.getItem('auth_token');
@@ -607,6 +650,7 @@ const fetchCategories = async () => {
         
     } catch (error) { console.error('Kategori gagal dimuat', error); categories.value = []; }
 };
+
 const openCategoryModal = () => { crudErrors.categoryName = false; newCategoryName.value = ''; crudModals.category = true; };
 const addCategory = async () => {
     if (!newCategoryName.value.trim()) { crudErrors.categoryName = true; return; }
@@ -615,13 +659,6 @@ const addCategory = async () => {
         await axios.post('https://api.etres.my.id/api/v1/categories', { name: newCategoryName.value, outlet_id: currentUserOutletId.value }, { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
         newCategoryName.value = ''; await fetchCategories();
     } catch (e) { alert('Gagal menambah kategori.'); } finally { isSubmittingCrud.value = false; }
-};
-const deleteCategory = async (id) => {
-    if(!confirm('Hapus kategori ini?')) return;
-    try {
-        await axios.delete(`https://api.etres.my.id/api/v1/categories/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
-        await fetchCategories();
-    } catch (e) { alert('Gagal menghapus kategori.'); }
 };
 
 const fetchStations = async () => {
@@ -636,6 +673,7 @@ const fetchStations = async () => {
         
     } catch (error) { console.error('Gagal memuat station'); stations.value = []; }
 };
+
 const openStationModal = () => { crudErrors.stationName = false; newStationName.value = ''; crudModals.station = true; };
 const addStation = async () => {
     if (!newStationName.value.trim()) { crudErrors.stationName = true; return; }
@@ -645,24 +683,26 @@ const addStation = async () => {
         newStationName.value = ''; await fetchStations();
     } catch (e) { alert('Gagal menambah station.'); } finally { isSubmittingCrud.value = false; }
 };
-const deleteStation = async (id) => {
-    if(!confirm('Hapus station ini?')) return;
-    try {
-        await axios.delete(`https://api.etres.my.id/api/v1/stations/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } });
-        await fetchStations();
-    } catch (e) { alert('Gagal menghapus station.'); }
-};
 
-// ================= MODAL UTILS =================
+// ================= MODAL UTILS (PRODUK) =================
 const openViewModal = (item) => { viewModal.data = item; viewModal.show = true; };
 const showAlert = (msg, type) => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 const openModal = (item = null) => {
     formErrors.name = false; formErrors.category_id = false; formErrors.cost_price = false; formErrors.price = false; formErrors.stock = false; modalAlert.show = false;
+    
     if (item) {
         isEditMode.value = true; selectedProductId.value = item.id;
-        form.name = item.name; form.category_id = item.category_id; form.station_id = item.station_id || '';
-        form.cost_price = item.cost_price || '0'; form.price = item.price; form.stock = item.stock || '0';
-        form.description = item.description; form.is_active = item.is_active === 1 || item.is_active === true;
+        form.name = item.name; 
+        form.category_id = item.category_id; 
+        form.station_id = item.station_id || '';
+        form.description = item.description; 
+        form.is_active = item.is_active === 1 || item.is_active === true;
+        
+        // Memasukkan angka yang sudah berformat titik ke dalam form modal
+        form.cost_price = item.cost_price ? new Intl.NumberFormat('id-ID').format(item.cost_price) : '0'; 
+        form.price = item.price ? new Intl.NumberFormat('id-ID').format(item.price) : '0'; 
+        form.stock = item.stock ? new Intl.NumberFormat('id-ID').format(item.stock) : '0';
+        
         imagePreview.value = item.image ? `https://api.etres.my.id/storage/${item.image}` : null; form.image = null;
     } else {
         isEditMode.value = false; selectedProductId.value = null;
