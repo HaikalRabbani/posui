@@ -129,68 +129,90 @@
         </div>
 
         <div v-if="menuModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/60 backdrop-blur-sm px-4">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[90vh] animate-[fadeIn_0.2s_ease-out]">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[90vh] animate-[fadeIn_0.2s_ease-out]">
                 
-                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD] flex-shrink-0">
                     <div>
                         <h3 class="text-[18px] font-bold text-[#1A2332] flex items-center gap-2">
                             <svg class="w-5 h-5 text-[#2A7A4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                             Katalog Cabang: {{ menuModal.outletName }}
                         </h3>
-                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur menu mana saja yang dijual, tentukan harga, stok, dan station untuk cabang ini.</p>
+                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">Centang station yang tersedia, lalu atur stok dan harga menu untuk cabang ini.</p>
                     </div>
                     <button @click="menuModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] p-1.5 border border-[#D4E4F4] rounded bg-white shadow-sm transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
 
-                <div class="overflow-y-auto flex-1 bg-white">
+                <div class="overflow-y-auto flex-1 bg-white p-4">
                     <div v-if="menuModal.isLoading" class="text-center py-10 text-[13px] text-[#8AAFCC] animate-pulse">Menyiapkan daftar master menu...</div>
                     <div v-else-if="menuForm.length === 0" class="text-center py-10 text-[13px] text-[#8AAFCC]">Belum ada Master Menu yang dibuat. Silakan buat di halaman Manajemen Menu.</div>
                     
-                    <table v-else class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-[#F7FAFD] shadow-sm z-10">
-                            <tr class="border-b border-[#D4E4F4]">
-                                <th class="p-3 text-center w-12">
-                                    <input type="checkbox" @change="toggleAllMenus" v-model="isAllSelected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
-                                </th>
-                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Menu</th>
-                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-32">Harga Jual (Rp)</th>
-                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-24">Stok</th>
-                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-36">Pilih Station</th>
-                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-center w-24">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#EBF3FB]">
-                            <tr v-for="(prod, idx) in menuForm" :key="prod.id" :class="prod.selected ? 'bg-white' : 'bg-gray-50 opacity-60'">
-                                <td class="p-3 text-center">
-                                    <input type="checkbox" v-model="prod.selected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
-                                </td>
-                                <td class="p-3">
-                                    <p class="text-[13px] font-semibold text-[#1A2332]">{{ prod.name }}</p>
-                                    <p class="text-[10px] text-[#5A7A9A] font-['JetBrains_Mono']">Modal: Rp {{ formatRupiah(prod.cost_price) }}</p>
-                                </td>
-                                <td class="p-3">
-                                    <input type="text" v-model="prod.price" @input="formatProductNumber(idx, 'price')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-bold text-[#1B4F8A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent">
-                                </td>
-                                <td class="p-3">
-                                    <input type="text" v-model="prod.stock" @input="formatProductNumber(idx, 'stock')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-semibold text-[#1A2332] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent text-center">
-                                </td>
-                                <td class="p-3">
-                                    <select v-model="prod.station_id" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[11px] font-semibold text-[#5A7A9A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent bg-white">
-                                        <option value="">Tanpa Station</option>
-                                        <option v-for="st in stations" :key="st.id" :value="st.id">{{ st.name }}</option>
-                                    </select>
-                                </td>
-                                <td class="p-3 text-center">
-                                    <span :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', getRawNumber(prod.stock) > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                                        {{ getRawNumber(prod.stock) > 0 ? 'Tersedia' : 'Habis' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div v-else class="space-y-4">
+                        
+                        <div class="bg-[#F0F4F8] border border-[#D4E4F4] p-4 rounded-lg">
+                            <h4 class="text-[13px] font-bold text-[#1A2332] mb-2 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-[#1B4F8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                1. Pilih Station yang Tersedia di Cabang Ini
+                            </h4>
+                            <p class="text-[11px] text-[#5A7A9A] mb-3">Menu di tabel bawah akan otomatis terfilter sesuai station yang dicentang.</p>
+                            
+                            <div class="flex flex-wrap gap-3">
+                                <label v-for="st in stations" :key="st.id" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#D4E4F4] rounded-lg text-[12px] font-medium text-[#1A2332] cursor-pointer hover:border-[#2A7A4B] transition-colors shadow-sm">
+                                    <input type="checkbox" :value="st.id" v-model="menuModal.selectedStations" class="w-3.5 h-3.5 text-[#2A7A4B] rounded">
+                                    {{ st.name }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="border border-[#D4E4F4] rounded-lg overflow-hidden">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-[#F7FAFD]">
+                                    <tr class="border-b border-[#D4E4F4]">
+                                        <th class="p-3 text-center w-12">
+                                            <input type="checkbox" @change="toggleAllMenus" v-model="isAllSelected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
+                                        </th>
+                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Menu & Station</th>
+                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-40">Harga Jual (Rp)</th>
+                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-28">Stok</th>
+                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-center w-24">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#EBF3FB]">
+                                    <tr v-if="filteredMenuForm.length === 0">
+                                        <td colspan="5" class="p-6 text-center text-[12px] text-[#8AAFCC]">Tidak ada menu yang sesuai dengan station yang dipilih.</td>
+                                    </tr>
+                                    <tr v-else v-for="(prod, idx) in filteredMenuForm" :key="prod.id" :class="prod.selected ? 'bg-white' : 'bg-gray-50 opacity-60'">
+                                        <td class="p-3 text-center">
+                                            <input type="checkbox" v-model="prod.selected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
+                                        </td>
+                                        <td class="p-3">
+                                            <p class="text-[13px] font-semibold text-[#1A2332]">{{ prod.name }}</p>
+                                            <div class="flex items-center gap-2 mt-0.5">
+                                                <span class="text-[10px] text-[#5A7A9A] font-['JetBrains_Mono']">Modal: Rp {{ formatRupiah(prod.cost_price) }}</span>
+                                                <span v-if="prod.station_id" class="text-[9px] px-1.5 py-0.5 bg-orange-50 text-orange-700 rounded">{{ getStationName(prod.station_id) }}</span>
+                                                <span v-else class="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Tanpa Station</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-3">
+                                            <input type="text" v-model="prod.price" @input="formatProductNumber(prod.indexInOriginal, 'price')" :disabled="!prod.selected" placeholder="Cth: 15.000" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-bold text-[#1B4F8A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent">
+                                        </td>
+                                        <td class="p-3">
+                                            <input type="text" v-model="prod.stock" @input="formatProductNumber(prod.indexInOriginal, 'stock')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-semibold text-[#1A2332] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent text-center">
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <span v-if="prod.selected" :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', getRawNumber(prod.stock) > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                                                {{ getRawNumber(prod.stock) > 0 ? 'Tersedia' : 'Habis' }}
+                                            </span>
+                                            <span v-else class="text-[10px] text-[#8AAFCC]">-</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
                 </div>
 
-                <div class="px-6 py-4 border-t border-[#D4E4F4] bg-[#F7FAFD] flex justify-end gap-3 rounded-b-xl">
+                <div class="px-6 py-4 border-t border-[#D4E4F4] bg-[#F7FAFD] flex justify-end gap-3 rounded-b-xl flex-shrink-0">
                     <button @click="menuModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#EBF3FB] rounded-lg transition-colors">Batal</button>
                     <button @click="saveOutletMenu" :disabled="menuModal.isSaving" class="px-5 py-2 bg-[#2A7A4B] hover:bg-green-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg shadow-sm transition-colors">
                         {{ menuModal.isSaving ? 'Menyimpan...' : 'Simpan Konfigurasi Cabang' }}
@@ -231,7 +253,7 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 
 // --- STATE OUTLET & GLOBAL ---
 const outlets = ref([]);
-const stations = ref([]); // Data Station Global
+const stations = ref([]); 
 const isLoading = ref(true);
 const searchQuery = ref('');
 const itemsPerPage = ref(10);
@@ -243,33 +265,49 @@ const formOutlet = reactive({ name: '', address: '', phone: '' });
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
 // --- STATE MENU MANAGER ---
-const menuModal = reactive({ show: false, outletId: null, outletName: '', isLoading: false, isSaving: false });
+const menuModal = reactive({ show: false, outletId: null, outletName: '', isLoading: false, isSaving: false, selectedStations: [] });
 const menuForm = ref([]);
 const masterProducts = ref([]);
-const isAllSelected = ref(false); // Checkbox master (toggle all)
+const isAllSelected = ref(false);
 
 // --- COMPUTED & UTILS ---
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
-
-// Helper mengubah string berformat ke pure integer
 const getRawNumber = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
+
+const getStationName = (id) => {
+    const st = stations.value.find(s => s.id === id);
+    return st ? st.name : '';
+};
 
 const paginatedOutlets = computed(() => {
     let filtered = outlets.value.filter(o => o.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
     const start = (currentPage.value - 1) * itemsPerPage.value;
     return filtered.slice(start, start + itemsPerPage.value);
 });
+
 const totalPages = computed(() => Math.ceil(outlets.value.filter(o => o.name.toLowerCase().includes(searchQuery.value.toLowerCase())).length / itemsPerPage.value));
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
-const formatProductNumber = (index, field) => {
-    let rawValue = menuForm.value[index][field].toString().replace(/[^0-9]/g, '');
-    menuForm.value[index][field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
+// Format angka real-time di array asli berdasarkan index original
+const formatProductNumber = (originalIndex, field) => {
+    let rawValue = menuForm.value[originalIndex][field].toString().replace(/[^0-9]/g, '');
+    menuForm.value[originalIndex][field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
 };
 
+// --- LOGIKA FILTER DINAMIS STATION ---
+const filteredMenuForm = computed(() => {
+    return menuForm.value.filter(prod => {
+        // Jika menu tidak terikat ke station master, selalu muncul (misal Kerupuk/Rokok)
+        if (!prod.station_id) return true;
+        // Jika terikat, hanya muncul jika stationnya dicentang oleh manajer
+        return menuModal.selectedStations.includes(prod.station_id);
+    });
+});
+
 const toggleAllMenus = () => {
-    menuForm.value.forEach(m => m.selected = isAllSelected.value);
+    // Hanya centang menu yang sedang tampil di layar (sesuai filter station)
+    filteredMenuForm.value.forEach(m => m.selected = isAllSelected.value);
 };
 
 // --- API CALLS ---
@@ -279,7 +317,7 @@ const fetchInitialData = async () => {
         const [resOut, resProd, resStat] = await Promise.all([
             axios.get(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() }),
             axios.get(`${apiBase}/products?limit=1000`, { headers: authHeaders() }),
-            axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() }) // Load Station
+            axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() })
         ]);
         outlets.value = resOut.data.data?.data || resOut.data.data || resOut.data || [];
         masterProducts.value = resProd.data.data?.data || resProd.data.data || resProd.data || [];
@@ -342,30 +380,44 @@ const openMenuManager = async (outlet) => {
     menuModal.outletName = outlet.name;
     menuModal.show = true;
     menuModal.isLoading = true;
+    menuModal.selectedStations = []; // Reset station check
+    isAllSelected.value = false;
 
     try {
         const res = await axios.get(`${apiBase}/outlets/${outlet.id}/products`, { headers: authHeaders() });
         const outletProducts = res.data.data || []; 
+        
+        const activeStationsSet = new Set();
 
-        menuForm.value = masterProducts.value.map(master => {
+        menuForm.value = masterProducts.value.map((master, idx) => {
             const existingPivot = outletProducts.find(op => op.id === master.id);
+            
             if (existingPivot && existingPivot.pivot) {
+                // Jika menu pernah diset untuk outlet ini
+                if (master.station_id) activeStationsSet.add(master.station_id);
+                
                 return {
-                    id: master.id, name: master.name, cost_price: master.cost_price,
+                    indexInOriginal: idx, 
+                    id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
                     selected: true,
                     price: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.price),
                     stock: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.stock),
-                    station_id: existingPivot.pivot.station_id || '' // Assign station cabang ini
                 };
             } else {
                 return {
-                    id: master.id, name: master.name, cost_price: master.cost_price,
-                    selected: false, price: '', stock: '0', station_id: ''
+                    indexInOriginal: idx,
+                    id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
+                    selected: false, price: '', stock: '0'
                 };
             }
         });
         
-        isAllSelected.value = menuForm.value.every(m => m.selected);
+        // Auto-check station berdasarkan menu yang sedang aktif di outlet ini.
+        if (outletProducts.length === 0) {
+            menuModal.selectedStations = stations.value.map(s => s.id);
+        } else {
+            menuModal.selectedStations = Array.from(activeStationsSet);
+        }
         
     } catch (e) {
         showAlert('Gagal mengambil data menu cabang', 'error');
@@ -375,6 +427,7 @@ const openMenuManager = async (outlet) => {
 const saveOutletMenu = async () => {
     menuModal.isSaving = true;
     try {
+        // Yang disimpan ke backend HANYA menu yang dicentang
         const selectedMenus = menuForm.value.filter(m => m.selected);
         
         let hasInvalidData = false;
@@ -392,8 +445,7 @@ const saveOutletMenu = async () => {
                     product_id: m.id,
                     price: getRawNumber(m.price),
                     stock: pureStock,
-                    station_id: m.station_id || null, 
-                    is_active: pureStock > 0 // Otomatis aktif jika stok lebih dari 0
+                    is_active: pureStock > 0 // Otomatis Deteksi Tersedia/Habis
                 };
             })
         };
@@ -415,7 +467,6 @@ onMounted(() => fetchInitialData());
     from { opacity: 0; transform: translateY(10px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
-/* Mempercantik checkbox */
 input[type=checkbox] {
     cursor: pointer;
 }

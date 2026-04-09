@@ -55,7 +55,7 @@
 
                             <button @click="openModal()" class="bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                Tambah Menu
+                                Buat Master Menu
                             </button>
                         </template>
                     </div>
@@ -65,18 +65,19 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-2/5">Master Produk</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Kategori & Station</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-1/3">Master Produk</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Kategori</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Station</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Harga Modal (Pusat)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="isLoadingData" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat master katalog...</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat master katalog...</td>
                             </tr>
                             <tr v-else-if="paginatedProducts.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data menu ditemukan.</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data menu ditemukan.</td>
                             </tr>
                             <tr v-else v-for="item in paginatedProducts" :key="item.id" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3">
@@ -85,23 +86,23 @@
                                             <img v-if="item.image" :src="`https://api.etres.my.id/storage/${item.image}`" class="w-full h-full object-cover" />
                                             <svg v-else class="w-full h-full text-[#8AAFCC] p-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </div>
-                                        <div class="flex flex-col items-start gap-1">
-                                            <p class="text-[14px] text-[#1A2332] font-semibold leading-tight">{{ item.name }}</p>
-                                        </div>
+                                        <p class="text-[14px] text-[#1A2332] font-semibold leading-tight">{{ item.name }}</p>
                                     </div>
                                 </td>
                                 
                                 <td class="px-5 py-3">
-                                    <div class="flex flex-col items-start gap-1.5">
-                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F0F4F8] border border-[#D4E4F4] text-[11px] font-medium text-[#5A7A9A]">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#8AAFCC]"></span>
-                                            {{ item.category?.name || 'Tanpa Kategori' }}
-                                        </span>
-                                        <span v-if="item.station" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-100 text-[11px] font-medium text-orange-700">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                                            {{ item.station.name }}
-                                        </span>
-                                    </div>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F0F4F8] border border-[#D4E4F4] text-[11px] font-medium text-[#5A7A9A]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#8AAFCC]"></span>
+                                        {{ item.category?.name || 'Tanpa Kategori' }}
+                                    </span>
+                                </td>
+
+                                <td class="px-5 py-3">
+                                    <span v-if="item.station_id" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-100 text-[11px] font-medium text-orange-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                                        {{ getStationName(item.station_id) }}
+                                    </span>
+                                    <span v-else class="text-[11px] text-[#8AAFCC] italic">Tanpa Station</span>
                                 </td>
                                 
                                 <td class="px-5 py-3">
@@ -158,28 +159,29 @@
                         </div>
                     </div>
                     
-                    <div class="flex-1 space-y-4">
-                        <div>
-                            <h4 class="text-[18px] font-bold text-[#1A2332] leading-tight mb-2">{{ viewModal.data.name }}</h4>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F0F4F8] border border-[#D4E4F4] text-[11px] font-medium text-[#5A7A9A]">
-                                    Kategori: {{ viewModal.data.category?.name || '-' }}
-                                </span>
-                                <span v-if="viewModal.data.station" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 border border-orange-100 text-[11px] font-medium text-orange-700">
-                                    Station: {{ viewModal.data.station.name }}
-                                </span>
+                    <div class="flex-1">
+                        <h4 class="text-[18px] font-bold text-[#1A2332] leading-tight mb-4">{{ viewModal.data.name }}</h4>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="p-3 bg-[#F0F4F8] rounded-lg border border-[#D4E4F4]">
+                                <p class="text-[11px] font-medium text-[#5A7A9A] mb-0.5">Kategori</p>
+                                <p class="text-[13px] font-bold text-[#1A2332]">{{ viewModal.data.category?.name || 'Tanpa Kategori' }}</p>
+                            </div>
+                            <div class="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                                <p class="text-[11px] font-medium text-orange-700/70 mb-0.5">Station Dapur</p>
+                                <p class="text-[13px] font-bold text-orange-800">{{ getStationName(viewModal.data.station_id) || 'Tanpa Station' }}</p>
                             </div>
                         </div>
 
-                        <div class="p-3 bg-[#F7FAFD] rounded-lg border border-[#D4E4F4]">
-                            <p class="text-[11px] font-medium text-[#5A7A9A] mb-0.5">Harga Modal (Master)</p>
-                            <p class="text-[16px] font-bold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(viewModal.data.cost_price || 0) }}</p>
+                        <div class="p-3 bg-[#F7FAFD] rounded-lg border border-[#D4E4F4] mb-4 flex justify-between items-center">
+                            <p class="text-[12px] font-medium text-[#5A7A9A]">Harga Modal (Master)</p>
+                            <p class="text-[16px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(viewModal.data.cost_price || 0) }}</p>
                         </div>
 
                         <div>
                             <p class="text-[12px] font-medium text-[#5A7A9A] mb-1">Deskripsi:</p>
                             <p class="text-[13px] text-[#1A2332] bg-[#F0F4F8] p-2.5 rounded-lg border border-[#D4E4F4]">
-                                {{ viewModal.data.description || 'Tidak ada deskripsi.' }}
+                                {{ viewModal.data.description || 'Tidak ada deskripsi yang disediakan.' }}
                             </p>
                         </div>
                     </div>
@@ -410,6 +412,13 @@ const handleFileUpload = (e) => {
     }
 };
 
+// Fungsi Baru: Mendapatkan nama station secara manual
+const getStationName = (id) => {
+    if (!id) return '';
+    const st = stations.value.find(s => s.id === id);
+    return st ? st.name : '';
+};
+
 const sortedAndFilteredProducts = computed(() => {
     let filtered = Array.isArray(products.value) ? [...products.value] : [];
     if (searchQuery.value) {
@@ -461,7 +470,6 @@ const addCategory = async () => {
     if (!newCategoryName.value.trim()) { crudErrors.categoryName = true; return; }
     isSubmittingCrud.value = true;
     try {
-        // Hapus pengiriman outlet_id karena backend skrg pakai owner_id dari Token Auth
         await axios.post(`${apiBase}/categories`, { name: newCategoryName.value }, { headers: authHeaders() });
         newCategoryName.value = ''; 
         await fetchCategories();
