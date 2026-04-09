@@ -1,12 +1,34 @@
 <template>
     <AdminLayout>
-        <div class="space-y-6 font-['Poppins']">
+        <div class="space-y-6 font-['Poppins'] pb-10">
             
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#D4E4F4] pb-4">
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative w-full sm:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" v-model="searchQuery" placeholder="Cari nama atau email..." class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
+                    </div>
+
+                    <select v-if="currentUserRole !== 'developer'" v-model="filterRole" class="appearance-none bg-white border border-[#D4E4F4] text-[#1A2332] text-[13px] font-semibold rounded-lg px-4 py-2 focus:outline-none focus:border-[#2E7DD6] cursor-pointer">
+                        <option value="">Semua Role</option>
+                        <option value="manager">Manager / Owner</option>
+                        <option value="karyawan">Karyawan / Kasir</option>
+                    </select>
+
+                    <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block"></div>
+
+                    <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        {{ currentUserRole === 'developer' ? 'Tambah Manager' : 'Tambah User' }}
+                    </button>
+                </div>
+            </div>
+
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-                <div v-if="alert.show" :class="[ 
-                    'p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2',
-                    alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' 
-                ]">
+                <div v-if="alert.show" :class="['p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2', alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' ]">
                     <div class="flex items-center gap-2">
                         <svg v-if="alert.type === 'error'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <svg v-else class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -17,78 +39,60 @@
             </transition>
 
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
-                
-                <div class="p-4 border-b border-[#D4E4F4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#F7FAFD]">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[13px] text-[#5A7A9A] font-medium">Tampilkan</span>
-                        <select v-model="itemsPerPage" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-md px-2 py-1 focus:outline-none focus:border-[#2E7DD6]">
-                            <option :value="5">5</option>
-                            <option :value="10">10</option>
-                            <option :value="15">15</option>
-                            <option :value="50">50</option>
-                        </select>
-                        <span class="text-[13px] text-[#5A7A9A] font-medium">data</span>
-                    </div>
-
-                    <div class="flex items-center gap-3 w-full sm:w-auto">
-                        <div class="relative w-full sm:w-64 flex-shrink-0">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            </div>
-                            <input 
-                                type="text" v-model="searchQuery" placeholder="Cari nama atau email..." 
-                                class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC]"
-                            >
-                        </div>
-                        
-                        <button @click="openModal()" class="bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Tambah
-                        </button>
-                    </div>
-                </div>
-
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Lengkap</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Email</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Role</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
+                                <th v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr v-if="isLoadingData" class="border-b border-[#EBF3FB]">
-                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Memuat data...</td>
+                        <tbody class="divide-y divide-[#EBF3FB]">
+                            <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
+                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data user...</td>
                             </tr>
-                            <tr v-else-if="paginatedUsers.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data ditemukan.</td>
+                            <tr v-else-if="filteredUsers.length === 0" class="border-b border-[#EBF3FB]">
+                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data ditemukan.</td>
                             </tr>
-                            <tr v-else v-for="user in paginatedUsers" :key="user.id" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
-                                <td class="px-5 py-3 text-[14px] text-[#1A2332] font-semibold">{{ user.name }}</td>
-                                <td class="px-5 py-3 text-[14px] text-[#5A7A9A]">{{ user.email }}</td>
-                                <td class="px-5 py-3 text-[13px]">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[12px] font-medium text-[#1B4F8A] capitalize">
+                            <tr v-else v-for="user in paginatedUsers" :key="user.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                <td class="px-5 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0">
+                                            {{ user.name.charAt(0).toUpperCase() }}
+                                        </div>
+                                        <div>
+                                            <p class="text-[13px] font-semibold text-[#1A2332]">{{ user.name }}</p>
+                                            <p class="text-[11px] text-[#5A7A9A]">{{ user.email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3">
+                                    <span :class="[
+                                        'px-2.5 py-1 text-[11px] font-bold rounded-full border uppercase tracking-wider',
+                                        user.role === 'developer' ? 'bg-purple-50 text-purple-700 border-purple-200' : '',
+                                        user.role === 'manager' ? 'bg-blue-50 text-[#1B4F8A] border-blue-200' : '',
+                                        user.role === 'karyawan' ? 'bg-green-50 text-[#2A7A4B] border-green-200' : ''
+                                    ]">
                                         {{ user.role }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-3">
-                                    <span :class="[ 
-                                        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold border',
-                                        user.is_active === false || user.is_active === 0 ? 'bg-red-50 text-[#B83B2A] border-red-200' : 'bg-green-50 text-[#2A7A4B] border-green-200'
-                                    ]">
-                                        <span :class="['w-1.5 h-1.5 rounded-full', user.is_active === false || user.is_active === 0 ? 'bg-[#B83B2A]' : 'bg-[#2A7A4B]']"></span>
-                                        {{ user.is_active === false || user.is_active === 0 ? 'Nonaktif' : 'Aktif' }}
-                                    </span>
+                                <td v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[13px] text-[#5A7A9A] font-medium">
+                                    {{ getOutletName(user) }}
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
-                                    <button @click="openModal(user)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors mr-2" title="Edit Akun">
-                                        <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    
+                                    <button v-if="currentUserRole === 'developer' && user.role === 'manager'" @click="openKaryawanListModal(user)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-2" title="Kelola Karyawan Manager Ini">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                        Lihat Karyawan
                                     </button>
-                                    <button @click="confirmDelete(user)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors" title="Hapus Akun">
-                                        <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    
+                                    <button @click="openModal(user)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit User">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    </button>
+                                    <button @click="confirmDelete(user, 'main')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus User">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </td>
                             </tr>
@@ -97,96 +101,59 @@
                 </div>
 
                 <div class="p-4 bg-white flex items-center justify-between border-t border-[#D4E4F4]" v-if="totalPages > 0">
-                    <p class="text-[12px] text-[#5A7A9A]">
-                        Halaman <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ currentPage }}</span> dari <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ totalPages }}</span>
-                    </p>
+                    <p class="text-[12px] text-[#5A7A9A]">Halaman <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ currentPage }}</span> dari <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ totalPages }}</span></p>
                     <div class="flex gap-2">
-                        <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Sebelumnya</button>
-                        <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Selanjutnya</button>
+                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Prev</button>
+                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Next</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
-            <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] max-h-[90vh] flex flex-col">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] flex flex-col">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-semibold text-[#1A2332]">
-                        {{ isEditMode ? 'Edit' : 'Tambah' }} {{ currentUser.role === 'developer' ? 'Manager' : 'Karyawan' }}
-                    </h3>
+                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Profil' : (currentUserRole === 'developer' ? 'Tambah Manager Baru' : 'Tambah User Baru') }}</h3>
                     <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
-                
-                <form @submit.prevent="submitForm" class="p-6 space-y-4 overflow-y-auto">
+                <form @submit.prevent="submitForm('main')" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
+                        <input type="text" v-model="form.name" required placeholder="Masukkan nama..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
+                        <input type="email" v-model="form.email" required placeholder="email@contoh.com" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
+                    </div>
                     
-                    <div v-if="modalAlert.show" class="p-3 mb-2 rounded-lg border bg-red-50 border-[#B83B2A] text-[#B83B2A] text-[13px] font-medium flex items-center gap-2">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>{{ modalAlert.message }}</span>
-                    </div>
-
-                    <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Nama Lengkap</label>
-                        <input 
-                            type="text" v-model="form.name" @input="formErrors.name = false" maxlength="50" placeholder="Masukkan nama..." 
-                            :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" 
-                        />
-                        <span v-if="formErrors.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama wajib diisi.</span>
-                    </div>
-
-                    <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Alamat Email</label>
-                        <input 
-                            type="email" v-model="form.email" @input="formErrors.email = false" maxlength="60" placeholder="email@contoh.com" 
-                            :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.email ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" 
-                        />
-                        <span v-if="formErrors.email" class="text-[#B83B2A] text-[11px] mt-1 block">Email tidak valid atau kosong.</span>
-                    </div>
-
-                    <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Status Akun</label>
-                        <select v-model="form.is_active" class="w-full px-3 py-2 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
-                            <option :value="true">Aktif (Dapat Login)</option>
-                            <option :value="false">Nonaktif (Akses Diblokir)</option>
-                        </select>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Password</label>
-                            <input 
-                                type="password" v-model="form.password" @input="formErrors.password = false" maxlength="30" placeholder="••••••••" 
-                                :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.password ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" 
-                            />
-                            <span v-if="formErrors.password" class="text-[#B83B2A] text-[11px] mt-1 block">Minimal 6 karakter.</span>
-                            <span v-else-if="isEditMode" class="text-[11px] text-[#8AAFCC] mt-1 block">Kosongkan jika tidak diubah.</span>
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Role <span class="text-[#B83B2A]">*</span></label>
+                            
+                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole === 'developer'">
+                                <option value="manager" v-if="currentUserRole === 'developer' || currentUserRole === 'manager'">Manager / Owner</option>
+                                <option value="karyawan" v-if="currentUserRole !== 'developer'">Karyawan / Kasir</option>
+                            </select>
                         </div>
-                        <div>
-                            <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">PIN Akses</label>
-                            <div class="flex gap-2">
-                                <input 
-                                    type="password" v-model="form.pin" @input="handlePinInput" maxlength="6" placeholder="123456" 
-                                    :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]', formErrors.pin ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" 
-                                />
-                                <button type="button" @click="generatePin" class="bg-[#F0F4F8] hover:bg-[#D4E4F4] border border-[#D4E4F4] text-[#1B4F8A] px-2 py-1 rounded-lg text-[12px] font-semibold transition-colors">
-                                    Acak
-                                </button>
-                            </div>
-                            <span v-if="formErrors.pin" class="text-[#B83B2A] text-[11px] mt-1 block">Minimal 4 angka.</span>
-                            <span v-else-if="isEditMode" class="text-[11px] text-[#8AAFCC] mt-1 block">Kosongkan jika tidak diubah.</span>
+                        <div v-if="form.role === 'karyawan'">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet Penempatan</label>
+                            <select v-model="form.outlet_id" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
+                                <option value="">Pilih Outlet</option>
+                                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                            </select>
                         </div>
                     </div>
-                    
-                    <div v-if="currentUser.role === 'developer'">
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">ID Outlet (Opsional)</label>
-                        <input type="number" v-model="form.outlet_id" placeholder="Contoh: 1" class="w-full px-3 py-2 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] bg-white" />
+
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ isEditMode ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!isEditMode" class="text-[#B83B2A]">*</span></label>
+                        <input type="password" v-model="form.password" :required="!isEditMode" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
                     </div>
 
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
-                        <button type="button" @click="closeModal" class="px-4 py-2 text-[14px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
-                        <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:bg-[#8AAFCC] text-white text-[14px] font-semibold rounded-lg transition-colors">
+                        <button type="button" @click="closeModal" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
+                        <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors">
                             {{ isSubmitting ? 'Menyimpan...' : 'Simpan Data' }}
                         </button>
                     </div>
@@ -194,17 +161,114 @@
             </div>
         </div>
 
-        <div v-if="deleteModal.show" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
+        <div v-if="karyawanListModal.show" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/60 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[90vh] animate-[fadeIn_0.2s_ease-out]">
+                
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                    <div>
+                        <h3 class="text-[18px] font-bold text-[#1A2332] flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#2A7A4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            Daftar Karyawan: {{ karyawanListModal.managerName }}
+                        </h3>
+                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">Melihat dan mengelola karyawan di bawah wewenang manager ini.</p>
+                    </div>
+                    <button @click="karyawanListModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors p-1.5 border border-[#D4E4F4] rounded bg-white shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <div class="px-6 py-3 border-b border-[#D4E4F4] flex justify-between items-center bg-white">
+                    <span class="text-[12px] font-semibold text-[#5A7A9A] bg-[#F0F4F8] px-3 py-1 rounded-full">Total: {{ karyawanList.length }} Karyawan</span>
+                    <button @click="openModalKaryawan(null)" class="px-3 py-1.5 bg-[#2A7A4B] hover:bg-green-700 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Tambah Karyawan
+                    </button>
+                </div>
+
+                <div class="overflow-y-auto flex-1 bg-[#F0F4F8] p-4">
+                    <div class="bg-white border border-[#D4E4F4] rounded-lg shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#EBF3FB]">
+                                <tr v-if="karyawanListModal.isLoading" class="bg-white">
+                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Menarik data dari server...</td>
+                                </tr>
+                                <tr v-else-if="karyawanList.length === 0" class="bg-white">
+                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Manager ini belum memiliki karyawan.</td>
+                                </tr>
+                                <tr v-else v-for="kar in karyawanList" :key="kar.id" class="bg-white hover:bg-[#F7FAFD]">
+                                    <td class="px-4 py-3">
+                                        <p class="text-[13px] font-semibold text-[#1A2332]">{{ kar.name }}</p>
+                                        <p class="text-[11px] text-[#5A7A9A]">{{ kar.email }}</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-[12px] text-[#5A7A9A] font-medium">{{ getOutletName(kar) }}</td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <button @click="openModalKaryawan(kar)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </button>
+                                        <button @click="confirmDelete(kar, 'karyawan')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="karyawanFormModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-[#D4E4F4] flex flex-col">
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                    <h3 class="text-[15px] font-semibold text-[#1A2332]">{{ karyawanFormModal.isEdit ? 'Edit Karyawan' : 'Tambah Karyawan Baru' }}</h3>
+                </div>
+                <form @submit.prevent="submitForm('karyawan')" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
+                        <input type="text" v-model="formKaryawan.name" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
+                        <input type="email" v-model="formKaryawan.email" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet Penempatan</label>
+                        <select v-model="formKaryawan.outlet_id" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] bg-white">
+                            <option value="">Pilih Outlet</option>
+                            <option v-for="out in managerOutlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ karyawanFormModal.isEdit ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!karyawanFormModal.isEdit" class="text-[#B83B2A]">*</span></label>
+                        <input type="password" v-model="formKaryawan.password" :required="!karyawanFormModal.isEdit" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                    </div>
+
+                    <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
+                        <button type="button" @click="karyawanFormModal.show = false" class="px-4 py-2 text-[12px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
+                        <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-[#2A7A4B] hover:bg-green-800 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg transition-colors">
+                            {{ isSubmitting ? 'Loading...' : 'Simpan' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div v-if="deleteModal.show" class="fixed inset-0 z-[80] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-sm overflow-hidden border border-[#D4E4F4] text-center p-6">
                 <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Akun?</h3>
-                <p class="text-[14px] text-[#5A7A9A] mb-6">
-                    Apakah Anda yakin ingin menghapus akun <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Data yang dihapus tidak dapat dikembalikan.
-                </p>
+                <p class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Data tidak dapat dikembalikan.</p>
                 <div class="flex justify-center gap-3">
-                    <button @click="closeDeleteModal" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
+                    <button @click="deleteModal.show = false" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
                     <button @click="executeDelete" :disabled="deleteModal.isDeleting" class="px-4 py-2 w-full text-[14px] font-semibold text-white bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 rounded-lg transition-colors">
                         {{ deleteModal.isDeleting ? 'Menghapus...' : 'Ya, Hapus' }}
                     </button>
@@ -216,272 +280,213 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-const router = useRouter();
-
-// ================= STATE =================
-const currentUser = ref({ role: '', outlet_id: null });
+// --- STATE GLOBAL ---
+const apiBase = 'https://api.etres.my.id/api/v1';
+const currentUserRole = ref(localStorage.getItem('user_role') || 'manager');
 const users = ref([]);
-const isLoadingData = ref(true);
-
-const isModalOpen = ref(false);
+const outlets = ref([]); 
+const isLoading = ref(true);
 const isSubmitting = ref(false);
-const isEditMode = ref(false);
-const selectedUserId = ref(null);
-
-const alert = reactive({ show: false, message: '', type: 'success' });
-const modalAlert = reactive({ show: false, message: '' });
-const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
 const searchQuery = ref('');
-
-const form = reactive({
-    name: '',
-    email: '',
-    password: '',
-    pin: '',
-    outlet_id: '',
-    is_active: true
-});
-
-const formErrors = reactive({
-    name: false,
-    email: false,
-    password: false,
-    pin: false
-});
-
-// ================= UX & VALIDASI =================
-const handlePinInput = () => {
-    form.pin = form.pin.replace(/[^0-9]/g, '');
-    formErrors.pin = false;
-};
-
-const generatePin = () => {
-    form.pin = Math.floor(100000 + Math.random() * 900000).toString();
-    formErrors.pin = false;
-};
-
-const validateForm = () => {
-    formErrors.name = !form.name.trim();
-    formErrors.email = !form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    
-    formErrors.password = !isEditMode.value ? (!form.password || form.password.length < 6) : (form.password && form.password.length < 6);
-    formErrors.pin = !isEditMode.value ? (!form.pin || form.pin.length < 4) : (form.pin && form.pin.length < 4);
-
-    return !formErrors.name && !formErrors.email && !formErrors.password && !formErrors.pin;
-};
-
-// ================= SEARCH & PAGINATION =================
+const filterRole = ref('');
 const currentPage = ref(1);
-const itemsPerPage = ref(5); 
+const itemsPerPage = ref(10);
+
+const alert = reactive({ show: false, message: '', type: 'success' });
+const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
+
+// --- STATE MODAL UTAMA ---
+const isModalOpen = ref(false);
+const isEditMode = ref(false);
+const selectedUserId = ref(null);
+const form = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '' });
+
+// --- STATE DEVELOPER: LIST KARYAWAN ---
+const karyawanListModal = reactive({ show: false, managerId: null, managerName: '', isLoading: false });
+const karyawanList = ref([]);
+const managerOutlets = ref([]); 
+const karyawanFormModal = reactive({ show: false, isEdit: false, id: null });
+const formKaryawan = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', owner_id: null });
+
+// --- STATE DELETE MODAL ---
+const deleteModal = reactive({ show: false, id: null, name: '', type: 'main', isDeleting: false });
+
+// --- HELPER & COMPUTED ---
+const getOutletName = (usr) => {
+    if (usr.outlet) return usr.outlet.name;
+    if (usr.outlet_id) {
+        const out = outlets.value.find(o => o.id === usr.outlet_id) || managerOutlets.value.find(o => o.id === usr.outlet_id);
+        return out ? out.name : `Outlet #${usr.outlet_id}`;
+    }
+    return '-';
+};
 
 const filteredUsers = computed(() => {
-    let filtered = Array.isArray(users.value) ? [...users.value] : [];
-    
-    // Filter by text search
-    if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase();
-        filtered = filtered.filter(u => 
-            u.name?.toLowerCase().includes(q) || 
-            u.email?.toLowerCase().includes(q)
-        );
-    }
-    
-    // Logika sorting: Akun aktif di atas, akun nonaktif di paling bawah
-    return filtered.sort((a, b) => {
-        // Konversi nilai is_active ke angka: aktif = 1, nonaktif = 0
-        const aActive = a.is_active === false || a.is_active === 0 ? 0 : 1;
-        const bActive = b.is_active === false || b.is_active === 0 ? 0 : 1;
+    return users.value.filter(u => {
+        const matchSearch = u.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.value.toLowerCase());
         
-        // Urutkan secara descending supaya yang 1 di atas, dan 0 dilempar ke bawah
-        return bActive - aActive;
+        // LOGIKA PENYARINGAN KHUSUS DEVELOPER
+        if (currentUserRole.value === 'developer') {
+            return matchSearch && u.role === 'manager'; // HANYA Tampilkan Manager di Tabel Utama
+        }
+        
+        // Logika Normal untuk Manager
+        const matchRole = filterRole.value === '' || u.role === filterRole.value;
+        return matchSearch && matchRole;
     });
 });
 
 const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage.value));
-const paginatedUsers = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value;
-    return filteredUsers.value.slice(start, start + itemsPerPage.value);
-});
+const paginatedUsers = computed(() => filteredUsers.value.slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value));
 
-watch(searchQuery, () => { currentPage.value = 1; });
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
-const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
+// --- API CALLS: MAIN ---
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
-// ================= API CALLS =================
-const checkAuth = async () => {
+const fetchData = async () => {
+    isLoading.value = true;
     try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) throw new Error('No token');
-        
-        const res = await axios.get('https://api.etres.my.id/api/v1/me', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        currentUser.value = res.data.user;
+        const [resUsers, resOutlets] = await Promise.all([
+            axios.get(`${apiBase}/users`, { headers: authHeaders() }),
+            axios.get(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() })
+        ]);
+        users.value = resUsers.data.data?.data || resUsers.data.data || resUsers.data;
+        outlets.value = resOutlets.data.data?.data || resOutlets.data.data || resOutlets.data || [];
     } catch (error) {
-        router.push('/');
+        console.error("Gagal menarik data", error);
+        showAlert("Gagal memuat data", "error");
+    } finally { isLoading.value = false; }
+};
+
+const openModal = (user = null) => {
+    isEditMode.value = !!user;
+    if (user) {
+        selectedUserId.value = user.id;
+        form.name = user.name; form.email = user.email; form.role = user.role; form.outlet_id = user.outlet_id || ''; form.password = '';
+    } else {
+        selectedUserId.value = null;
+        form.name = ''; form.email = ''; form.outlet_id = ''; form.password = '';
+        // Otomatis assign "Manager" kalau Developer yg nge-klik Tambah User
+        form.role = currentUserRole.value === 'developer' ? 'manager' : 'karyawan';
+    }
+    isModalOpen.value = true;
+};
+const closeModal = () => { isModalOpen.value = false; };
+
+/// --- API CALLS: DEVELOPER VIEW KARYAWAN ---
+const fetchManagerKaryawan = async (managerId) => {
+    karyawanListModal.isLoading = true;
+    try {
+        // 1. Ambil data karyawan khusus untuk manager ini menggunakan parameter backend baru
+        const response = await axios.get(`${apiBase}/users?manager_id=${managerId}`, { headers: authHeaders() });
+        karyawanList.value = response.data.data?.data || response.data.data || response.data || [];
+
+        // 2. Ambil data outlet khusus milik manager ini (untuk pilihan dropdown form tambah)
+        const resOutlets = await axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() });
+        const allOutlets = resOutlets.data.data?.data || resOutlets.data.data || resOutlets.data || [];
+        
+        // Asumsi struktur tabel outlets Anda pakai user_id untuk menandakan kepemilikan manager
+        managerOutlets.value = allOutlets.filter(o => o.user_id === managerId || o.owner_id === managerId);
+
+    } catch (e) {
+        console.error(e);
+        showAlert("Gagal menarik data karyawan dari server", "error");
+    } finally { 
+        karyawanListModal.isLoading = false; 
     }
 };
 
-const fetchUsers = async () => {
-    isLoadingData.value = true;
-    try {
-        const token = localStorage.getItem('auth_token');
-        const headers = { Authorization: `Bearer ${token}` };
-
-        if (currentUser.value.role === 'developer') {
-            const res = await axios.get('https://api.etres.my.id/api/v1/users', { headers });
-            
-            let fetchedData = [];
-            if (Array.isArray(res.data.data)) fetchedData = res.data.data;
-            else if (Array.isArray(res.data)) fetchedData = res.data;
-            else if (res.data && Array.isArray(res.data.data?.data)) fetchedData = res.data.data.data;
-
-            users.value = fetchedData.filter(u => u.role === 'manager');
-        } else {
-            const res = await axios.get('https://api.etres.my.id/api/v1/users/karyawan', { headers });
-            
-            if (Array.isArray(res.data.data)) users.value = res.data.data;
-            else if (Array.isArray(res.data)) users.value = res.data;
-            else if (res.data && Array.isArray(res.data.data?.data)) users.value = res.data.data.data;
-            else users.value = [];
-        }
-        
-    } catch (error) {
-        showAlert('Gagal mengambil data user.', 'error');
-        users.value = [];
-    } finally {
-        isLoadingData.value = false;
-    }
+const openKaryawanListModal = (managerRow) => {
+    karyawanListModal.managerId = managerRow.id;
+    karyawanListModal.managerName = managerRow.name;
+    karyawanListModal.show = true;
+    fetchManagerKaryawan(managerRow.id);
 };
 
-const submitForm = async () => {
-    modalAlert.show = false;
-    
-    if (!validateForm()) {
-        modalAlert.message = 'Mohon perbaiki isian form yang berwarna merah.';
-        modalAlert.show = true;
-        return;
+const openModalKaryawan = (kar = null) => {
+    karyawanFormModal.isEdit = !!kar;
+    if (kar) {
+        karyawanFormModal.id = kar.id;
+        formKaryawan.name = kar.name; formKaryawan.email = kar.email; formKaryawan.outlet_id = kar.outlet_id || ''; formKaryawan.password = '';
+    } else {
+        karyawanFormModal.id = null;
+        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; formKaryawan.password = '';
     }
+    formKaryawan.role = 'karyawan';
+    formKaryawan.owner_id = karyawanListModal.managerId; // Sinkronisasi kepemilikan
+    karyawanFormModal.show = true;
+};
 
+// --- SUBMIT LOGIC ---
+const submitForm = async (type) => {
     isSubmitting.value = true;
+    const isMain = type === 'main';
+    const currentForm = isMain ? form : formKaryawan;
+    const isEdit = isMain ? isEditMode.value : karyawanFormModal.isEdit;
+    const targetId = isMain ? selectedUserId.value : karyawanFormModal.id;
+
     try {
-        const token = localStorage.getItem('auth_token');
-        const headers = { Authorization: `Bearer ${token}` };
+        const payload = { ...currentForm };
+        if (!payload.password) delete payload.password;
 
-        let payload = { 
-            name: form.name,
-            email: form.email,
-            is_active: form.is_active ? 1 : 0
-        };
-
-        if (form.password) payload.password = form.password;
-        if (form.pin) payload.pin = form.pin;
-
-        let endpoint = '';
-        if (currentUser.value.role === 'developer') {
-            endpoint = isEditMode.value ? `https://api.etres.my.id/api/v1/users/${selectedUserId.value}` : 'https://api.etres.my.id/api/v1/users';
-            payload.role = 'manager'; 
-            if (form.outlet_id) payload.outlet_id = form.outlet_id;
-        } else {
-            endpoint = isEditMode.value ? `https://api.etres.my.id/api/v1/users/karyawan/${selectedUserId.value}` : 'https://api.etres.my.id/api/v1/users/karyawan';
+        let endpoint = `${apiBase}/users`;
+        if (isEdit) {
+            endpoint += `/${targetId}`;
+            payload._method = 'PUT';
         }
 
-        if (isEditMode.value) {
-            await axios.put(endpoint, payload, { headers });
-            showAlert('Data user berhasil diperbarui!', 'success');
-        } else {
-            await axios.post(endpoint, payload, { headers });
-            showAlert('User baru berhasil ditambahkan!', 'success');
-        }
+        await axios.post(endpoint, payload, { headers: authHeaders() });
         
-        closeModal();
-        await fetchUsers(); 
+        showAlert(`Data berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}!`, 'success');
+        
+        if (isMain) {
+            closeModal();
+            fetchData();
+        } else {
+            karyawanFormModal.show = false;
+            fetchManagerKaryawan(karyawanListModal.managerId); // Refetch list modal
+        }
 
     } catch (error) {
-        modalAlert.message = error.response?.data?.message || 'Terjadi kesalahan saat menyimpan data.';
-        modalAlert.show = true;
-    } finally {
-        isSubmitting.value = false;
-    }
+        showAlert(error.response?.data?.message || 'Terjadi kesalahan sistem.', 'error');
+    } finally { isSubmitting.value = false; }
 };
 
-const confirmDelete = (user) => {
+// --- DELETE LOGIC ---
+const confirmDelete = (user, type) => {
     deleteModal.id = user.id;
     deleteModal.name = user.name;
+    deleteModal.type = type;
     deleteModal.show = true;
-};
-
-const closeDeleteModal = () => {
-    deleteModal.show = false; deleteModal.id = null; deleteModal.name = ''; deleteModal.isDeleting = false;
 };
 
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
-        const token = localStorage.getItem('auth_token');
-        const headers = { Authorization: `Bearer ${token}` };
+        await axios.delete(`${apiBase}/users/${deleteModal.id}`, { headers: authHeaders() });
+        showAlert("User berhasil dihapus!", "success");
+        deleteModal.show = false;
         
-        const endpoint = currentUser.value.role === 'developer' 
-            ? `https://api.etres.my.id/api/v1/users/${deleteModal.id}` 
-            : `https://api.etres.my.id/api/v1/users/karyawan/${deleteModal.id}`;
-
-        await axios.delete(endpoint, { headers });
+        if (deleteModal.type === 'main') fetchData();
+        else fetchManagerKaryawan(karyawanListModal.managerId);
         
-        showAlert('User berhasil dihapus!', 'success');
-        if (paginatedUsers.value.length === 1 && currentPage.value > 1) currentPage.value--;
-        
-        await fetchUsers();
-        closeDeleteModal();
     } catch (error) {
-        showAlert('Gagal menghapus user.', 'error');
-        deleteModal.isDeleting = false;
-    }
+        showAlert("Gagal menghapus user.", "error");
+    } finally { deleteModal.isDeleting = false; }
 };
 
-// ================= UTILS =================
-const showAlert = (msg, type) => {
-    alert.message = msg;
-    alert.type = type;
-    alert.show = true;
-    setTimeout(() => { alert.show = false; }, 4000);
-};
-
-const openModal = (user = null) => {
-    formErrors.name = false; formErrors.email = false; formErrors.password = false; formErrors.pin = false;
-    modalAlert.show = false;
-
-    if (user) {
-        isEditMode.value = true;
-        selectedUserId.value = user.id;
-        form.name = user.name;
-        form.email = user.email;
-        form.password = ''; 
-        form.pin = '';      
-        form.outlet_id = user.outlet_id || '';
-        form.is_active = user.is_active === 1 || user.is_active === true;
-    } else {
-        isEditMode.value = false;
-        selectedUserId.value = null;
-        form.name = '';
-        form.email = '';
-        form.password = '';
-        form.pin = '';
-        form.outlet_id = '';
-        form.is_active = true;
-    }
-    isModalOpen.value = true;
-};
-
-const closeModal = () => { isModalOpen.value = false; };
-
-onMounted(async () => {
-    await checkAuth();
-    await fetchUsers();
+onMounted(() => {
+    fetchData();
 });
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
