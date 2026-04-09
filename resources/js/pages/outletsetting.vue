@@ -1,27 +1,21 @@
 <template>
     <AdminLayout>
-        <div class="space-y-6 font-['Poppins']">
+        <div class="space-y-6 font-['Poppins'] pb-10">
+
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-                <div
-                    v-if="alert.show"
-                    :class="[
-                        'p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2',
-                        alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]'
-                    ]"
-                >
+                <div v-if="alert.show" :class="['p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2', alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' ]">
                     <div class="flex items-center gap-2">
-                        <svg v-if="alert.type === 'error'" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <svg v-else class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg v-if="alert.type === 'error'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg v-else class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <span>{{ alert.message }}</span>
                     </div>
-                    <button @click="alert.show = false" class="focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+                    <button @click="alert.show = false" class="focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
             </transition>
 
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-4 border-b border-[#D4E4F4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#F7FAFD]">
+                
+                <div class="p-4 border-b border-[#D4E4F4] flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 bg-[#F7FAFD]">
                     <div class="flex items-center gap-2">
                         <span class="text-[13px] text-[#5A7A9A] font-medium">Tampilkan</span>
                         <select v-model="itemsPerPage" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-md px-2 py-1 focus:outline-none focus:border-[#2E7DD6]">
@@ -30,23 +24,19 @@
                             <option :value="15">15</option>
                             <option :value="50">50</option>
                         </select>
-                        <span class="text-[13px] text-[#5A7A9A] font-medium">data</span>
                     </div>
 
-                    <div class="flex items-center gap-3 w-full sm:w-auto">
-                        <div class="relative w-full sm:w-72 shrink-0">
+                    <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                        <div class="relative w-full sm:w-64 flex-shrink-0">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             </div>
-                            <input
-                                type="text"
-                                v-model="searchQuery"
-                                placeholder="Cari outlet..."
-                                class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC]"
-                            >
+                            <input type="text" v-model="searchQuery" placeholder="Cari nama outlet..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
                         </div>
 
-                        <button @click="openModal()" class="bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap">
+                        <div class="w-px h-6 bg-[#D4E4F4] hidden sm:block mx-1"></div>
+
+                        <button @click="openOutletModal()" class="bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                             Tambah Outlet
                         </button>
@@ -57,28 +47,40 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">ID Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Outlet</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Owner ID</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Alamat & Telp</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr v-if="isLoadingData" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Memuat data outlet...</td>
+                        <tbody class="divide-y divide-[#EBF3FB]">
+                            <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
+                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data outlet...</td>
                             </tr>
                             <tr v-else-if="paginatedOutlets.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Belum ada outlet.</td>
+                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data outlet ditemukan.</td>
                             </tr>
-                            <tr v-else v-for="outlet in paginatedOutlets" :key="resolveOutletId(outlet) ?? outlet.name" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
-                                <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ resolveOutletId(outlet) ?? '-' }}</td>
-                                <td class="px-5 py-3 text-[14px] text-[#1A2332] font-semibold">{{ outlet.name }}</td>
-                                <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ outlet.owner_id ?? '-' }}</td>
+                            <tr v-else v-for="outlet in paginatedOutlets" :key="outlet.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                <td class="px-5 py-3 font-semibold text-[#1A2332] text-[14px]">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0">
+                                            {{ outlet.name.charAt(0).toUpperCase() }}
+                                        </div>
+                                        <span>{{ outlet.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3">
+                                    <p class="text-[13px] text-[#1A2332] font-medium">{{ outlet.address || '-' }}</p>
+                                    <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono'] mt-0.5">{{ outlet.phone || 'Tidak ada nomor telepon' }}</p>
+                                </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
-                                    <button @click="openModal(outlet)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors mr-2" title="Edit Outlet">
+                                    <button @click="openMenuManager(outlet)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Katalog Menu Outlet">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                        Kelola Menu
+                                    </button>
+                                    <button @click="openOutletModal(outlet)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Data Outlet">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                     </button>
-                                    <button @click="confirmDelete(outlet)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors" title="Hapus Outlet">
+                                    <button @click="confirmDelete(outlet)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Outlet">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </td>
@@ -88,9 +90,7 @@
                 </div>
 
                 <div class="p-4 bg-white flex items-center justify-between border-t border-[#D4E4F4]" v-if="totalPages > 0">
-                    <p class="text-[12px] text-[#5A7A9A]">
-                        Halaman <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ currentPage }}</span> dari <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ totalPages }}</span>
-                    </p>
+                    <p class="text-[12px] text-[#5A7A9A]">Halaman <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ currentPage }}</span> dari <span class="font-semibold text-[#1A2332] font-['JetBrains_Mono']">{{ totalPages }}</span></p>
                     <div class="flex gap-2">
                         <button @click="prevPage" :disabled="currentPage === 1" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Sebelumnya</button>
                         <button @click="nextPage" :disabled="currentPage === totalPages" class="px-3 py-1.5 border border-[#D4E4F4] text-[13px] rounded-lg text-[#1A2332] disabled:opacity-50 hover:bg-[#F0F4F8] transition-colors">Selanjutnya</button>
@@ -99,295 +99,324 @@
             </div>
         </div>
 
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
-            <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] max-h-[90vh] flex flex-col">
+        <div v-if="outletModal.show" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] flex flex-col">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Outlet' : 'Tambah Outlet' }}</h3>
-                    <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ outletModal.isEdit ? 'Edit Data Outlet' : 'Tambah Outlet Baru' }}</h3>
+                    <button @click="outletModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
-
-                <form @submit.prevent="submitForm" class="p-6 space-y-4 overflow-y-auto">
+                <form @submit.prevent="submitOutlet" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Nama Outlet</label>
-                        <input
-                            type="text"
-                            v-model="form.name"
-                            @input="formError = ''"
-                            maxlength="255"
-                            placeholder="Contoh: Outlet Pusat"
-                            :class="[
-                                'w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] placeholder-[#8AAFCC]',
-                                formError ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white'
-                            ]"
-                        >
-                        <span v-if="formError" class="text-[#B83B2A] text-[11px] mt-1 block">{{ formError }}</span>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Outlet <span class="text-[#B83B2A]">*</span></label>
+                        <input type="text" v-model="formOutlet.name" required placeholder="Contoh: Cabang Sudirman" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
                     </div>
-
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
+                        <input type="tel" v-model="formOutlet.phone" placeholder="08123456789" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Alamat Lengkap</label>
+                        <textarea v-model="formOutlet.address" rows="3" placeholder="Alamat lengkap outlet..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] resize-none"></textarea>
+                    </div>
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
-                        <button type="button" @click="closeModal" class="px-4 py-2 text-[14px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
-                        <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:bg-[#8AAFCC] text-white text-[14px] font-semibold rounded-lg transition-colors">
-                            {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
+                        <button type="button" @click="outletModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
+                        <button type="submit" :disabled="outletModal.isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors">
+                            {{ outletModal.isSubmitting ? 'Menyimpan...' : 'Simpan Data' }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div v-if="deleteModal.show" class="fixed inset-0 z-60 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
+        <div v-if="menuModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/60 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[90vh] animate-[fadeIn_0.2s_ease-out]">
+                
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                    <div>
+                        <h3 class="text-[18px] font-bold text-[#1A2332] flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#2A7A4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                            Katalog Cabang: {{ menuModal.outletName }}
+                        </h3>
+                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur menu mana saja yang dijual, tentukan harga, stok, dan station untuk cabang ini.</p>
+                    </div>
+                    <button @click="menuModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] p-1.5 border border-[#D4E4F4] rounded bg-white shadow-sm transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+
+                <div class="overflow-y-auto flex-1 bg-white">
+                    <div v-if="menuModal.isLoading" class="text-center py-10 text-[13px] text-[#8AAFCC] animate-pulse">Menyiapkan daftar master menu...</div>
+                    <div v-else-if="menuForm.length === 0" class="text-center py-10 text-[13px] text-[#8AAFCC]">Belum ada Master Menu yang dibuat. Silakan buat di halaman Manajemen Menu.</div>
+                    
+                    <table v-else class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-[#F7FAFD] shadow-sm z-10">
+                            <tr class="border-b border-[#D4E4F4]">
+                                <th class="p-3 text-center w-12">
+                                    <input type="checkbox" @change="toggleAllMenus" v-model="isAllSelected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
+                                </th>
+                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Menu</th>
+                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-32">Harga Jual (Rp)</th>
+                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-24">Stok</th>
+                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-36">Pilih Station</th>
+                                <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-center w-24">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#EBF3FB]">
+                            <tr v-for="(prod, idx) in menuForm" :key="prod.id" :class="prod.selected ? 'bg-white' : 'bg-gray-50 opacity-60'">
+                                <td class="p-3 text-center">
+                                    <input type="checkbox" v-model="prod.selected" class="w-4 h-4 rounded text-[#2A7A4B] focus:ring-[#2A7A4B]">
+                                </td>
+                                <td class="p-3">
+                                    <p class="text-[13px] font-semibold text-[#1A2332]">{{ prod.name }}</p>
+                                    <p class="text-[10px] text-[#5A7A9A] font-['JetBrains_Mono']">Modal: Rp {{ formatRupiah(prod.cost_price) }}</p>
+                                </td>
+                                <td class="p-3">
+                                    <input type="text" v-model="prod.price" @input="formatProductNumber(idx, 'price')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-bold text-[#1B4F8A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent">
+                                </td>
+                                <td class="p-3">
+                                    <input type="text" v-model="prod.stock" @input="formatProductNumber(idx, 'stock')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-semibold text-[#1A2332] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent text-center">
+                                </td>
+                                <td class="p-3">
+                                    <select v-model="prod.station_id" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[11px] font-semibold text-[#5A7A9A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent bg-white">
+                                        <option value="">Tanpa Station</option>
+                                        <option v-for="st in stations" :key="st.id" :value="st.id">{{ st.name }}</option>
+                                    </select>
+                                </td>
+                                <td class="p-3 text-center">
+                                    <span :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', getRawNumber(prod.stock) > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                                        {{ getRawNumber(prod.stock) > 0 ? 'Tersedia' : 'Habis' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 border-t border-[#D4E4F4] bg-[#F7FAFD] flex justify-end gap-3 rounded-b-xl">
+                    <button @click="menuModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#EBF3FB] rounded-lg transition-colors">Batal</button>
+                    <button @click="saveOutletMenu" :disabled="menuModal.isSaving" class="px-5 py-2 bg-[#2A7A4B] hover:bg-green-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg shadow-sm transition-colors">
+                        {{ menuModal.isSaving ? 'Menyimpan...' : 'Simpan Konfigurasi Cabang' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="deleteModal.show" class="fixed inset-0 z-[80] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-sm overflow-hidden border border-[#D4E4F4] text-center p-6">
                 <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-100">
-                    <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Outlet?</h3>
-                <p class="text-[14px] text-[#5A7A9A] mb-6">
-                    Yakin ingin menghapus outlet <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>?
-                </p>
+                <p class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Semua riwayat dan pengaturan menu cabang ini akan hilang.</p>
                 <div class="flex justify-center gap-3">
-                    <button @click="closeDeleteModal" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
+                    <button @click="deleteModal.show = false" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
                     <button @click="executeDelete" :disabled="deleteModal.isDeleting" class="px-4 py-2 w-full text-[14px] font-semibold text-white bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 rounded-lg transition-colors">
                         {{ deleteModal.isDeleting ? 'Menghapus...' : 'Ya, Hapus' }}
                     </button>
                 </div>
             </div>
         </div>
+
     </AdminLayout>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-const router = useRouter();
 const apiBase = 'https://api.etres.my.id/api/v1';
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
-const outlets = ref([]);
-const isLoadingData = ref(true);
-const isModalOpen = ref(false);
-const isEditMode = ref(false);
-const isSubmitting = ref(false);
-const selectedOutletId = ref(null);
-
-const searchQuery = ref('');
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
-
-const form = reactive({
-    name: ''
-});
-
-const formError = ref('');
 const alert = reactive({ show: false, message: '', type: 'success' });
+const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
+
+// --- STATE OUTLET & GLOBAL ---
+const outlets = ref([]);
+const stations = ref([]); // Data Station Global
+const isLoading = ref(true);
+const searchQuery = ref('');
+const itemsPerPage = ref(10);
+const currentPage = ref(1);
+
+const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
+const formOutlet = reactive({ name: '', address: '', phone: '' });
+
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
-const showAlert = (message, type = 'success') => {
-    alert.show = true;
-    alert.message = message;
-    alert.type = type;
-};
+// --- STATE MENU MANAGER ---
+const menuModal = reactive({ show: false, outletId: null, outletName: '', isLoading: false, isSaving: false });
+const menuForm = ref([]);
+const masterProducts = ref([]);
+const isAllSelected = ref(false); // Checkbox master (toggle all)
 
-const resolveOutletId = (outlet) => outlet?.id ?? null;
+// --- COMPUTED & UTILS ---
+const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
 
-const resolveOwnerId = (outlet) => outlet?.owner_id ?? null;
-
-const resolveOutletName = (outlet) => outlet?.name ?? '-';
-
-const extractOutletRows = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.data)) return payload.data;
-    if (Array.isArray(payload?.data?.data)) return payload.data.data;
-    if (Array.isArray(payload?.outlets)) return payload.outlets;
-    if (Array.isArray(payload?.result)) return payload.result;
-    return [];
-};
-
-const normalizeOutlet = (raw) => ({
-    ...raw,
-    id: resolveOutletId(raw),
-    owner_id: resolveOwnerId(raw),
-    name: resolveOutletName(raw),
-});
-
-const authHeaders = () => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-        router.push('/');
-        throw new Error('Unauthorized');
-    }
-
-    return { Authorization: `Bearer ${token}` };
-};
-
-const normalizedOutlets = computed(() => {
-    return Array.isArray(outlets.value) ? outlets.value : [];
-});
-
-const filteredOutlets = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    if (!query) return normalizedOutlets.value;
-
-    return normalizedOutlets.value.filter((outlet) => {
-        const id = String(resolveOutletId(outlet) ?? '');
-        const name = (outlet.name || '').toLowerCase();
-        const owner = String(outlet.owner_id ?? '');
-        return id.includes(query) || name.includes(query) || owner.includes(query);
-    });
-});
-
-const totalPages = computed(() => {
-    const total = Math.ceil(filteredOutlets.value.length / itemsPerPage.value);
-    return total > 0 ? total : 1;
-});
+// Helper mengubah string berformat ke pure integer
+const getRawNumber = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
 const paginatedOutlets = computed(() => {
+    let filtered = outlets.value.filter(o => o.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
     const start = (currentPage.value - 1) * itemsPerPage.value;
-    return filteredOutlets.value.slice(start, start + itemsPerPage.value);
+    return filtered.slice(start, start + itemsPerPage.value);
 });
+const totalPages = computed(() => Math.ceil(outlets.value.filter(o => o.name.toLowerCase().includes(searchQuery.value.toLowerCase())).length / itemsPerPage.value));
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
+const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
-watch([filteredOutlets, itemsPerPage], () => {
-    if (currentPage.value > totalPages.value) {
-        currentPage.value = totalPages.value;
-    }
-});
-
-const fetchOutlets = async () => {
-    isLoadingData.value = true;
-    try {
-        const response = await axios.get(`${apiBase}/outlets`, {
-            headers: authHeaders()
-        });
-
-        outlets.value = extractOutletRows(response.data).map(normalizeOutlet);
-    } catch (error) {
-        const status = error.response?.status;
-        if (status === 401) {
-            localStorage.removeItem('auth_token');
-            router.push('/');
-            return;
-        }
-
-        const message = error.response?.data?.message || 'Gagal memuat data outlet.';
-        showAlert(message, 'error');
-    } finally {
-        isLoadingData.value = false;
-    }
+const formatProductNumber = (index, field) => {
+    let rawValue = menuForm.value[index][field].toString().replace(/[^0-9]/g, '');
+    menuForm.value[index][field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
 };
 
-const openModal = (outlet = null) => {
-    formError.value = '';
+const toggleAllMenus = () => {
+    menuForm.value.forEach(m => m.selected = isAllSelected.value);
+};
 
-    if (outlet) {
-        const outletId = resolveOutletId(outlet);
-        isEditMode.value = true;
-        selectedOutletId.value = outletId;
-        form.name = outlet.name || '';
+// --- API CALLS ---
+const fetchInitialData = async () => {
+    isLoading.value = true;
+    try {
+        const [resOut, resProd, resStat] = await Promise.all([
+            axios.get(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() }),
+            axios.get(`${apiBase}/products?limit=1000`, { headers: authHeaders() }),
+            axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() }) // Load Station
+        ]);
+        outlets.value = resOut.data.data?.data || resOut.data.data || resOut.data || [];
+        masterProducts.value = resProd.data.data?.data || resProd.data.data || resProd.data || [];
+        stations.value = resStat.data.data?.data || resStat.data.data || resStat.data || [];
+    } catch (e) {
+        showAlert("Gagal memuat data", "error");
+    } finally { isLoading.value = false; }
+};
+
+const openOutletModal = (item = null) => {
+    outletModal.isEdit = !!item;
+    if (item) {
+        outletModal.id = item.id;
+        formOutlet.name = item.name; formOutlet.address = item.address || ''; formOutlet.phone = item.phone || '';
     } else {
-        isEditMode.value = false;
-        selectedOutletId.value = null;
-        form.name = '';
+        outletModal.id = null;
+        formOutlet.name = ''; formOutlet.address = ''; formOutlet.phone = '';
     }
-
-    isModalOpen.value = true;
+    outletModal.show = true;
 };
 
-const closeModal = () => {
-    isModalOpen.value = false;
-    isSubmitting.value = false;
-    formError.value = '';
-};
-
-const validateForm = () => {
-    if (!form.name.trim()) {
-        formError.value = 'Nama outlet wajib diisi.';
-        return false;
-    }
-
-    formError.value = '';
-    return true;
-};
-
-const submitForm = async () => {
-    if (!validateForm()) return;
-
-    isSubmitting.value = true;
-
+const submitOutlet = async () => {
+    outletModal.isSubmitting = true;
     try {
-        if (isEditMode.value && selectedOutletId.value) {
-            await axios.put(`${apiBase}/outlets/${selectedOutletId.value}`, {
-                name: form.name
-            }, {
-                headers: authHeaders()
-            });
-
-            showAlert('Outlet berhasil diupdate.', 'success');
-        } else {
-            await axios.post(`${apiBase}/outlets`, {
-                name: form.name
-            }, {
-                headers: authHeaders()
-            });
-
-            showAlert('Outlet berhasil dibuat.', 'success');
+        const payload = { ...formOutlet };
+        let endpoint = `${apiBase}/outlets`;
+        if (outletModal.isEdit) {
+            endpoint += `/${outletModal.id}`;
+            payload._method = 'PUT';
         }
 
-        closeModal();
-        await fetchOutlets();
+        await axios.post(endpoint, payload, { headers: authHeaders() });
+        showAlert(`Outlet berhasil ${outletModal.isEdit ? 'diperbarui' : 'ditambahkan'}!`, 'success');
+        outletModal.show = false;
+        fetchInitialData();
     } catch (error) {
-        const message = error.response?.data?.message || 'Gagal menyimpan outlet.';
-        showAlert(message, 'error');
-    } finally {
-        isSubmitting.value = false;
-    }
+        showAlert(error.response?.data?.message || 'Gagal menyimpan outlet.', 'error');
+    } finally { outletModal.isSubmitting = false; }
 };
 
-const confirmDelete = (outlet) => {
-    const outletId = resolveOutletId(outlet);
-    deleteModal.show = true;
-    deleteModal.id = outletId;
-    deleteModal.name = outlet.name;
-    deleteModal.isDeleting = false;
-};
-
-const closeDeleteModal = () => {
-    deleteModal.show = false;
-    deleteModal.id = null;
-    deleteModal.name = '';
-    deleteModal.isDeleting = false;
+const confirmDelete = (item) => {
+    deleteModal.id = item.id; deleteModal.name = item.name; deleteModal.show = true;
 };
 
 const executeDelete = async () => {
-    if (!deleteModal.id) return;
-
     deleteModal.isDeleting = true;
+    try {
+        await axios.delete(`${apiBase}/outlets/${deleteModal.id}`, { headers: authHeaders() });
+        showAlert('Outlet berhasil dihapus!', 'success');
+        deleteModal.show = false;
+        fetchInitialData();
+    } catch (error) {
+        showAlert('Gagal menghapus outlet.', 'error');
+    } finally { deleteModal.isDeleting = false; }
+};
+
+// --- MENU MANAGER LOGIC ---
+const openMenuManager = async (outlet) => {
+    menuModal.outletId = outlet.id;
+    menuModal.outletName = outlet.name;
+    menuModal.show = true;
+    menuModal.isLoading = true;
 
     try {
-        await axios.delete(`${apiBase}/outlets/${deleteModal.id}`, {
-            headers: authHeaders()
+        const res = await axios.get(`${apiBase}/outlets/${outlet.id}/products`, { headers: authHeaders() });
+        const outletProducts = res.data.data || []; 
+
+        menuForm.value = masterProducts.value.map(master => {
+            const existingPivot = outletProducts.find(op => op.id === master.id);
+            if (existingPivot && existingPivot.pivot) {
+                return {
+                    id: master.id, name: master.name, cost_price: master.cost_price,
+                    selected: true,
+                    price: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.price),
+                    stock: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.stock),
+                    station_id: existingPivot.pivot.station_id || '' // Assign station cabang ini
+                };
+            } else {
+                return {
+                    id: master.id, name: master.name, cost_price: master.cost_price,
+                    selected: false, price: '', stock: '0', station_id: ''
+                };
+            }
         });
+        
+        isAllSelected.value = menuForm.value.every(m => m.selected);
+        
+    } catch (e) {
+        showAlert('Gagal mengambil data menu cabang', 'error');
+    } finally { menuModal.isLoading = false; }
+};
 
-        showAlert('Outlet berhasil dihapus.', 'success');
-        closeDeleteModal();
-        await fetchOutlets();
+const saveOutletMenu = async () => {
+    menuModal.isSaving = true;
+    try {
+        const selectedMenus = menuForm.value.filter(m => m.selected);
+        
+        let hasInvalidData = false;
+        selectedMenus.forEach(m => { if (!m.price) hasInvalidData = true; });
+        if (hasInvalidData) {
+            alert('Semua menu yang dicentang wajib diisi Harga Jualnya!');
+            menuModal.isSaving = false;
+            return;
+        }
+
+        const payload = {
+            products: selectedMenus.map(m => {
+                const pureStock = getRawNumber(m.stock);
+                return {
+                    product_id: m.id,
+                    price: getRawNumber(m.price),
+                    stock: pureStock,
+                    station_id: m.station_id || null, 
+                    is_active: pureStock > 0 // Otomatis aktif jika stok lebih dari 0
+                };
+            })
+        };
+
+        await axios.post(`${apiBase}/outlets/${menuModal.outletId}/sync-products`, payload, { headers: authHeaders() });
+        
+        showAlert('Konfigurasi menu cabang berhasil disimpan!', 'success');
+        menuModal.show = false;
     } catch (error) {
-        const message = error.response?.data?.message || 'Gagal menghapus outlet.';
-        showAlert(message, 'error');
-    } finally {
-        deleteModal.isDeleting = false;
-    }
+        showAlert('Gagal menyimpan katalog cabang.', 'error');
+    } finally { menuModal.isSaving = false; }
 };
 
-const prevPage = () => {
-    if (currentPage.value > 1) currentPage.value--;
-};
-
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) currentPage.value++;
-};
-
-onMounted(() => {
-    fetchOutlets();
-});
+onMounted(() => fetchInitialData());
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Mempercantik checkbox */
+input[type=checkbox] {
+    cursor: pointer;
+}
+</style>
