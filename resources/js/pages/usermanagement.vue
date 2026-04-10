@@ -12,12 +12,6 @@
                         <input type="text" v-model="searchQuery" placeholder="Cari nama atau email..." class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
                     </div>
 
-                    <select v-if="currentUserRole !== 'developer'" v-model="filterRole" class="appearance-none bg-white border border-[#D4E4F4] text-[#1A2332] text-[13px] font-semibold rounded-lg px-4 py-2 focus:outline-none focus:border-[#2E7DD6] cursor-pointer">
-                        <option value="">Semua Role</option>
-                        <option value="manager">Manager / Owner</option>
-                        <option value="karyawan">Karyawan / Kasir</option>
-                    </select>
-
                     <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block"></div>
 
                     <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">

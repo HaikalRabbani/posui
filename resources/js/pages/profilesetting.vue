@@ -1,13 +1,7 @@
 <template>
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
-            
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#D4E4F4] pb-4">
-                <div>
-                    <h1 class="text-[24px] font-semibold text-[#1A2332]">Profile Setting</h1>
-                    <p class="text-[14px] text-[#5A7A9A] mt-1">Kelola informasi pribadi dan keamanan akun Anda.</p>
-                </div>
-            </div>
+
 
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
                 <div v-if="alert.show" :class="['p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2', alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' ]">

@@ -2,13 +2,7 @@
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
             
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-[24px] font-semibold text-[#1A2332]">Riwayat Transaksi</h1>
-                    <p class="text-[14px] text-[#5A7A9A] mt-1">Pantau, edit, dan cetak struk riwayat pesanan.</p>
-                </div>
-            </div>
-
+            
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div class="p-4 border-b border-[#D4E4F4] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#F7FAFD]">
                     <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
