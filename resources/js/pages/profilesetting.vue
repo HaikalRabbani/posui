@@ -2,7 +2,6 @@
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
 
-
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
                 <div v-if="alert.show" :class="['p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2', alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' ]">
                     <div class="flex items-center gap-2">
@@ -33,12 +32,16 @@
                 <div class="p-6 md:p-8 flex flex-col md:flex-row gap-8">
                     
                     <div class="flex flex-col items-center gap-4 md:w-1/3">
-                        <div class="w-32 h-32 rounded-full bg-[#EBF3FB] flex items-center justify-center border border-[#D4E4F4] shadow-sm relative group cursor-pointer overflow-hidden">
-                            <span class="text-[36px] font-bold text-[#1B4F8A] uppercase">{{ userInitials }}</span>
+                        <div @click="$refs.profileImageInput.click()" class="w-32 h-32 rounded-full bg-[#EBF3FB] flex items-center justify-center border border-[#D4E4F4] shadow-sm relative group cursor-pointer overflow-hidden">
+                            <img v-if="displayImage" :src="displayImage" class="w-full h-full object-cover" />
+                            <span v-else class="text-[36px] font-bold text-[#1B4F8A] uppercase">{{ userInitials }}</span>
+                            
                             <div class="absolute inset-0 bg-[#1A2332]/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
                         </div>
+                        <input type="file" ref="profileImageInput" @change="onImageChange" accept="image/jpeg, image/png, image/jpg" class="hidden" />
+
                         <div class="text-center">
                             <h3 class="font-bold text-[#1A2332] text-[18px] leading-tight">{{ formProfile.name || 'Memuat...' }}</h3>
                             <span class="inline-block px-3 py-1 mt-2 bg-[#F7FAFD] text-[#5A7A9A] border border-[#D4E4F4] rounded-md text-[11px] font-bold uppercase tracking-wider">
@@ -64,7 +67,7 @@
                                 <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Nomor Telepon</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">+62</span>
-                                    <input v-model="formProfile.phone" type="tel" placeholder="81234567890" class="w-full pl-12 pr-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
+                                    <input v-model="formProfile.phone_number" type="tel" placeholder="81234567890" class="w-full pl-12 pr-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
                                 </div>
                             </div>
 
@@ -139,8 +142,30 @@ const isSavingSecurity = ref(false);
 const alert = reactive({ show: false, message: '', type: 'success' });
 
 // State Form
-const formProfile = ref({ name: '', email: '', phone: '', role: '' });
+const formProfile = ref({ name: '', email: '', phone_number: '', role: '' });
 const formSecurity = ref({ newPassword: '', confirmPassword: '' });
+
+// State Image
+const profileImageInput = ref(null);
+const imageFile = ref(null);
+const imagePreview = ref(null);
+const existingImage = ref(null);
+
+const displayImage = computed(() => {
+    if (imagePreview.value) return imagePreview.value;
+    if (existingImage.value) {
+        return existingImage.value.startsWith('http') ? existingImage.value : `https://api.etres.my.id/storage/${existingImage.value}`;
+    }
+    return null;
+});
+
+const onImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        imageFile.value = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
 
 // Header Profile Initials
 const userInitials = computed(() => {
@@ -150,7 +175,6 @@ const userInitials = computed(() => {
     return names[0].charAt(0);
 });
 
-// Validasi Password Mismatch
 const passwordMismatch = computed(() => {
     if (formSecurity.value.newPassword && formSecurity.value.confirmPassword) {
         return formSecurity.value.newPassword !== formSecurity.value.confirmPassword;
@@ -169,8 +193,10 @@ const showAlert = (message, type = 'success') => {
     setTimeout(() => alert.show = false, 4000);
 };
 
-// Mengambil data profile asli dari API
 const fetchProfile = async () => {
+    imageFile.value = null;
+    imagePreview.value = null;
+
     try {
         const response = await axios.get(`${apiBase}/me`, { headers: authHeaders() });
         const userData = response.data.user;
@@ -178,30 +204,40 @@ const fetchProfile = async () => {
         formProfile.value = {
             name: userData.name || '',
             email: userData.email || '',
-            phone: userData.phone || '', // Opsional, diisi jika dari API ada
+            phone_number: userData.phone_number || '', 
             role: userData.role || 'karyawan'
         };
+        
+        existingImage.value = userData.image || null;
+
     } catch (error) {
         console.error('Gagal mengambil data profil:', error);
         showAlert('Gagal memuat data profil.', 'error');
     }
 };
 
-// Simpan Data Profil
+// Simpan Data Profil dengan FormData
 const saveProfile = async () => {
     isSaving.value = true;
     alert.show = false;
 
     try {
-        const response = await axios.put(`${apiBase}/me`, {
-            name: formProfile.value.name,
-            email: formProfile.value.email,
-            // Phone diabaikan jika tidak ada validasi di backend, tapi bisa ditambahkan jika backend mendukung
-        }, { headers: authHeaders() });
+        const formData = new FormData();
+        formData.append('name', formProfile.value.name);
+        formData.append('email', formProfile.value.email);
+        if (formProfile.value.phone_number) formData.append('phone_number', formProfile.value.phone_number);
+        if (imageFile.value) formData.append('image', imageFile.value);
+        
+        formData.append('_method', 'PUT'); // Trick method PUT Laravel untuk FormData
+
+        await axios.post(`${apiBase}/me`, formData, { 
+            headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' } 
+        });
 
         showAlert('Profil berhasil diperbarui!', 'success');
         
-        // Trigger event ke AdminLayout agar nama di header pojok kanan atas langsung berubah
+        // Refresh local data & trigger update layout admin
+        fetchProfile();
         window.dispatchEvent(new Event('profile-updated'));
 
     } catch (error) {
@@ -226,8 +262,8 @@ const savePassword = async () => {
 
     try {
         await axios.put(`${apiBase}/me`, {
-            name: formProfile.value.name, // Diwajibkan di backend
-            email: formProfile.value.email, // Diwajibkan di backend
+            name: formProfile.value.name,
+            email: formProfile.value.email,
             password: formSecurity.value.newPassword,
             password_confirmation: formSecurity.value.confirmPassword
         }, { headers: authHeaders() });

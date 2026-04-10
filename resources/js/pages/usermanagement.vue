@@ -12,8 +12,6 @@
                         <input type="text" v-model="searchQuery" placeholder="Cari nama atau email..." class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
                     </div>
 
-
-
                     <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block"></div>
 
                     <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
@@ -55,8 +53,9 @@
                             <tr v-else v-for="user in paginatedUsers" :key="user.id" class="hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0">
-                                            {{ user.name.charAt(0).toUpperCase() }}
+                                        <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0 overflow-hidden shadow-sm">
+                                            <img v-if="user.image" :src="user.image.startsWith('http') ? user.image : `https://api.etres.my.id/storage/${user.image}`" class="w-full h-full object-cover" />
+                                            <span v-else>{{ user.name.charAt(0).toUpperCase() }}</span>
                                         </div>
                                         <div>
                                             <p class="text-[13px] font-semibold text-[#1A2332]">{{ user.name }}</p>
@@ -114,7 +113,19 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
-                <form @submit.prevent="submitForm('main')" class="p-6 space-y-4">
+                <form @submit.prevent="submitForm('main')" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border border-[#D4E4F4] overflow-hidden bg-[#F0F4F8] flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <img v-if="imagePreviewMain" :src="imagePreviewMain" class="w-full h-full object-cover" />
+                            <svg v-else class="w-6 h-6 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Foto Profil (Opsional)</label>
+                            <input type="file" @change="onMainImageSelect" accept="image/png, image/jpeg, image/jpg" class="w-full text-[12px] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[12px] file:font-semibold file:bg-[#EBF3FB] file:text-[#2E7DD6] hover:file:bg-[#D4E4F4] text-[#5A7A9A]" />
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
                         <input type="text" v-model="form.name" required placeholder="Masukkan nama..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
@@ -140,6 +151,11 @@
                                 <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div v-if="form.role === 'karyawan'">
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
+                        <input type="text" v-model="form.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
                     </div>
 
                     <div>
@@ -200,8 +216,16 @@
                                 </tr>
                                 <tr v-else v-for="kar in karyawanList" :key="kar.id" class="bg-white hover:bg-[#F7FAFD]">
                                     <td class="px-4 py-3">
-                                        <p class="text-[13px] font-semibold text-[#1A2332]">{{ kar.name }}</p>
-                                        <p class="text-[11px] text-[#5A7A9A]">{{ kar.email }}</p>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-[#EBF3FB] text-[#2A7A4B] border border-[#D4E4F4] flex items-center justify-center font-bold text-[11px] flex-shrink-0 overflow-hidden shadow-sm">
+                                                <img v-if="kar.image" :src="kar.image.startsWith('http') ? kar.image : `https://api.etres.my.id/storage/${kar.image}`" class="w-full h-full object-cover" />
+                                                <span v-else>{{ kar.name.charAt(0).toUpperCase() }}</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-[13px] font-semibold text-[#1A2332]">{{ kar.name }}</p>
+                                                <p class="text-[11px] text-[#5A7A9A]">{{ kar.email }}</p>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3 text-[12px] text-[#5A7A9A] font-medium">{{ getOutletName(kar) }}</td>
                                     <td class="px-4 py-3 text-right whitespace-nowrap">
@@ -225,7 +249,19 @@
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
                     <h3 class="text-[15px] font-semibold text-[#1A2332]">{{ karyawanFormModal.isEdit ? 'Edit Karyawan' : 'Tambah Karyawan Baru' }}</h3>
                 </div>
-                <form @submit.prevent="submitForm('karyawan')" class="p-6 space-y-4">
+                <form @submit.prevent="submitForm('karyawan')" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border border-[#D4E4F4] overflow-hidden bg-[#F0F4F8] flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <img v-if="imagePreviewKar" :src="imagePreviewKar" class="w-full h-full object-cover" />
+                            <svg v-else class="w-6 h-6 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Foto Profil (Opsional)</label>
+                            <input type="file" @change="onKarImageSelect" accept="image/png, image/jpeg, image/jpg" class="w-full text-[12px] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[12px] file:font-semibold file:bg-[#EBF3FB] file:text-[#2A7A4B] hover:file:bg-[#D4E4F4] text-[#5A7A9A]" />
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
                         <input type="text" v-model="formKaryawan.name" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
@@ -241,6 +277,12 @@
                             <option v-for="out in managerOutlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                         </select>
                     </div>
+                    
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
+                        <input type="text" v-model="formKaryawan.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                    </div>
+
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ karyawanFormModal.isEdit ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!karyawanFormModal.isEdit" class="text-[#B83B2A]">*</span></label>
                         <input type="password" v-model="formKaryawan.password" :required="!karyawanFormModal.isEdit" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
@@ -300,14 +342,16 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedUserId = ref(null);
-const form = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '' });
+const form = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', pin: '', image_file: null });
+const imagePreviewMain = ref(null);
 
 // --- STATE DEVELOPER: LIST KARYAWAN ---
 const karyawanListModal = reactive({ show: false, managerId: null, managerName: '', isLoading: false });
 const karyawanList = ref([]);
 const managerOutlets = ref([]); 
 const karyawanFormModal = reactive({ show: false, isEdit: false, id: null });
-const formKaryawan = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', owner_id: null });
+const formKaryawan = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', pin: '', owner_id: null, image_file: null });
+const imagePreviewKar = ref(null);
 
 // --- STATE DELETE MODAL ---
 const deleteModal = reactive({ show: false, id: null, name: '', type: 'main', isDeleting: false });
@@ -320,6 +364,27 @@ const getOutletName = (usr) => {
         return out ? out.name : `Outlet #${usr.outlet_id}`;
     }
     return '-';
+};
+
+const onMainImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.image_file = file;
+        imagePreviewMain.value = URL.createObjectURL(file);
+    }
+};
+
+const onKarImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        formKaryawan.image_file = file;
+        imagePreviewKar.value = URL.createObjectURL(file);
+    }
+};
+
+const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    return imagePath.startsWith('http') ? imagePath : `https://api.etres.my.id/storage/${imagePath}`;
 };
 
 const filteredUsers = computed(() => {
@@ -363,11 +428,15 @@ const openModal = (user = null) => {
     if (user) {
         selectedUserId.value = user.id;
         form.name = user.name; form.email = user.email; form.role = user.role; form.outlet_id = user.outlet_id || ''; form.password = '';
+        form.pin = user.pin || '';
+        form.image_file = null;
+        imagePreviewMain.value = getImageUrl(user.image);
     } else {
         selectedUserId.value = null;
-        form.name = ''; form.email = ''; form.outlet_id = ''; form.password = '';
-        // Otomatis assign "Manager" kalau Developer yg nge-klik Tambah User
+        form.name = ''; form.email = ''; form.outlet_id = ''; form.password = ''; form.pin = '';
         form.role = currentUserRole.value === 'developer' ? 'manager' : 'karyawan';
+        form.image_file = null;
+        imagePreviewMain.value = null;
     }
     isModalOpen.value = true;
 };
@@ -377,17 +446,12 @@ const closeModal = () => { isModalOpen.value = false; };
 const fetchManagerKaryawan = async (managerId) => {
     karyawanListModal.isLoading = true;
     try {
-        // 1. Ambil data karyawan khusus untuk manager ini menggunakan parameter backend baru
         const response = await axios.get(`${apiBase}/users?manager_id=${managerId}`, { headers: authHeaders() });
         karyawanList.value = response.data.data?.data || response.data.data || response.data || [];
 
-        // 2. Ambil data outlet khusus milik manager ini (untuk pilihan dropdown form tambah)
         const resOutlets = await axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() });
         const allOutlets = resOutlets.data.data?.data || resOutlets.data.data || resOutlets.data || [];
-        
-        // Asumsi struktur tabel outlets Anda pakai user_id untuk menandakan kepemilikan manager
         managerOutlets.value = allOutlets.filter(o => o.user_id === managerId || o.owner_id === managerId);
-
     } catch (e) {
         console.error(e);
         showAlert("Gagal menarik data karyawan dari server", "error");
@@ -408,12 +472,17 @@ const openModalKaryawan = (kar = null) => {
     if (kar) {
         karyawanFormModal.id = kar.id;
         formKaryawan.name = kar.name; formKaryawan.email = kar.email; formKaryawan.outlet_id = kar.outlet_id || ''; formKaryawan.password = '';
+        formKaryawan.pin = kar.pin || '';
+        formKaryawan.image_file = null;
+        imagePreviewKar.value = getImageUrl(kar.image);
     } else {
         karyawanFormModal.id = null;
-        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; formKaryawan.password = '';
+        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; formKaryawan.password = ''; formKaryawan.pin = '';
+        formKaryawan.image_file = null;
+        imagePreviewKar.value = null;
     }
     formKaryawan.role = 'karyawan';
-    formKaryawan.owner_id = karyawanListModal.managerId; // Sinkronisasi kepemilikan
+    formKaryawan.owner_id = karyawanListModal.managerId; 
     karyawanFormModal.show = true;
 };
 
@@ -426,16 +495,34 @@ const submitForm = async (type) => {
     const targetId = isMain ? selectedUserId.value : karyawanFormModal.id;
 
     try {
-        const payload = { ...currentForm };
-        if (!payload.password) delete payload.password;
+        const formData = new FormData();
+        
+        formData.append('name', currentForm.name);
+        formData.append('email', currentForm.email);
+        formData.append('role', currentForm.role);
+        
+        if (currentForm.outlet_id) formData.append('outlet_id', currentForm.outlet_id);
+        if (currentForm.password) formData.append('password', currentForm.password);
+        if (currentForm.owner_id) formData.append('owner_id', currentForm.owner_id);
+        
+        // Cek PIN (Jika Karyawan)
+        if (currentForm.role === 'karyawan' && currentForm.pin) {
+            formData.append('pin', currentForm.pin);
+        }
+        
+        if (currentForm.image_file) {
+            formData.append('image', currentForm.image_file);
+        }
 
         let endpoint = `${apiBase}/users`;
         if (isEdit) {
             endpoint += `/${targetId}`;
-            payload._method = 'PUT';
+            formData.append('_method', 'PUT'); // Trick Laravel FormData Update
         }
 
-        await axios.post(endpoint, payload, { headers: authHeaders() });
+        await axios.post(endpoint, formData, { 
+            headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' } 
+        });
         
         showAlert(`Data berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}!`, 'success');
         
@@ -444,7 +531,7 @@ const submitForm = async (type) => {
             fetchData();
         } else {
             karyawanFormModal.show = false;
-            fetchManagerKaryawan(karyawanListModal.managerId); // Refetch list modal
+            fetchManagerKaryawan(karyawanListModal.managerId); 
         }
 
     } catch (error) {
