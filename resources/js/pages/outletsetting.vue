@@ -48,16 +48,17 @@
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Outlet</th>
+                                <th v-if="currentUserRole === 'developer'" class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Pemilik (Manager)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Alamat & Telp</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#EBF3FB]">
                             <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
-                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data outlet...</td>
+                                <td :colspan="currentUserRole === 'developer' ? 4 : 3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data outlet...</td>
                             </tr>
                             <tr v-else-if="paginatedOutlets.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data outlet ditemukan.</td>
+                                <td :colspan="currentUserRole === 'developer' ? 4 : 3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data outlet ditemukan.</td>
                             </tr>
                             <tr v-else v-for="outlet in paginatedOutlets" :key="outlet.id" class="hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3 font-semibold text-[#1A2332] text-[14px]">
@@ -68,15 +69,23 @@
                                         <span>{{ outlet.name }}</span>
                                     </div>
                                 </td>
+                                <td v-if="currentUserRole === 'developer'" class="px-5 py-3">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                        <span class="text-[12px] font-semibold text-[#1B4F8A] bg-[#EBF3FB] px-2 py-0.5 rounded border border-[#D4E4F4]">{{ outlet.user?.name || outlet.owner?.name || 'Tidak Diketahui' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-5 py-3">
                                     <p class="text-[13px] text-[#1A2332] font-medium">{{ outlet.address || '-' }}</p>
                                     <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono'] mt-0.5">{{ outlet.phone || 'Tidak ada nomor telepon' }}</p>
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
-                                    <button @click="openMenuManager(outlet)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Katalog Menu Outlet">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                    
+                                    <button v-if="currentUserRole !== 'developer'" @click="openMenuManager(outlet)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Katalog Menu Outlet">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                                         Kelola Menu
                                     </button>
+
                                     <button @click="openOutletModal(outlet)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Data Outlet">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                     </button>
@@ -110,6 +119,15 @@
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Outlet <span class="text-[#B83B2A]">*</span></label>
                         <input type="text" v-model="formOutlet.name" required placeholder="Contoh: Cabang Sudirman" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
                     </div>
+
+                    <div v-if="currentUserRole === 'developer'">
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Pemilik (Manager) <span class="text-[#B83B2A]">*</span></label>
+                        <select v-model="formOutlet.user_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
+                            <option value="">Pilih Manager</option>
+                            <option v-for="mgr in managers" :key="mgr.id" :value="mgr.id">{{ mgr.name }}</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
                         <input type="tel" v-model="formOutlet.phone" placeholder="08123456789" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
@@ -248,19 +266,22 @@ import AdminLayout from '../components/adminlayout.vue';
 const apiBase = 'https://api.etres.my.id/api/v1';
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
+const currentUserRole = ref(localStorage.getItem('user_role') || 'manager');
+
 const alert = reactive({ show: false, message: '', type: 'success' });
 const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 
 // --- STATE OUTLET & GLOBAL ---
 const outlets = ref([]);
 const stations = ref([]); 
+const managers = ref([]); // State khusus menampung manager untuk Developer
 const isLoading = ref(true);
 const searchQuery = ref('');
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
 
 const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-const formOutlet = reactive({ name: '', address: '', phone: '' });
+const formOutlet = reactive({ name: '', address: '', phone: '', user_id: '' });
 
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
@@ -314,14 +335,28 @@ const toggleAllMenus = () => {
 const fetchInitialData = async () => {
     isLoading.value = true;
     try {
-        const [resOut, resProd, resStat] = await Promise.all([
+        const reqs = [
             axios.get(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() }),
             axios.get(`${apiBase}/products?limit=1000`, { headers: authHeaders() }),
             axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() })
-        ]);
-        outlets.value = resOut.data.data?.data || resOut.data.data || resOut.data || [];
-        masterProducts.value = resProd.data.data?.data || resProd.data.data || resProd.data || [];
-        stations.value = resStat.data.data?.data || resStat.data.data || resStat.data || [];
+        ];
+
+        // Developer butuh list Manager untuk di-assign saat buat outlet baru
+        if (currentUserRole.value === 'developer') {
+            reqs.push(axios.get(`${apiBase}/users?limit=1000`, { headers: authHeaders() }));
+        }
+
+        const responses = await Promise.all(reqs);
+
+        outlets.value = responses[0].data.data?.data || responses[0].data.data || responses[0].data || [];
+        masterProducts.value = responses[1].data.data?.data || responses[1].data.data || responses[1].data || [];
+        stations.value = responses[2].data.data?.data || responses[2].data.data || responses[2].data || [];
+
+        if (currentUserRole.value === 'developer') {
+            const allUsers = responses[3].data.data?.data || responses[3].data.data || responses[3].data || [];
+            managers.value = allUsers.filter(u => u.role === 'manager');
+        }
+
     } catch (e) {
         showAlert("Gagal memuat data", "error");
     } finally { isLoading.value = false; }
@@ -331,10 +366,16 @@ const openOutletModal = (item = null) => {
     outletModal.isEdit = !!item;
     if (item) {
         outletModal.id = item.id;
-        formOutlet.name = item.name; formOutlet.address = item.address || ''; formOutlet.phone = item.phone || '';
+        formOutlet.name = item.name; 
+        formOutlet.address = item.address || ''; 
+        formOutlet.phone = item.phone || '';
+        formOutlet.user_id = item.user_id || item.owner_id || '';
     } else {
         outletModal.id = null;
-        formOutlet.name = ''; formOutlet.address = ''; formOutlet.phone = '';
+        formOutlet.name = ''; 
+        formOutlet.address = ''; 
+        formOutlet.phone = '';
+        formOutlet.user_id = '';
     }
     outletModal.show = true;
 };
