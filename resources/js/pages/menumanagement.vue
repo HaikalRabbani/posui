@@ -82,9 +82,9 @@
                             <tr v-else v-for="item in paginatedProducts" :key="item.id" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-lg bg-[#D4E4F4] overflow-hidden flex-shrink-0 border border-[#D4E4F4]">
-                                            <img v-if="item.image" :src="`https://api.etres.my.id/storage/${item.image}`" class="w-full h-full object-cover" />
-                                            <svg v-else class="w-full h-full text-[#8AAFCC] p-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <div class="w-12 h-12 rounded-lg bg-[#D4E4F4] overflow-hidden flex-shrink-0 border border-[#D4E4F4] flex items-center justify-center">
+                                            <img v-if="item.image" :src="item.image.startsWith('http') ? item.image : `https://api.etres.my.id/storage/${item.image}`" class="w-full h-full object-cover" />
+                                            <svg v-else class="w-6 h-6 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </div>
                                         <p class="text-[14px] text-[#1A2332] font-semibold leading-tight">{{ item.name }}</p>
                                     </div>
@@ -154,7 +154,7 @@
                 <div class="p-6 flex flex-col sm:flex-row gap-6">
                     <div class="w-full sm:w-1/3 flex-shrink-0">
                         <div class="aspect-square rounded-xl bg-[#F0F4F8] border border-[#D4E4F4] overflow-hidden flex items-center justify-center">
-                            <img v-if="viewModal.data.image" :src="`https://api.etres.my.id/storage/${viewModal.data.image}`" class="w-full h-full object-cover" />
+                            <img v-if="viewModal.data.image" :src="viewModal.data.image.startsWith('http') ? viewModal.data.image : `https://api.etres.my.id/storage/${viewModal.data.image}`" class="w-full h-full object-cover" />
                             <svg v-else class="w-12 h-12 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                             <span v-if="formErrors.category_id" class="text-[#B83B2A] text-[11px] mt-1 block">Pilih kategori.</span>
                         </div>
                         <div>
-                            <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Station (Opsional)</label>
+                            <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Station</label>
                             <select v-model="form.station_id" class="w-full px-3 py-2 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
                                 <option value="">Tanpa Station</option>
                                 <option v-for="st in stations" :key="st.id" :value="st.id">{{ st.name }}</option>
@@ -238,16 +238,24 @@
                     </div>
 
                     <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Deskripsi (Opsional)</label>
+                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Deskripsi</label>
                         <textarea v-model="form.description" rows="2" placeholder="Detail komposisi..." class="w-full px-3 py-2 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC]"></textarea>
                     </div>
 
-                    <div>
-                        <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Foto Menu (Opsional)</label>
+                    <div class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
+                        <label class="block text-[12px] font-semibold text-[#1A2332] mb-2">Foto / Gambar Menu</label>
+                        
                         <div class="flex items-center gap-4">
-                            <div v-if="imagePreview" class="w-14 h-14 rounded-lg bg-[#D4E4F4] overflow-hidden flex-shrink-0 border border-[#D4E4F4]"><img :src="imagePreview" class="w-full h-full object-cover" /></div>
-                            <div v-else class="w-14 h-14 rounded-lg bg-[#F0F4F8] flex items-center justify-center border border-dashed border-[#8AAFCC] flex-shrink-0"><svg class="w-5 h-5 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
-                            <input type="file" @change="handleFileUpload" accept="image/jpeg, image/png, image/jpg" class="w-full text-[13px] text-[#5A7A9A] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#EBF3FB] file:text-[#1B4F8A] hover:file:bg-[#D4E4F4] transition-colors" />
+                            <div v-if="imagePreview" class="w-14 h-14 rounded-lg border border-[#D4E4F4] overflow-hidden bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <img :src="imagePreview" class="w-full h-full object-cover" />
+                            </div>
+                            <div v-else class="w-14 h-14 rounded-lg bg-[#F0F4F8] flex items-center justify-center border border-dashed border-[#8AAFCC] flex-shrink-0">
+                                <svg class="w-5 h-5 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </div>
+                            
+                            <div class="flex-1">
+                                <input type="file" @change="handleFileUpload" accept="image/jpeg, image/png, image/jpg" class="w-full text-[13px] text-[#5A7A9A] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#EBF3FB] file:text-[#1B4F8A] hover:file:bg-[#D4E4F4] transition-colors" />
+                            </div>
                         </div>
                     </div>
 
@@ -301,7 +309,7 @@
             <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[80vh]">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
                     <h3 class="text-[16px] font-semibold text-[#1A2332] flex items-center gap-2">
-                        <svg class="w-5 h-5 text-[#1B4F8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        <svg class="w-5 h-5 text-[#1B4F8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                         Manajemen Station
                     </h3>
                     <button @click="crudModals.station = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
@@ -380,8 +388,11 @@ const currentPage = ref(1);
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedProductId = ref(null);
-const imagePreview = ref(null);
-const form = reactive({ name: '', category_id: '', station_id: '', cost_price: '', description: '', image: null });
+const imagePreview = ref(null); // Preview dari URL atau File Lokal
+const form = reactive({ 
+    name: '', category_id: '', station_id: '', cost_price: '', description: '', 
+    image: null // Hanya berisi file objek jika upload
+});
 const formErrors = reactive({ name: false, category_id: false, cost_price: false });
 
 // State Modal Tambahan
@@ -412,7 +423,6 @@ const handleFileUpload = (e) => {
     }
 };
 
-// Fungsi Baru: Mendapatkan nama station secara manual
 const getStationName = (id) => {
     if (!id) return '';
     const st = stations.value.find(s => s.id === id);
@@ -503,12 +513,26 @@ const openModal = (item = null) => {
     if (item) {
         isEditMode.value = true; selectedProductId.value = item.id;
         form.name = item.name; form.category_id = item.category_id; form.station_id = item.station_id || '';
-        form.description = item.description || ''; form.image = null;
+        form.description = item.description || ''; 
+        
+        form.image = null; // Direset agar user harus pilih file baru jika ingin merubah foto
         form.cost_price = item.cost_price ? new Intl.NumberFormat('id-ID').format(item.cost_price) : '0'; 
-        imagePreview.value = item.image ? `https://api.etres.my.id/storage/${item.image}` : null;
+        
+        // Deteksi TAMPILAN jika image berupa URL asli dari internet atau gambar lokal server
+        if (item.image) {
+            if (item.image.startsWith('http')) {
+                imagePreview.value = item.image; // Tampilkan URL lurus
+            } else {
+                imagePreview.value = `https://api.etres.my.id/storage/${item.image}`; // Tambahkan path Storage
+            }
+        } else {
+            imagePreview.value = null;
+        }
+
     } else {
         isEditMode.value = false; selectedProductId.value = null;
-        form.name = ''; form.category_id = ''; form.station_id = ''; form.cost_price = ''; form.description = ''; form.image = null;
+        form.name = ''; form.category_id = ''; form.station_id = ''; form.cost_price = ''; form.description = ''; 
+        form.image = null; 
         imagePreview.value = null;
     }
     isModalOpen.value = true;
@@ -530,7 +554,11 @@ const submitForm = async () => {
         if (form.station_id) formData.append('station_id', form.station_id);
         formData.append('cost_price', form.cost_price.toString().replace(/\./g, '') || 0);
         formData.append('description', form.description || '');
-        if (form.image) formData.append('image', form.image);
+        
+        // Cukup append 'image' jika ada file yang baru dipilih
+        if (form.image) {
+            formData.append('image', form.image);
+        }
 
         let endpoint = `${apiBase}/products`;
         if (isEditMode.value) {
