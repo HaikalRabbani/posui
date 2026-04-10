@@ -230,15 +230,24 @@ const saveProfile = async () => {
         
         formData.append('_method', 'PUT'); // Trick method PUT Laravel untuk FormData
 
-        await axios.post(`${apiBase}/me`, formData, { 
+        const response = await axios.post(`${apiBase}/me`, formData, { 
             headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' } 
         });
 
+        const updatedUser = response.data.user;
+
         showAlert('Profil berhasil diperbarui!', 'success');
         
-        // Refresh local data & trigger update layout admin
+        // Refresh local data
         fetchProfile();
-        window.dispatchEvent(new Event('profile-updated'));
+        
+        // Trigger update layout admin & passing the payload
+        window.dispatchEvent(new CustomEvent('profile-updated', {
+            detail: {
+                name: updatedUser.name,
+                image: updatedUser.image
+            }
+        }));
 
     } catch (error) {
         if (error.response && error.response.data && error.response.data.errors) {

@@ -148,8 +148,11 @@
 
                     <div class="relative">
                         <button @click="toggleProfileMenu" class="flex items-center gap-3 focus:outline-none rounded-lg p-1 hover:bg-[#F7FAFD] transition-colors text-left">
-                            <div class="w-9 h-9 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center font-semibold text-[14px] flex-shrink-0">
+                            <div class="w-9 h-9 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center font-semibold text-[14px] flex-shrink-0 overflow-hidden">
                                 <svg v-if="isLoading" class="w-4 h-4 animate-spin text-[#1B4F8A]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                
+                                <img v-else-if="user.image" :src="user.image.startsWith('http') ? user.image : `https://api.etres.my.id/storage/${user.image}`" class="w-full h-full object-cover" alt="Profile" />
+                                
                                 <span v-else>{{ userInitials }}</span>
                             </div>
                             <div class="hidden md:block">
@@ -195,7 +198,7 @@ const isLoading = ref(true);
 
 const currentOutlet = ref('');
 const userRole = ref('');
-const user = ref({ name: '', email: '' });
+const user = ref({ name: '', email: '', image: null });
 
 const userInitials = computed(() => {
     if (!user.value.name) return '';
@@ -205,24 +208,21 @@ const userInitials = computed(() => {
 });
 
 const fetchUserProfile = async () => {
-    // 1. Cek apakah ada data di Cache (Local Storage)
     const cachedUser = localStorage.getItem('user_profile_cache');
     
     if (cachedUser) {
-        // Jika ada, langsung tampilkan secara instan (Bypass Loading)
         const parsedData = JSON.parse(cachedUser);
         user.value.name = parsedData.name;
         user.value.email = parsedData.email;
+        user.value.image = parsedData.image || null;
         userRole.value = parsedData.role;
         currentOutlet.value = parsedData.outlet;
         isLoading.value = false;
         
-        // Lakukan sinkronisasi ke server secara diam-diam di background
         silentFetchProfile();
         return;
     }
 
-    // Jika cache kosong (baru login), jalankan loading normal
     await silentFetchProfile();
 };
 
@@ -238,6 +238,7 @@ const silentFetchProfile = async () => {
         const userData = response.data.user;
         user.value.name = userData.name || 'Admin';
         user.value.email = userData.email || '';
+        user.value.image = userData.image || null;
         userRole.value = userData.role || 'karyawan';
         
         localStorage.setItem('user_role', userRole.value);
@@ -250,10 +251,10 @@ const silentFetchProfile = async () => {
             currentOutlet.value = 'Belum Ada Outlet';
         }
 
-        // 2. Simpan / Perbarui Cache agar perpindahan halaman selanjutnya instan
         localStorage.setItem('user_profile_cache', JSON.stringify({
             name: user.value.name,
             email: user.value.email,
+            image: user.value.image,
             role: userRole.value,
             outlet: currentOutlet.value
         }));
@@ -290,7 +291,7 @@ const handleLogout = async () => {
     finally {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_role');
-        localStorage.removeItem('user_profile_cache'); // Hapus cache profil saat logout
+        localStorage.removeItem('user_profile_cache');
         router.push('/');
     }
 };
@@ -301,10 +302,22 @@ const closeDropdown = (e) => {
     }
 };
 
-// Fungsi untuk menangkap event jika user update nama di halaman Profile
-const handleProfileUpdate = () => {
-    localStorage.removeItem('user_profile_cache');
-    silentFetchProfile();
+const handleProfileUpdate = (event) => {
+    if (event.detail) {
+        if (event.detail.name) user.value.name = event.detail.name;
+        if (event.detail.image !== undefined) user.value.image = event.detail.image;
+        
+        const cachedUser = localStorage.getItem('user_profile_cache');
+        if (cachedUser) {
+            const parsedData = JSON.parse(cachedUser);
+            parsedData.name = user.value.name;
+            parsedData.image = user.value.image;
+            localStorage.setItem('user_profile_cache', JSON.stringify(parsedData));
+        }
+    } else {
+        localStorage.removeItem('user_profile_cache');
+        silentFetchProfile();
+    }
 };
 
 onMounted(() => {
