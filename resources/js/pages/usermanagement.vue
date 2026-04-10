@@ -155,10 +155,13 @@
 
                     <div v-if="form.role === 'karyawan'">
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="form.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
+                        <div class="flex gap-2">
+                            <input type="text" v-model="form.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
+                            <button type="button" @click="generatePin('main')" class="px-3 py-2 bg-[#EBF3FB] text-[#2E7DD6] text-[12px] font-semibold rounded-lg hover:bg-[#D4E4F4] transition-colors border border-[#D4E4F4] whitespace-nowrap">Generate</button>
+                        </div>
                     </div>
 
-                    <div>
+                    <div v-if="form.role !== 'karyawan'">
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ isEditMode ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!isEditMode" class="text-[#B83B2A]">*</span></label>
                         <input type="password" v-model="form.password" :required="!isEditMode" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
                     </div>
@@ -280,12 +283,10 @@
                     
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="formKaryawan.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
-                    </div>
-
-                    <div>
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ karyawanFormModal.isEdit ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!karyawanFormModal.isEdit" class="text-[#B83B2A]">*</span></label>
-                        <input type="password" v-model="formKaryawan.password" :required="!karyawanFormModal.isEdit" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                        <div class="flex gap-2">
+                            <input type="text" v-model="formKaryawan.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                            <button type="button" @click="generatePin('karyawan')" class="px-3 py-2 bg-[#F0FDF4] text-[#2A7A4B] text-[12px] font-semibold rounded-lg hover:bg-[#DCFCE7] transition-colors border border-[#bbf7d0] whitespace-nowrap">Generate</button>
+                        </div>
                     </div>
 
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
@@ -357,6 +358,16 @@ const imagePreviewKar = ref(null);
 const deleteModal = reactive({ show: false, id: null, name: '', type: 'main', isDeleting: false });
 
 // --- HELPER & COMPUTED ---
+
+const generatePin = (type) => {
+    const randomPin = Math.floor(100000 + Math.random() * 900000).toString();
+    if (type === 'main') {
+        form.pin = randomPin;
+    } else {
+        formKaryawan.pin = randomPin;
+    }
+};
+
 const getOutletName = (usr) => {
     if (usr.outlet) return usr.outlet.name;
     if (usr.outlet_id) {
@@ -391,12 +402,10 @@ const filteredUsers = computed(() => {
     return users.value.filter(u => {
         const matchSearch = u.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.value.toLowerCase());
         
-        // LOGIKA PENYARINGAN KHUSUS DEVELOPER
         if (currentUserRole.value === 'developer') {
-            return matchSearch && u.role === 'manager'; // HANYA Tampilkan Manager di Tabel Utama
+            return matchSearch && u.role === 'manager';
         }
         
-        // Logika Normal untuk Manager
         const matchRole = filterRole.value === '' || u.role === filterRole.value;
         return matchSearch && matchRole;
     });
@@ -471,13 +480,18 @@ const openModalKaryawan = (kar = null) => {
     karyawanFormModal.isEdit = !!kar;
     if (kar) {
         karyawanFormModal.id = kar.id;
-        formKaryawan.name = kar.name; formKaryawan.email = kar.email; formKaryawan.outlet_id = kar.outlet_id || ''; formKaryawan.password = '';
+        formKaryawan.name = kar.name; formKaryawan.email = kar.email; formKaryawan.outlet_id = kar.outlet_id || ''; 
+        // Kosongkan password state (meski UI sudah dihapus)
+        formKaryawan.password = '';
         formKaryawan.pin = kar.pin || '';
         formKaryawan.image_file = null;
         imagePreviewKar.value = getImageUrl(kar.image);
     } else {
         karyawanFormModal.id = null;
-        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; formKaryawan.password = ''; formKaryawan.pin = '';
+        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; 
+        // Beri password default 12345678 secara internal agar API lolos saat pembuatan akun pertama
+        formKaryawan.password = '12345678'; 
+        formKaryawan.pin = '';
         formKaryawan.image_file = null;
         imagePreviewKar.value = null;
     }
@@ -502,10 +516,12 @@ const submitForm = async (type) => {
         formData.append('role', currentForm.role);
         
         if (currentForm.outlet_id) formData.append('outlet_id', currentForm.outlet_id);
+        
+        // Cek jika ada isian password internal (saat create) atau input manual
         if (currentForm.password) formData.append('password', currentForm.password);
+        
         if (currentForm.owner_id) formData.append('owner_id', currentForm.owner_id);
         
-        // Cek PIN (Jika Karyawan)
         if (currentForm.role === 'karyawan' && currentForm.pin) {
             formData.append('pin', currentForm.pin);
         }
@@ -517,7 +533,7 @@ const submitForm = async (type) => {
         let endpoint = `${apiBase}/users`;
         if (isEdit) {
             endpoint += `/${targetId}`;
-            formData.append('_method', 'PUT'); // Trick Laravel FormData Update
+            formData.append('_method', 'PUT'); 
         }
 
         await axios.post(endpoint, formData, { 
