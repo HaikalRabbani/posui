@@ -153,13 +153,49 @@ const handleLogin = async () => {
     showAlert('Sedang memverifikasi kredensial...', 'info');
     
     try {
+        // 1. Eksekusi Login
         const response = await axios.post('https://api.etres.my.id/api/v1/login', {
             email: form.email,
             password: form.password
         });
 
-        localStorage.setItem('auth_token', response.data.token || response.data.access_token);
+        const token = response.data.token || response.data.access_token;
+        
+        // 2. Tarik Data Profil untuk validasi role
+        const meResponse = await axios.get('https://api.etres.my.id/api/v1/me', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const userData = meResponse.data.user;
+        const userRole = userData.role;
+
+        // 3. LOGIKA BLOKIR KARYAWAN
+        if (userRole === 'karyawan') {
+            // Hentikan proses, jangan simpan token, munculkan pesan error
+            isLoading.value = false;
+            showAlert('Akses Ditolak: Akun Karyawan tidak dapat mengakses Admin Panel.', 'error');
+            return; 
+        }
+
+        // 4. Jika role bukan karyawan (Manager/Developer), izinkan login
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('user_role', userRole);
         localStorage.setItem('last_login_email', form.email);
+        
+        // Simpan cache profil agar perpindahan ke dashboard instan
+        let outletName = 'Belum Ada Outlet';
+        if (userData.outlet && userData.outlet.name) {
+            outletName = userData.outlet.name;
+        } else if (userData.outlet_id) {
+            outletName = `Outlet #${userData.outlet_id}`;
+        }
+
+        localStorage.setItem('user_profile_cache', JSON.stringify({
+            name: userData.name,
+            email: userData.email,
+            role: userRole,
+            outlet: outletName
+        }));
         
         showAlert('Login berhasil! Mengalihkan...', 'success');
         
@@ -168,10 +204,9 @@ const handleLogin = async () => {
         }, 800);
 
     } catch (error) {
+        isLoading.value = false;
         const message = error.response?.data?.message || 'Login gagal, periksa email atau password Anda.';
         showAlert(message, 'error');
-    } finally {
-        isLoading.value = false;
     }
 };
 </script>
