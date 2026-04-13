@@ -16,7 +16,7 @@
 
                     <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        {{ currentUserRole === 'developer' ? 'Tambah Manager' : 'Tambah User' }}
+                        {{ currentUserRole === 'developer' ? 'Tambah User' : 'Tambah Karyawan' }}
                     </button>
                 </div>
             </div>
@@ -37,9 +37,9 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Profil User</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Role</th>
-                                <th v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -60,6 +60,7 @@
                                         <div>
                                             <p class="text-[13px] font-semibold text-[#1A2332]">{{ user.name }}</p>
                                             <p class="text-[11px] text-[#5A7A9A]">{{ user.email }}</p>
+                                            <p v-if="user.phone_number" class="text-[11px] text-[#8AAFCC] font-['JetBrains_Mono']">{{ user.phone_number }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -73,7 +74,7 @@
                                         {{ user.role }}
                                     </span>
                                 </td>
-                                <td v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[13px] text-[#5A7A9A] font-medium">
+                                <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-medium">
                                     {{ getOutletName(user) }}
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
@@ -108,7 +109,7 @@
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] flex flex-col">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Profil' : (currentUserRole === 'developer' ? 'Tambah Manager Baru' : 'Tambah User Baru') }}</h3>
+                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Profil' : (currentUserRole === 'developer' ? 'Tambah User Baru' : 'Tambah Karyawan Baru') }}</h3>
                     <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -134,14 +135,20 @@
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
                         <input type="email" v-model="form.email" required placeholder="email@contoh.com" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
                     </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">+62</span>
+                            <input type="tel" v-model="form.phone_number" placeholder="81234567890" class="w-full pl-10 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
+                        </div>
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Role <span class="text-[#B83B2A]">*</span></label>
-                            
-                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole === 'developer'">
-                                <option value="manager" v-if="currentUserRole === 'developer' || currentUserRole === 'manager'">Manager / Owner</option>
-                                <option value="karyawan" v-if="currentUserRole !== 'developer'">Karyawan / Kasir</option>
+                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole !== 'developer'">
+                                <option value="karyawan">Karyawan / Kasir</option>
+                                <option value="manager" v-if="currentUserRole === 'developer'">Manager / Owner</option>
                             </select>
                         </div>
                         <div v-if="form.role === 'karyawan'">
@@ -205,7 +212,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Profil User</th>
                                     <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
                                     <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
@@ -227,6 +234,7 @@
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#1A2332]">{{ kar.name }}</p>
                                                 <p class="text-[11px] text-[#5A7A9A]">{{ kar.email }}</p>
+                                                <p v-if="kar.phone_number" class="text-[11px] text-[#8AAFCC] font-['JetBrains_Mono']">{{ kar.phone_number }}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -272,6 +280,13 @@
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
                         <input type="email" v-model="formKaryawan.email" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">+62</span>
+                            <input type="tel" v-model="formKaryawan.phone_number" placeholder="81234567890" class="w-full pl-10 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet Penempatan</label>
@@ -343,7 +358,7 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedUserId = ref(null);
-const form = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', pin: '', image_file: null });
+const form = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', image_file: null });
 const imagePreviewMain = ref(null);
 
 // --- STATE DEVELOPER: LIST KARYAWAN ---
@@ -351,7 +366,7 @@ const karyawanListModal = reactive({ show: false, managerId: null, managerName: 
 const karyawanList = ref([]);
 const managerOutlets = ref([]); 
 const karyawanFormModal = reactive({ show: false, isEdit: false, id: null });
-const formKaryawan = reactive({ name: '', email: '', role: 'karyawan', outlet_id: '', password: '', pin: '', owner_id: null, image_file: null });
+const formKaryawan = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', owner_id: null, image_file: null });
 const imagePreviewKar = ref(null);
 
 // --- STATE DELETE MODAL ---
@@ -436,13 +451,23 @@ const openModal = (user = null) => {
     isEditMode.value = !!user;
     if (user) {
         selectedUserId.value = user.id;
-        form.name = user.name; form.email = user.email; form.role = user.role; form.outlet_id = user.outlet_id || ''; form.password = '';
+        form.name = user.name; 
+        form.email = user.email; 
+        form.phone_number = user.phone_number || '';
+        form.role = user.role; 
+        form.outlet_id = user.outlet_id || ''; 
+        form.password = '';
         form.pin = user.pin || '';
         form.image_file = null;
         imagePreviewMain.value = getImageUrl(user.image);
     } else {
         selectedUserId.value = null;
-        form.name = ''; form.email = ''; form.outlet_id = ''; form.password = ''; form.pin = '';
+        form.name = ''; 
+        form.email = ''; 
+        form.phone_number = '';
+        form.outlet_id = ''; 
+        form.password = ''; 
+        form.pin = '';
         form.role = currentUserRole.value === 'developer' ? 'manager' : 'karyawan';
         form.image_file = null;
         imagePreviewMain.value = null;
@@ -480,7 +505,10 @@ const openModalKaryawan = (kar = null) => {
     karyawanFormModal.isEdit = !!kar;
     if (kar) {
         karyawanFormModal.id = kar.id;
-        formKaryawan.name = kar.name; formKaryawan.email = kar.email; formKaryawan.outlet_id = kar.outlet_id || ''; 
+        formKaryawan.name = kar.name; 
+        formKaryawan.email = kar.email; 
+        formKaryawan.phone_number = kar.phone_number || '';
+        formKaryawan.outlet_id = kar.outlet_id || ''; 
         // Kosongkan password state (meski UI sudah dihapus)
         formKaryawan.password = '';
         formKaryawan.pin = kar.pin || '';
@@ -488,7 +516,10 @@ const openModalKaryawan = (kar = null) => {
         imagePreviewKar.value = getImageUrl(kar.image);
     } else {
         karyawanFormModal.id = null;
-        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.outlet_id = ''; 
+        formKaryawan.name = ''; 
+        formKaryawan.email = ''; 
+        formKaryawan.phone_number = '';
+        formKaryawan.outlet_id = ''; 
         // Beri password default 12345678 secara internal agar API lolos saat pembuatan akun pertama
         formKaryawan.password = '12345678'; 
         formKaryawan.pin = '';
@@ -515,6 +546,7 @@ const submitForm = async (type) => {
         formData.append('email', currentForm.email);
         formData.append('role', currentForm.role);
         
+        if (currentForm.phone_number) formData.append('phone_number', currentForm.phone_number);
         if (currentForm.outlet_id) formData.append('outlet_id', currentForm.outlet_id);
         
         // Cek jika ada isian password internal (saat create) atau input manual
