@@ -1,3 +1,18 @@
+Ah, saya langsung melihat akar masalahnya setelah membaca kode `outletsetting.vue` Anda!
+
+Masalah ini terjadi karena **ada perbedaan penamaan variabel (Key Mismatch)** antara Frontend (Vue) dan Backend (Laravel Database).
+
+* Di **Database/Backend** (file migrasi Anda), kolomnya bernama: `address_outlet` dan `phone_number_outlet`.
+* Namun, di **Frontend** (file `outletsetting.vue` ini), Anda memanggil dan mengirimkannya menggunakan nama singkat: `outlet.address` dan `outlet.phone`.
+
+Karena nama variabelnya tidak sama, Vue tidak bisa membaca data dari database (sehingga kosong di tabel), dan saat form disubmit, Laravel mengabaikan inputnya karena tidak mengenali parameter `address` dan `phone`.
+
+### Solusinya:
+Kita hanya perlu menyesuaikan penamaan variabel di file `outletsetting.vue` agar persis sama dengan yang ada di database.
+
+Berikut adalah **kode utuh `outletsetting.vue` yang sudah saya perbaiki**. Silakan *copy-paste* seluruhnya untuk menimpa file lama Anda:
+
+```vue
 <template>
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
@@ -76,8 +91,8 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-3">
-                                    <p class="text-[13px] text-[#1A2332] font-medium">{{ outlet.address || '-' }}</p>
-                                    <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono'] mt-0.5">{{ outlet.phone || 'Tidak ada nomor telepon' }}</p>
+                                    <p class="text-[13px] text-[#1A2332] font-medium">{{ outlet.address_outlet || '-' }}</p>
+                                    <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono'] mt-0.5">{{ outlet.phone_number_outlet || 'Tidak ada nomor telepon' }}</p>
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
                                     
@@ -130,11 +145,11 @@
 
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
-                        <input type="tel" v-model="formOutlet.phone" placeholder="08123456789" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
+                        <input type="tel" v-model="formOutlet.phone_number_outlet" placeholder="08123456789" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Alamat Lengkap</label>
-                        <textarea v-model="formOutlet.address" rows="3" placeholder="Alamat lengkap outlet..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] resize-none"></textarea>
+                        <textarea v-model="formOutlet.address_outlet" rows="3" placeholder="Alamat lengkap outlet..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] resize-none"></textarea>
                     </div>
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
                         <button type="button" @click="outletModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
@@ -274,14 +289,15 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 // --- STATE OUTLET & GLOBAL ---
 const outlets = ref([]);
 const stations = ref([]); 
-const managers = ref([]); // State khusus menampung manager untuk Developer
+const managers = ref([]);
 const isLoading = ref(true);
 const searchQuery = ref('');
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
 
 const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-const formOutlet = reactive({ name: '', address: '', phone: '', user_id: '' });
+// PERBAIKAN: Ubah key di form state agar sama dengan kolom database (Backend)
+const formOutlet = reactive({ name: '', address_outlet: '', phone_number_outlet: '', user_id: '' });
 
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
@@ -310,24 +326,19 @@ const totalPages = computed(() => Math.ceil(outlets.value.filter(o => o.name.toL
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
-// Format angka real-time di array asli berdasarkan index original
 const formatProductNumber = (originalIndex, field) => {
     let rawValue = menuForm.value[originalIndex][field].toString().replace(/[^0-9]/g, '');
     menuForm.value[originalIndex][field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
 };
 
-// --- LOGIKA FILTER DINAMIS STATION ---
 const filteredMenuForm = computed(() => {
     return menuForm.value.filter(prod => {
-        // Jika menu tidak terikat ke station master, selalu muncul (misal Kerupuk/Rokok)
         if (!prod.station_id) return true;
-        // Jika terikat, hanya muncul jika stationnya dicentang oleh manajer
         return menuModal.selectedStations.includes(prod.station_id);
     });
 });
 
 const toggleAllMenus = () => {
-    // Hanya centang menu yang sedang tampil di layar (sesuai filter station)
     filteredMenuForm.value.forEach(m => m.selected = isAllSelected.value);
 };
 
@@ -341,7 +352,6 @@ const fetchInitialData = async () => {
             axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() })
         ];
 
-        // Developer butuh list Manager untuk di-assign saat buat outlet baru
         if (currentUserRole.value === 'developer') {
             reqs.push(axios.get(`${apiBase}/users?limit=1000`, { headers: authHeaders() }));
         }
@@ -367,14 +377,15 @@ const openOutletModal = (item = null) => {
     if (item) {
         outletModal.id = item.id;
         formOutlet.name = item.name; 
-        formOutlet.address = item.address || ''; 
-        formOutlet.phone = item.phone || '';
+        // PERBAIKAN: Tangkap data menggunakan nama kolom database
+        formOutlet.address_outlet = item.address_outlet || ''; 
+        formOutlet.phone_number_outlet = item.phone_number_outlet || '';
         formOutlet.user_id = item.user_id || item.owner_id || '';
     } else {
         outletModal.id = null;
         formOutlet.name = ''; 
-        formOutlet.address = ''; 
-        formOutlet.phone = '';
+        formOutlet.address_outlet = ''; 
+        formOutlet.phone_number_outlet = '';
         formOutlet.user_id = '';
     }
     outletModal.show = true;
@@ -383,7 +394,7 @@ const openOutletModal = (item = null) => {
 const submitOutlet = async () => {
     outletModal.isSubmitting = true;
     try {
-        const payload = { ...formOutlet };
+        const payload = { ...formOutlet }; // Sekarang mengirim key yang benar!
         let endpoint = `${apiBase}/outlets`;
         if (outletModal.isEdit) {
             endpoint += `/${outletModal.id}`;
@@ -421,7 +432,7 @@ const openMenuManager = async (outlet) => {
     menuModal.outletName = outlet.name;
     menuModal.show = true;
     menuModal.isLoading = true;
-    menuModal.selectedStations = []; // Reset station check
+    menuModal.selectedStations = []; 
     isAllSelected.value = false;
 
     try {
@@ -434,7 +445,6 @@ const openMenuManager = async (outlet) => {
             const existingPivot = outletProducts.find(op => op.id === master.id);
             
             if (existingPivot && existingPivot.pivot) {
-                // Jika menu pernah diset untuk outlet ini
                 if (master.station_id) activeStationsSet.add(master.station_id);
                 
                 return {
@@ -453,7 +463,6 @@ const openMenuManager = async (outlet) => {
             }
         });
         
-        // Auto-check station berdasarkan menu yang sedang aktif di outlet ini.
         if (outletProducts.length === 0) {
             menuModal.selectedStations = stations.value.map(s => s.id);
         } else {
@@ -468,7 +477,6 @@ const openMenuManager = async (outlet) => {
 const saveOutletMenu = async () => {
     menuModal.isSaving = true;
     try {
-        // Yang disimpan ke backend HANYA menu yang dicentang
         const selectedMenus = menuForm.value.filter(m => m.selected);
         
         let hasInvalidData = false;
@@ -486,7 +494,7 @@ const saveOutletMenu = async () => {
                     product_id: m.id,
                     price: getRawNumber(m.price),
                     stock: pureStock,
-                    is_active: pureStock > 0 // Otomatis Deteksi Tersedia/Habis
+                    is_active: pureStock > 0 
                 };
             })
         };
@@ -512,3 +520,4 @@ input[type=checkbox] {
     cursor: pointer;
 }
 </style>
+```
