@@ -150,10 +150,20 @@
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Role <span class="text-[#B83B2A]">*</span></label>
                             
-                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole === 'developer'">
-                                <option value="manager" v-if="currentUserRole === 'developer' || currentUserRole === 'manager'">Manager / Owner</option>
-                                <option value="karyawan" v-if="currentUserRole !== 'developer'">Karyawan / Kasir</option>
-                            </select>
+                            <select 
+  v-model="form.role" 
+  required 
+  class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" 
+  :disabled="currentUserRole === 'manager' || currentUserRole === 'developer'"
+>
+  <option value="manager" v-if="currentUserRole === 'developer'">
+    Manager / Owner
+  </option>
+
+  <option value="karyawan">
+    Karyawan / Kasir
+  </option>
+</select>
                         </div>
                         <div v-if="form.role === 'karyawan'">
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet Penempatan</label>
@@ -300,6 +310,10 @@
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
                         <input type="email" v-model="formKaryawan.email" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Password <span class="text-[#B83B2A]">*</span></label>
+                        <input type="email" v-model="formKaryawan.password" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>

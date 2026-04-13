@@ -42,6 +42,7 @@
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">No. Invoice</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Waktu Pesanan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Meja / Tipe</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Total Harga</th>
@@ -51,16 +52,17 @@
                         </thead>
                         <tbody>
                             <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
-                                <td colspan="6" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Menarik data transaksi...</td>
+                                <td colspan="7" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Menarik data transaksi...</td>
                             </tr>
                             <tr v-else-if="transactions.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="6" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data transaksi.</td>
+                                <td colspan="7" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data transaksi.</td>
                             </tr>
                             <tr v-else v-for="tx in transactions" :key="tx.id" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3 text-[13px] text-[#1B4F8A] font-bold font-['JetBrains_Mono']">
                                     {{ tx.invoice }}
                                     <span v-if="tx.logs && tx.logs.length > 0" class="ml-1 text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded" title="Pernah Diedit">Edited</span>
                                 </td>
+                                <td class="px-5 py-3 text-[13px] font-semibold text-[#1A2332] whitespace-nowrap">{{ tx.outlet }}</td>
                                 <td class="px-5 py-3 text-[13px] text-[#5A7A9A] whitespace-nowrap">{{ tx.date }}</td>
                                 <td class="px-5 py-3 text-[13px] font-medium text-[#1A2332]">
                                     <span v-if="tx.table" class="px-2 py-0.5 bg-[#EBF3FB] text-[#1B4F8A] rounded text-[11px] font-bold">Meja {{ tx.table }}</span>
@@ -108,7 +110,9 @@
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-start bg-[#F7FAFD]">
                     <div>
                         <h3 class="text-[18px] font-bold text-[#1A2332] font-['JetBrains_Mono']">{{ selectedTx.invoice }}</h3>
-                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">{{ selectedTx.date }}</p>
+                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">
+                            {{ selectedTx.date }} &bull; <span class="font-semibold text-[#1B4F8A]">{{ selectedTx.outlet }}</span>
+                        </p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button v-if="!isEditMode" @click="printReceipt" class="text-white bg-[#1B4F8A] hover:bg-blue-900 px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-colors">
@@ -260,36 +264,44 @@ const fetchTransactions = async () => {
         const params = {
             page: currentPage.value,
             limit: itemsPerPage.value,
-            search: searchQuery.value,
+            invoice_number: searchQuery.value, // Disesuaikan dengan penamaan parameter di Controller baru
             status: filterStatus.value === 'all' ? '' : filterStatus.value
         };
 
-        const response = await axios.get(`${apiBase}/orders`, { headers: authHeaders(), params });
+        const response = await axios.get(`${apiBase}/history-transactions`, { headers: authHeaders(), params });
         const respData = response.data;
         
-        const dataArray = respData.data?.data || respData.data || [];
-        totalPages.value = respData.data?.last_page || 1;
-        totalData.value = respData.data?.total || dataArray.length;
+        // Laravel mereturn langsung paginasi di root JSON
+        const dataArray = respData.data || [];
+        totalPages.value = respData.last_page || 1;
+        totalData.value = respData.total || dataArray.length;
 
-        transactions.value = dataArray.map(tx => ({
-            id: tx.id,
-            invoice: tx.invoice_number || '-',
-            cashier: tx.user?.name || 'Kasir', 
-            table: tx.table?.name || null,
-            status: tx.status,
-            date: new Date(tx.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-            total_price: tx.total_price,
-            items: tx.items ? tx.items.map(item => ({
-                id: item.id,
-                name: item.product?.name || 'Item Terhapus',
-                qty: item.qty,
-                cancelled_qty: item.cancelled_qty || 0, // BACA DARI DATABASE
-                price: item.price
-            })) : [],
-            logs: tx.logs || [] // BACA DARI DATABASE
-        }));
+        // Pemetaan (Mapping) sesuai struktur HistoryTransaction.php
+        transactions.value = dataArray.map(history => {
+            return {
+                id: history.order_id, // Tetap gunakan order_id untuk payload Edit/Void
+                history_id: history.id,
+                invoice: history.invoice_number || '-',
+                cashier: history.cashier?.name || 'Kasir', // Diambil langsung dari History
+                table: history.order?.table?.name || null, // Meja tetap di dalam Order
+                outlet: history.outlet?.name || 'Cabang Tidak Diketahui', // NAMA OUTLET SEKARANG MUNCUL
+                status: history.status,
+                date: history.paid_at ? new Date(history.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
+                total_price: history.total_price,
+                payment_method: history.payment_method || 'Tunai',
+                items: history.order?.items ? history.order.items.map(item => ({
+                    id: item.id,
+                    name: item.product?.name || 'Item Terhapus',
+                    qty: item.qty,
+                    cancelled_qty: item.cancelled_qty || 0,
+                    price: item.price
+                })) : [],
+                logs: history.order?.logs || [] 
+            };
+        });
+
     } catch (error) {
-        console.error("Gagal mengambil data", error);
+        console.error("Gagal mengambil data riwayat", error);
     } finally {
         isLoading.value = false;
     }
@@ -385,7 +397,7 @@ const printReceipt = () => {
         <html><head><title>Struk - ${tx.invoice}</title>
         <style>body { font-family: monospace; width: 300px; padding: 20px; } .line { border-top: 1px dashed #000; margin: 10px 0; }</style>
         </head><body><h2 style="text-align:center; margin:0;">POS F&B</h2><div class="line"></div>
-        <p style="font-size:12px;">No: ${tx.invoice}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
+        <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
         ${itemsHtml}<div class="line"></div>
         <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL</span><span>Rp ${formatRupiah(total)}</span></div>
         <script>window.onload = () => { window.print(); window.close(); }<\/script></body></html>
