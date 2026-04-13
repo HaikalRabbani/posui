@@ -16,7 +16,7 @@
 
                     <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        {{ currentUserRole === 'developer' ? 'Tambah User' : 'Tambah Karyawan' }}
+                        {{ currentUserRole === 'developer' ? 'Tambah Manager' : 'Tambah User' }}
                     </button>
                 </div>
             </div>
@@ -37,18 +37,19 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Profil User</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Kontak</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Role</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
+                                <th v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#EBF3FB]">
                             <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data user...</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data user...</td>
                             </tr>
                             <tr v-else-if="filteredUsers.length === 0" class="border-b border-[#EBF3FB]">
-                                <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data ditemukan.</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data ditemukan.</td>
                             </tr>
                             <tr v-else v-for="user in paginatedUsers" :key="user.id" class="hover:bg-[#F7FAFD] transition-colors">
                                 <td class="px-5 py-3">
@@ -60,9 +61,11 @@
                                         <div>
                                             <p class="text-[13px] font-semibold text-[#1A2332]">{{ user.name }}</p>
                                             <p class="text-[11px] text-[#5A7A9A]">{{ user.email }}</p>
-                                            <p v-if="user.phone_number" class="text-[11px] text-[#8AAFCC] font-['JetBrains_Mono']">{{ user.phone_number }}</p>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="px-5 py-3 text-[12px] font-medium text-[#1A2332] font-['JetBrains_Mono']">
+                                    {{ user.phone_number ? '+62 ' + user.phone_number : '-' }}
                                 </td>
                                 <td class="px-5 py-3">
                                     <span :class="[
@@ -74,7 +77,7 @@
                                         {{ user.role }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-medium">
+                                <td v-if="currentUserRole !== 'developer'" class="px-5 py-3 text-[13px] text-[#5A7A9A] font-medium">
                                     {{ getOutletName(user) }}
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
@@ -109,7 +112,7 @@
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-[#D4E4F4] flex flex-col">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Profil' : (currentUserRole === 'developer' ? 'Tambah User Baru' : 'Tambah Karyawan Baru') }}</h3>
+                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Profil' : (currentUserRole === 'developer' ? 'Tambah Manager Baru' : 'Tambah User Baru') }}</h3>
                     <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -146,9 +149,10 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Role <span class="text-[#B83B2A]">*</span></label>
-                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole !== 'developer'">
-                                <option value="karyawan">Karyawan / Kasir</option>
-                                <option value="manager" v-if="currentUserRole === 'developer'">Manager / Owner</option>
+                            
+                            <select v-model="form.role" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white" :disabled="currentUserRole === 'developer'">
+                                <option value="manager" v-if="currentUserRole === 'developer' || currentUserRole === 'manager'">Manager / Owner</option>
+                                <option value="karyawan" v-if="currentUserRole !== 'developer'">Karyawan / Kasir</option>
                             </select>
                         </div>
                         <div v-if="form.role === 'karyawan'">
@@ -161,10 +165,23 @@
                     </div>
 
                     <div v-if="form.role === 'karyawan'">
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
-                        <div class="flex gap-2">
-                            <input type="text" v-model="form.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
-                            <button type="button" @click="generatePin('main')" class="px-3 py-2 bg-[#EBF3FB] text-[#2E7DD6] text-[12px] font-semibold rounded-lg hover:bg-[#D4E4F4] transition-colors border border-[#D4E4F4] whitespace-nowrap">Generate</button>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A]">PIN Akses Karyawan <span class="text-[#B83B2A]">*</span></label>
+                            <button type="button" @click="generatePin('main')" class="text-[#2E7DD6] hover:text-[#1B4F8A] text-[11px] font-bold transition-colors">Acak PIN</button>
+                        </div>
+                        <div class="flex justify-between gap-1.5">
+                            <input 
+                                v-for="(digit, index) in pinDigitsMain" 
+                                :key="index"
+                                :ref="el => { if(el) pinRefsMain[index] = el }"
+                                type="text" 
+                                maxlength="1"
+                                v-model="pinDigitsMain[index]"
+                                @input="handlePinInput(index, 'main', $event)"
+                                @keydown.delete="handlePinDelete(index, 'main', $event)"
+                                class="w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl focus:border-[#2E7DD6] focus:bg-white outline-none transition-all shadow-sm font-['JetBrains_Mono']"
+                                placeholder="•"
+                            />
                         </div>
                     </div>
 
@@ -212,17 +229,18 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Profil User</th>
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Email</th>
+                                    <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Kontak</th>
                                     <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet (Penempatan)</th>
                                     <th class="px-4 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
                                 <tr v-if="karyawanListModal.isLoading" class="bg-white">
-                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Menarik data dari server...</td>
+                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Menarik data dari server...</td>
                                 </tr>
                                 <tr v-else-if="karyawanList.length === 0" class="bg-white">
-                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Manager ini belum memiliki karyawan.</td>
+                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Manager ini belum memiliki karyawan.</td>
                                 </tr>
                                 <tr v-else v-for="kar in karyawanList" :key="kar.id" class="bg-white hover:bg-[#F7FAFD]">
                                     <td class="px-4 py-3">
@@ -234,9 +252,11 @@
                                             <div>
                                                 <p class="text-[13px] font-semibold text-[#1A2332]">{{ kar.name }}</p>
                                                 <p class="text-[11px] text-[#5A7A9A]">{{ kar.email }}</p>
-                                                <p v-if="kar.phone_number" class="text-[11px] text-[#8AAFCC] font-['JetBrains_Mono']">{{ kar.phone_number }}</p>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-[12px] font-medium text-[#1A2332] font-['JetBrains_Mono']">
+                                        {{ kar.phone_number ? '+62 ' + kar.phone_number : '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-[12px] text-[#5A7A9A] font-medium">{{ getOutletName(kar) }}</td>
                                     <td class="px-4 py-3 text-right whitespace-nowrap">
@@ -297,10 +317,23 @@
                     </div>
                     
                     <div>
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">PIN Akses (6 Angka) <span class="text-[#B83B2A]">*</span></label>
-                        <div class="flex gap-2">
-                            <input type="text" v-model="formKaryawan.pin" required maxlength="6" pattern="\d{6}" placeholder="Contoh: 123456" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
-                            <button type="button" @click="generatePin('karyawan')" class="px-3 py-2 bg-[#F0FDF4] text-[#2A7A4B] text-[12px] font-semibold rounded-lg hover:bg-[#DCFCE7] transition-colors border border-[#bbf7d0] whitespace-nowrap">Generate</button>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A]">PIN Akses Karyawan <span class="text-[#B83B2A]">*</span></label>
+                            <button type="button" @click="generatePin('karyawan')" class="text-[#2A7A4B] hover:text-green-800 text-[11px] font-bold transition-colors">Acak PIN</button>
+                        </div>
+                        <div class="flex justify-between gap-1.5">
+                            <input 
+                                v-for="(digit, index) in pinDigitsKar" 
+                                :key="index"
+                                :ref="el => { if(el) pinRefsKar[index] = el }"
+                                type="text" 
+                                maxlength="1"
+                                v-model="pinDigitsKar[index]"
+                                @input="handlePinInput(index, 'karyawan', $event)"
+                                @keydown.delete="handlePinDelete(index, 'karyawan', $event)"
+                                class="w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] bg-[#F0FDF4] border border-[#bbf7d0] rounded-xl focus:border-[#2A7A4B] focus:bg-white outline-none transition-all shadow-sm font-['JetBrains_Mono']"
+                                placeholder="•"
+                            />
                         </div>
                     </div>
 
@@ -361,6 +394,10 @@ const selectedUserId = ref(null);
 const form = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', image_file: null });
 const imagePreviewMain = ref(null);
 
+// State PIN Kotak Utama
+const pinDigitsMain = ref(['', '', '', '', '', '']);
+const pinRefsMain = ref([]);
+
 // --- STATE DEVELOPER: LIST KARYAWAN ---
 const karyawanListModal = reactive({ show: false, managerId: null, managerName: '', isLoading: false });
 const karyawanList = ref([]);
@@ -369,17 +406,55 @@ const karyawanFormModal = reactive({ show: false, isEdit: false, id: null });
 const formKaryawan = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', owner_id: null, image_file: null });
 const imagePreviewKar = ref(null);
 
+// State PIN Kotak Karyawan
+const pinDigitsKar = ref(['', '', '', '', '', '']);
+const pinRefsKar = ref([]);
+
 // --- STATE DELETE MODAL ---
 const deleteModal = reactive({ show: false, id: null, name: '', type: 'main', isDeleting: false });
 
-// --- HELPER & COMPUTED ---
+// --- HELPER LOGIK PIN (OTP STYLE) ---
+const handlePinInput = (index, type, event) => {
+    const val = event.target.value;
+    const digits = type === 'main' ? pinDigitsMain.value : pinDigitsKar.value;
+    const refs = type === 'main' ? pinRefsMain.value : pinRefsKar.value;
+    const targetForm = type === 'main' ? form : formKaryawan;
+
+    // Tolak jika bukan angka
+    if (!/^\d*$/.test(val)) {
+        digits[index] = '';
+        return;
+    }
+
+    // Pindah fokus ke kotak berikutnya
+    if (val && index < 5) {
+        refs[index + 1]?.focus();
+    }
+
+    targetForm.pin = digits.join('');
+};
+
+const handlePinDelete = (index, type, event) => {
+    const digits = type === 'main' ? pinDigitsMain.value : pinDigitsKar.value;
+    const refs = type === 'main' ? pinRefsMain.value : pinRefsKar.value;
+    const targetForm = type === 'main' ? form : formKaryawan;
+
+    // Jika kotak kosong dan backspace ditekan, mundur fokusnya
+    if (!digits[index] && index > 0) {
+        refs[index - 1]?.focus();
+    }
+    
+    targetForm.pin = digits.join('');
+};
 
 const generatePin = (type) => {
     const randomPin = Math.floor(100000 + Math.random() * 900000).toString();
     if (type === 'main') {
         form.pin = randomPin;
+        pinDigitsMain.value = randomPin.split('');
     } else {
         formKaryawan.pin = randomPin;
+        pinDigitsKar.value = randomPin.split('');
     }
 };
 
@@ -460,17 +535,17 @@ const openModal = (user = null) => {
         form.pin = user.pin || '';
         form.image_file = null;
         imagePreviewMain.value = getImageUrl(user.image);
+        
+        // Pecah pin ke kotak-kotak UI
+        if (user.pin) pinDigitsMain.value = user.pin.split('').concat(Array(6).fill('')).slice(0, 6);
+        else pinDigitsMain.value = Array(6).fill('');
     } else {
         selectedUserId.value = null;
-        form.name = ''; 
-        form.email = ''; 
-        form.phone_number = '';
-        form.outlet_id = ''; 
-        form.password = ''; 
-        form.pin = '';
+        form.name = ''; form.email = ''; form.phone_number = ''; form.outlet_id = ''; form.password = ''; form.pin = '';
         form.role = currentUserRole.value === 'developer' ? 'manager' : 'karyawan';
         form.image_file = null;
         imagePreviewMain.value = null;
+        pinDigitsMain.value = Array(6).fill('');
     }
     isModalOpen.value = true;
 };
@@ -509,22 +584,21 @@ const openModalKaryawan = (kar = null) => {
         formKaryawan.email = kar.email; 
         formKaryawan.phone_number = kar.phone_number || '';
         formKaryawan.outlet_id = kar.outlet_id || ''; 
-        // Kosongkan password state (meski UI sudah dihapus)
         formKaryawan.password = '';
         formKaryawan.pin = kar.pin || '';
         formKaryawan.image_file = null;
         imagePreviewKar.value = getImageUrl(kar.image);
+
+        if (kar.pin) pinDigitsKar.value = kar.pin.split('').concat(Array(6).fill('')).slice(0, 6);
+        else pinDigitsKar.value = Array(6).fill('');
     } else {
         karyawanFormModal.id = null;
-        formKaryawan.name = ''; 
-        formKaryawan.email = ''; 
-        formKaryawan.phone_number = '';
-        formKaryawan.outlet_id = ''; 
-        // Beri password default 12345678 secara internal agar API lolos saat pembuatan akun pertama
-        formKaryawan.password = '12345678'; 
+        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.phone_number = ''; formKaryawan.outlet_id = ''; 
+        formKaryawan.password = '12345678'; // Default password untuk karyawan
         formKaryawan.pin = '';
         formKaryawan.image_file = null;
         imagePreviewKar.value = null;
+        pinDigitsKar.value = Array(6).fill('');
     }
     formKaryawan.role = 'karyawan';
     formKaryawan.owner_id = karyawanListModal.managerId; 
@@ -548,10 +622,7 @@ const submitForm = async (type) => {
         
         if (currentForm.phone_number) formData.append('phone_number', currentForm.phone_number);
         if (currentForm.outlet_id) formData.append('outlet_id', currentForm.outlet_id);
-        
-        // Cek jika ada isian password internal (saat create) atau input manual
         if (currentForm.password) formData.append('password', currentForm.password);
-        
         if (currentForm.owner_id) formData.append('owner_id', currentForm.owner_id);
         
         if (currentForm.role === 'karyawan' && currentForm.pin) {
