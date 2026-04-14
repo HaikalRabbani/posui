@@ -1,18 +1,3 @@
-Ah, saya langsung melihat akar masalahnya setelah membaca kode `outletsetting.vue` Anda!
-
-Masalah ini terjadi karena **ada perbedaan penamaan variabel (Key Mismatch)** antara Frontend (Vue) dan Backend (Laravel Database).
-
-* Di **Database/Backend** (file migrasi Anda), kolomnya bernama: `address_outlet` dan `phone_number_outlet`.
-* Namun, di **Frontend** (file `outletsetting.vue` ini), Anda memanggil dan mengirimkannya menggunakan nama singkat: `outlet.address` dan `outlet.phone`.
-
-Karena nama variabelnya tidak sama, Vue tidak bisa membaca data dari database (sehingga kosong di tabel), dan saat form disubmit, Laravel mengabaikan inputnya karena tidak mengenali parameter `address` dan `phone`.
-
-### Solusinya:
-Kita hanya perlu menyesuaikan penamaan variabel di file `outletsetting.vue` agar persis sama dengan yang ada di database.
-
-Berikut adalah **kode utuh `outletsetting.vue` yang sudah saya perbaiki**. Silakan *copy-paste* seluruhnya untuk menimpa file lama Anda:
-
-```vue
 <template>
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
@@ -62,6 +47,7 @@ Berikut adalah **kode utuh `outletsetting.vue` yang sudah saya perbaiki**. Silak
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-16">ID</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Outlet</th>
                                 <th v-if="currentUserRole === 'developer'" class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Pemilik (Manager)</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Alamat & Telp</th>
@@ -70,12 +56,16 @@ Berikut adalah **kode utuh `outletsetting.vue` yang sudah saya perbaiki**. Silak
                         </thead>
                         <tbody class="divide-y divide-[#EBF3FB]">
                             <tr v-if="isLoading" class="border-b border-[#EBF3FB]">
-                                <td :colspan="currentUserRole === 'developer' ? 4 : 3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data outlet...</td>
+                                <td :colspan="currentUserRole === 'developer' ? 5 : 4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat data outlet...</td>
                             </tr>
                             <tr v-else-if="paginatedOutlets.length === 0" class="border-b border-[#EBF3FB]">
-                                <td :colspan="currentUserRole === 'developer' ? 4 : 3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data outlet ditemukan.</td>
+                                <td :colspan="currentUserRole === 'developer' ? 5 : 4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data outlet ditemukan.</td>
                             </tr>
                             <tr v-else v-for="outlet in paginatedOutlets" :key="outlet.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                <td class="px-5 py-3 font-semibold text-[#1B4F8A] text-[13px] font-['JetBrains_Mono']">
+                                    #{{ outlet.id }}
+                                </td>
+                                
                                 <td class="px-5 py-3 font-semibold text-[#1A2332] text-[14px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0">
@@ -296,7 +286,6 @@ const itemsPerPage = ref(10);
 const currentPage = ref(1);
 
 const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-// PERBAIKAN: Ubah key di form state agar sama dengan kolom database (Backend)
 const formOutlet = reactive({ name: '', address_outlet: '', phone_number_outlet: '', user_id: '' });
 
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
@@ -377,7 +366,6 @@ const openOutletModal = (item = null) => {
     if (item) {
         outletModal.id = item.id;
         formOutlet.name = item.name; 
-        // PERBAIKAN: Tangkap data menggunakan nama kolom database
         formOutlet.address_outlet = item.address_outlet || ''; 
         formOutlet.phone_number_outlet = item.phone_number_outlet || '';
         formOutlet.user_id = item.user_id || item.owner_id || '';
@@ -394,7 +382,7 @@ const openOutletModal = (item = null) => {
 const submitOutlet = async () => {
     outletModal.isSubmitting = true;
     try {
-        const payload = { ...formOutlet }; // Sekarang mengirim key yang benar!
+        const payload = { ...formOutlet }; 
         let endpoint = `${apiBase}/outlets`;
         if (outletModal.isEdit) {
             endpoint += `/${outletModal.id}`;
@@ -520,4 +508,3 @@ input[type=checkbox] {
     cursor: pointer;
 }
 </style>
-```

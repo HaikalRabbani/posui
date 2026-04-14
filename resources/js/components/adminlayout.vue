@@ -104,7 +104,7 @@
                         </router-link>
 
                         <router-link
-                            v-if="userRole === 'manager' || userRole === 'developer'"
+                            v-if="userRole !== 'developer'"
                             to="/promotions"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -118,6 +118,7 @@
                         </router-link>
 
                         <router-link
+                            v-if="userRole !== 'developer'"
                             to="/tables"
                             class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
