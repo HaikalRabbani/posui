@@ -9,6 +9,7 @@ import UserManagement from '../pages/usermanagement.vue';
 import MenuManagement from '../pages/menumanagement.vue';
 import Analytics from '../pages/analytics.vue';
 import OutletSetting from '../pages/outletsetting.vue';
+import PromoManagement from '../pages/promomanagement.vue';
 import TransactionHistory from '../pages/transactionhistory.vue';
 
 const routes = [
@@ -89,6 +90,15 @@ const routes = [
             title: 'Outlet Setting',
             desc: 'Kelola outlet Anda dan lakukan perubahan data outlet.'
         }
+    },
+    { 
+        path: '/promotions', 
+        component: PromoManagement, 
+        meta: { 
+            requiresAuth: true, 
+            title: 'Manajemen Promo', 
+            desc: 'Atur diskon dan penawaran menarik untuk pelanggan' 
+        } 
     },
     {
         path: '/transactions',
