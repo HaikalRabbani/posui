@@ -101,7 +101,9 @@
                 <form @submit.prevent="submitForm" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama / Kode Promo <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="form.name" required placeholder="Contoh: DISKON MERDEKA" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                        <input type="text" v-model="form.name" @input="formErrors.name = false" placeholder="Contoh: DISKON MERDEKA" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                        <span v-if="formErrors.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama promo wajib diisi.</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -114,23 +116,29 @@
                         </div>
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nilai Potongan <span class="text-[#B83B2A]">*</span></label>
-                            <input type="number" v-model="form.value" required min="1" :placeholder="form.type === 'percentage' ? 'Maks 100' : 'Cth: 15000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                            <input type="text" v-model="form.value" @input="formatInputNumber('value')" :placeholder="form.type === 'percentage' ? 'Maks 100' : 'Cth: 15.000'" 
+                                :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] font-[\'JetBrains_Mono\']', formErrors.value ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                            <span v-if="formErrors.value" class="text-[#B83B2A] text-[11px] mt-1 block">Nilai potongan wajib diisi.</span>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Minimal Pembelian (Rp) <span class="text-[10px] font-normal text-[#8AAFCC]">(Opsional)</span></label>
-                        <input type="number" v-model="form.min_purchase" min="0" placeholder="0 = Tanpa minimal beli" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                        <input type="text" v-model="form.min_purchase" @input="formatInputNumber('min_purchase')" placeholder="Tanpa minimal beli" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Berlaku Dari <span class="text-[#B83B2A]">*</span></label>
-                            <input type="date" v-model="form.start_date" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                            <input type="date" v-model="form.start_date" @input="formErrors.start_date = false" 
+                                :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.start_date ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                            <span v-if="formErrors.start_date" class="text-[#B83B2A] text-[11px] mt-1 block">Pilih tanggal mulai.</span>
                         </div>
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Berlaku Sampai <span class="text-[#B83B2A]">*</span></label>
-                            <input type="date" v-model="form.end_date" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                            <input type="date" v-model="form.end_date" @input="formErrors.end_date = false" 
+                                :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.end_date ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                            <span v-if="formErrors.end_date" class="text-[#B83B2A] text-[11px] mt-1 block">Pilih tanggal selesai.</span>
                         </div>
                     </div>
 
@@ -190,12 +198,21 @@ const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedId = ref(null);
 
-// PERBAIKAN: discount_type jadi type, discount_value jadi value
-const form = reactive({ name: '', type: 'percentage', value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
+const form = reactive({ name: '', type: 'percentage', value: '', min_purchase: '', start_date: '', end_date: '', is_active: true });
+// STATE BARU: UX Form Error Merah
+const formErrors = reactive({ name: false, value: false, start_date: false, end_date: false });
 
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
+
+// FUNGSI BARU: Auto Format Angka Input
+const formatInputNumber = (field) => {
+    let rawValue = form[field].toString().replace(/[^0-9]/g, '');
+    form[field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
+    if (field === 'value') formErrors.value = false;
+};
+
 const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -227,26 +244,50 @@ const fetchPromos = async () => {
 
 // Modal Logic
 const openModal = (promo = null) => {
+    // Reset Notifikasi Merah
+    formErrors.name = false;
+    formErrors.value = false;
+    formErrors.start_date = false;
+    formErrors.end_date = false;
+
     isEditMode.value = !!promo;
     if (promo) {
         selectedId.value = promo.id;
         form.name = promo.name;
-        form.type = promo.type; // PERBAIKAN
-        form.value = promo.value; // PERBAIKAN
-        form.min_purchase = promo.min_purchase || 0;
+        form.type = promo.type; 
+        
+        // Menerapkan titik format ribuan saat edit
+        form.value = promo.value ? new Intl.NumberFormat('id-ID').format(promo.value) : ''; 
+        form.min_purchase = promo.min_purchase ? new Intl.NumberFormat('id-ID').format(promo.min_purchase) : '';
+        
         form.start_date = promo.start_date ? promo.start_date.split('T')[0] : '';
         form.end_date = promo.end_date ? promo.end_date.split('T')[0] : '';
         form.is_active = !!promo.is_active;
     } else {
         selectedId.value = null;
-        Object.assign(form, { name: '', type: 'percentage', value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
+        Object.assign(form, { name: '', type: 'percentage', value: '', min_purchase: '', start_date: '', end_date: '', is_active: true });
     }
     isModalOpen.value = true;
 };
 const closeModal = () => { isModalOpen.value = false; };
 
 const submitForm = async () => {
-    if (form.type === 'percentage' && form.value > 100) {
+    // 1. Cek UX Validasi Kosong
+    formErrors.name = !form.name.trim();
+    formErrors.value = !form.value.toString().trim();
+    formErrors.start_date = !form.start_date;
+    formErrors.end_date = !form.end_date;
+
+    // Jika ada error merah, hentikan fungsi simpan
+    if (formErrors.name || formErrors.value || formErrors.start_date || formErrors.end_date) {
+        return;
+    }
+
+    // 2. Membersihkan titik ribuan dari input string sebelum kirim ke backend
+    const cleanValue = parseInt(form.value.toString().replace(/\./g, '')) || 0;
+    const cleanMinPurchase = parseInt(form.min_purchase.toString().replace(/\./g, '')) || 0;
+
+    if (form.type === 'percentage' && cleanValue > 100) {
         alert.show = false;
         setTimeout(() => showAlert("Diskon persentase tidak boleh lebih dari 100%", "error"), 100);
         return;
@@ -254,10 +295,16 @@ const submitForm = async () => {
 
     isSubmitting.value = true;
     try {
+        const payload = {
+            ...form,
+            value: cleanValue,
+            min_purchase: cleanMinPurchase
+        };
+
         const url = isEditMode.value ? `${apiBase}/${selectedId.value}` : `${apiBase}`;
         const method = isEditMode.value ? 'put' : 'post';
         
-        await axios[method](url, form, { headers: authHeaders() });
+        await axios[method](url, payload, { headers: authHeaders() });
         showAlert(`Promo berhasil ${isEditMode.value ? 'diperbarui' : 'dibuat'}!`, 'success');
         closeModal();
         fetchPromos();

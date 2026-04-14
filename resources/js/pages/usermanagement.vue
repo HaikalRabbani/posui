@@ -132,11 +132,15 @@
 
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="form.name" required placeholder="Masukkan nama..." class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
+                        <input type="text" v-model="form.name" @input="formErrors.name = false" placeholder="Masukkan nama..." 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.name ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                        <span v-if="formErrors.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama lengkap wajib diisi.</span>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
-                        <input type="email" v-model="form.email" required placeholder="email@contoh.com" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
+                        <input type="email" v-model="form.email" @input="formErrors.email = false" placeholder="email@contoh.com" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.email ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                        <span v-if="formErrors.email" class="text-[#B83B2A] text-[11px] mt-1 block">Email wajib diisi.</span>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
@@ -151,19 +155,18 @@
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Role <span class="text-[#B83B2A]">*</span></label>
                             
                             <select 
-  v-model="form.role" 
-  required 
-  class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" 
-  :disabled="currentUserRole === 'manager' || currentUserRole === 'developer'"
->
-  <option value="manager" v-if="currentUserRole === 'developer'">
-    Manager / Owner
-  </option>
+                                v-model="form.role" 
+                                class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                                :disabled="currentUserRole === 'manager' || currentUserRole === 'developer'"
+                            >
+                                <option value="manager" v-if="currentUserRole === 'developer'">
+                                    Manager / Owner
+                                </option>
 
-  <option value="karyawan">
-    Karyawan / Kasir
-  </option>
-</select>
+                                <option value="karyawan">
+                                    Karyawan / Kasir
+                                </option>
+                            </select>
                         </div>
                         <div v-if="form.role === 'karyawan'">
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet Penempatan</label>
@@ -189,15 +192,18 @@
                                 v-model="pinDigitsMain[index]"
                                 @input="handlePinInput(index, 'main', $event)"
                                 @keydown.delete="handlePinDelete(index, 'main', $event)"
-                                class="w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl focus:border-[#2E7DD6] focus:bg-white outline-none transition-all shadow-sm font-['JetBrains_Mono']"
+                                :class="['w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] border rounded-xl focus:bg-white outline-none transition-all shadow-sm font-[\'JetBrains_Mono\']', formErrors.pin ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'bg-[#F7FAFD] border-[#D4E4F4] focus:border-[#2E7DD6]']"
                                 placeholder="•"
                             />
                         </div>
+                        <span v-if="formErrors.pin" class="text-[#B83B2A] text-[11px] mt-1 block">PIN 6 digit wajib diisi lengkap.</span>
                     </div>
 
                     <div v-if="form.role !== 'karyawan'">
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">{{ isEditMode ? 'Password Baru (Opsional)' : 'Password Default' }} <span v-if="!isEditMode" class="text-[#B83B2A]">*</span></label>
-                        <input type="password" v-model="form.password" :required="!isEditMode" placeholder="Minimal 8 karakter" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] font-['JetBrains_Mono']">
+                        <input type="password" v-model="form.password" @input="formErrors.password = false" :placeholder="isEditMode ? 'Kosongkan jika tidak ganti' : 'Minimal 8 karakter'" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] font-[\'JetBrains_Mono\']', formErrors.password ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                        <span v-if="formErrors.password" class="text-[#B83B2A] text-[11px] mt-1 block">Password wajib diisi (Min. 8 Karakter).</span>
                     </div>
 
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
@@ -305,15 +311,21 @@
 
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="formKaryawan.name" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                        <input type="text" v-model="formKaryawan.name" @input="formErrorsKar.name = false" placeholder="Masukkan nama..." 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrorsKar.name ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                        <span v-if="formErrorsKar.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama karyawan wajib diisi.</span>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Email <span class="text-[#B83B2A]">*</span></label>
-                        <input type="email" v-model="formKaryawan.email" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                        <input type="email" v-model="formKaryawan.email" @input="formErrorsKar.email = false" placeholder="email@contoh.com" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrorsKar.email ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                        <span v-if="formErrorsKar.email" class="text-[#B83B2A] text-[11px] mt-1 block">Email wajib diisi.</span>
                     </div>
                     <div>
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Password <span class="text-[#B83B2A]">*</span></label>
-                        <input type="email" v-model="formKaryawan.password" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332]">
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Password <span v-if="!karyawanFormModal.isEdit" class="text-[#B83B2A]">*</span></label>
+                        <input type="password" v-model="formKaryawan.password" @input="formErrorsKar.password = false" :placeholder="karyawanFormModal.isEdit ? 'Kosongkan jika tidak ganti' : 'Minimal 8 karakter'" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] font-[\'JetBrains_Mono\']', formErrorsKar.password ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
+                        <span v-if="formErrorsKar.password" class="text-[#B83B2A] text-[11px] mt-1 block">Password wajib diisi (Min. 8 Karakter).</span>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Telepon</label>
@@ -345,10 +357,11 @@
                                 v-model="pinDigitsKar[index]"
                                 @input="handlePinInput(index, 'karyawan', $event)"
                                 @keydown.delete="handlePinDelete(index, 'karyawan', $event)"
-                                class="w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] bg-[#F0FDF4] border border-[#bbf7d0] rounded-xl focus:border-[#2A7A4B] focus:bg-white outline-none transition-all shadow-sm font-['JetBrains_Mono']"
+                                :class="['w-12 h-12 text-center text-[18px] font-bold text-[#1A2332] border rounded-xl focus:bg-white outline-none transition-all shadow-sm font-[\'JetBrains_Mono\']', formErrorsKar.pin ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'bg-[#F0FDF4] border-[#bbf7d0] focus:border-[#2A7A4B]']"
                                 placeholder="•"
                             />
                         </div>
+                        <span v-if="formErrorsKar.pin" class="text-[#B83B2A] text-[11px] mt-1 block">PIN 6 digit wajib diisi lengkap.</span>
                     </div>
 
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
@@ -408,6 +421,9 @@ const selectedUserId = ref(null);
 const form = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', image_file: null });
 const imagePreviewMain = ref(null);
 
+// UX Validasi Main
+const formErrors = reactive({ name: false, email: false, password: false, pin: false });
+
 // State PIN Kotak Utama
 const pinDigitsMain = ref(['', '', '', '', '', '']);
 const pinRefsMain = ref([]);
@@ -419,6 +435,9 @@ const managerOutlets = ref([]);
 const karyawanFormModal = reactive({ show: false, isEdit: false, id: null });
 const formKaryawan = reactive({ name: '', email: '', phone_number: '', role: 'karyawan', outlet_id: '', password: '', pin: '', owner_id: null, image_file: null });
 const imagePreviewKar = ref(null);
+
+// UX Validasi Form Karyawan (Developer View)
+const formErrorsKar = reactive({ name: false, email: false, password: false, pin: false });
 
 // State PIN Kotak Karyawan
 const pinDigitsKar = ref(['', '', '', '', '', '']);
@@ -433,6 +452,7 @@ const handlePinInput = (index, type, event) => {
     const digits = type === 'main' ? pinDigitsMain.value : pinDigitsKar.value;
     const refs = type === 'main' ? pinRefsMain.value : pinRefsKar.value;
     const targetForm = type === 'main' ? form : formKaryawan;
+    const errObj = type === 'main' ? formErrors : formErrorsKar;
 
     // Tolak jika bukan angka
     if (!/^\d*$/.test(val)) {
@@ -446,6 +466,7 @@ const handlePinInput = (index, type, event) => {
     }
 
     targetForm.pin = digits.join('');
+    if (targetForm.pin.length === 6) errObj.pin = false;
 };
 
 const handlePinDelete = (index, type, event) => {
@@ -466,9 +487,11 @@ const generatePin = (type) => {
     if (type === 'main') {
         form.pin = randomPin;
         pinDigitsMain.value = randomPin.split('');
+        formErrors.pin = false;
     } else {
         formKaryawan.pin = randomPin;
         pinDigitsKar.value = randomPin.split('');
+        formErrorsKar.pin = false;
     }
 };
 
@@ -537,6 +560,9 @@ const fetchData = async () => {
 };
 
 const openModal = (user = null) => {
+    // Reset Errors
+    Object.keys(formErrors).forEach(key => formErrors[key] = false);
+
     isEditMode.value = !!user;
     if (user) {
         selectedUserId.value = user.id;
@@ -550,7 +576,6 @@ const openModal = (user = null) => {
         form.image_file = null;
         imagePreviewMain.value = getImageUrl(user.image);
         
-        // Pecah pin ke kotak-kotak UI
         if (user.pin) pinDigitsMain.value = user.pin.split('').concat(Array(6).fill('')).slice(0, 6);
         else pinDigitsMain.value = Array(6).fill('');
     } else {
@@ -565,87 +590,50 @@ const openModal = (user = null) => {
 };
 const closeModal = () => { isModalOpen.value = false; };
 
-/// --- API CALLS: DEVELOPER VIEW KARYAWAN ---
-const fetchManagerKaryawan = async (managerId) => {
-    karyawanListModal.isLoading = true;
-    try {
-        const response = await axios.get(`${apiBase}/users?manager_id=${managerId}`, { headers: authHeaders() });
-        karyawanList.value = response.data.data?.data || response.data.data || response.data || [];
-
-        const resOutlets = await axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() });
-        const allOutlets = resOutlets.data.data?.data || resOutlets.data.data || resOutlets.data || [];
-        managerOutlets.value = allOutlets.filter(o => o.user_id === managerId || o.owner_id === managerId);
-    } catch (e) {
-        console.error(e);
-        showAlert("Gagal menarik data karyawan dari server", "error");
-    } finally { 
-        karyawanListModal.isLoading = false; 
-    }
-};
-
-const openKaryawanListModal = (managerRow) => {
-    karyawanListModal.managerId = managerRow.id;
-    karyawanListModal.managerName = managerRow.name;
-    karyawanListModal.show = true;
-    fetchManagerKaryawan(managerRow.id);
-};
-
-const openModalKaryawan = (kar = null) => {
-    karyawanFormModal.isEdit = !!kar;
-    if (kar) {
-        karyawanFormModal.id = kar.id;
-        formKaryawan.name = kar.name; 
-        formKaryawan.email = kar.email; 
-        formKaryawan.phone_number = kar.phone_number || '';
-        formKaryawan.outlet_id = kar.outlet_id || ''; 
-        formKaryawan.password = '';
-        formKaryawan.pin = kar.pin || '';
-        formKaryawan.image_file = null;
-        imagePreviewKar.value = getImageUrl(kar.image);
-
-        if (kar.pin) pinDigitsKar.value = kar.pin.split('').concat(Array(6).fill('')).slice(0, 6);
-        else pinDigitsKar.value = Array(6).fill('');
-    } else {
-        karyawanFormModal.id = null;
-        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.phone_number = ''; formKaryawan.outlet_id = ''; 
-        formKaryawan.password = '12345678'; // Default password untuk karyawan
-        formKaryawan.pin = '';
-        formKaryawan.image_file = null;
-        imagePreviewKar.value = null;
-        pinDigitsKar.value = Array(6).fill('');
-    }
-    formKaryawan.role = 'karyawan';
-    formKaryawan.owner_id = karyawanListModal.managerId; 
-    karyawanFormModal.show = true;
-};
-
 // --- SUBMIT LOGIC ---
 const submitForm = async (type) => {
-    isSubmitting.value = true;
     const isMain = type === 'main';
     const currentForm = isMain ? form : formKaryawan;
+    const errObj = isMain ? formErrors : formErrorsKar;
     const isEdit = isMain ? isEditMode.value : karyawanFormModal.isEdit;
     const targetId = isMain ? selectedUserId.value : karyawanFormModal.id;
 
+    // VALIDASI UX MERAH
+    errObj.name = !currentForm.name.trim();
+    errObj.email = !currentForm.email.trim();
+    
+    // Password wajib jika form baru dan bukan karyawan
+    if (!isEdit && currentForm.role !== 'karyawan') {
+        errObj.password = !currentForm.password || currentForm.password.length < 8;
+    } else if (isEdit && currentForm.role !== 'karyawan' && currentForm.password) {
+        // Jika edit tapi password diisi, minimal 8 karakter
+        errObj.password = currentForm.password.length < 8;
+    } else {
+        errObj.password = false;
+    }
+
+    // PIN wajib jika karyawan
+    if (currentForm.role === 'karyawan') {
+        errObj.pin = !currentForm.pin || currentForm.pin.length < 6;
+    } else {
+        errObj.pin = false;
+    }
+
+    // Jika ada error, hentikan submit
+    if (errObj.name || errObj.email || errObj.password || errObj.pin) return;
+
+    isSubmitting.value = true;
     try {
         const formData = new FormData();
-        
         formData.append('name', currentForm.name);
         formData.append('email', currentForm.email);
         formData.append('role', currentForm.role);
-        
         if (currentForm.phone_number) formData.append('phone_number', currentForm.phone_number);
         if (currentForm.outlet_id) formData.append('outlet_id', currentForm.outlet_id);
         if (currentForm.password) formData.append('password', currentForm.password);
         if (currentForm.owner_id) formData.append('owner_id', currentForm.owner_id);
-        
-        if (currentForm.role === 'karyawan' && currentForm.pin) {
-            formData.append('pin', currentForm.pin);
-        }
-        
-        if (currentForm.image_file) {
-            formData.append('image', currentForm.image_file);
-        }
+        if (currentForm.role === 'karyawan' && currentForm.pin) formData.append('pin', currentForm.pin);
+        if (currentForm.image_file) formData.append('image', currentForm.image_file);
 
         let endpoint = `${apiBase}/users`;
         if (isEdit) {
@@ -672,7 +660,64 @@ const submitForm = async (type) => {
     } finally { isSubmitting.value = false; }
 };
 
-// --- DELETE LOGIC ---
+// ... (Sisanya tetap sama: fetchManagerKaryawan, openKaryawanListModal, openModalKaryawan, delete logic)
+
+const fetchManagerKaryawan = async (managerId) => {
+    karyawanListModal.isLoading = true;
+    try {
+        const response = await axios.get(`${apiBase}/users?manager_id=${managerId}`, { headers: authHeaders() });
+        karyawanList.value = response.data.data?.data || response.data.data || response.data || [];
+
+        const resOutlets = await axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() });
+        const allOutlets = resOutlets.data.data?.data || resOutlets.data.data || resOutlets.data || [];
+        managerOutlets.value = allOutlets.filter(o => o.user_id === managerId || o.owner_id === managerId);
+    } catch (e) {
+        console.error(e);
+        showAlert("Gagal menarik data karyawan dari server", "error");
+    } finally { 
+        karyawanListModal.isLoading = false; 
+    }
+};
+
+const openKaryawanListModal = (managerRow) => {
+    karyawanListModal.managerId = managerRow.id;
+    karyawanListModal.managerName = managerRow.name;
+    karyawanListModal.show = true;
+    fetchManagerKaryawan(managerRow.id);
+};
+
+const openModalKaryawan = (kar = null) => {
+    // Reset Errors Kar
+    Object.keys(formErrorsKar).forEach(key => formErrorsKar[key] = false);
+
+    karyawanFormModal.isEdit = !!kar;
+    if (kar) {
+        karyawanFormModal.id = kar.id;
+        formKaryawan.name = kar.name; 
+        formKaryawan.email = kar.email; 
+        formKaryawan.phone_number = kar.phone_number || '';
+        formKaryawan.outlet_id = kar.outlet_id || ''; 
+        formKaryawan.password = '';
+        formKaryawan.pin = kar.pin || '';
+        formKaryawan.image_file = null;
+        imagePreviewKar.value = getImageUrl(kar.image);
+
+        if (kar.pin) pinDigitsKar.value = kar.pin.split('').concat(Array(6).fill('')).slice(0, 6);
+        else pinDigitsKar.value = Array(6).fill('');
+    } else {
+        karyawanFormModal.id = null;
+        formKaryawan.name = ''; formKaryawan.email = ''; formKaryawan.phone_number = ''; formKaryawan.outlet_id = ''; 
+        formKaryawan.password = '12345678';
+        formKaryawan.pin = '';
+        formKaryawan.image_file = null;
+        imagePreviewKar.value = null;
+        pinDigitsKar.value = Array(6).fill('');
+    }
+    formKaryawan.role = 'karyawan';
+    formKaryawan.owner_id = karyawanListModal.managerId; 
+    karyawanFormModal.show = true;
+};
+
 const confirmDelete = (user, type) => {
     deleteModal.id = user.id;
     deleteModal.name = user.name;
