@@ -12,7 +12,7 @@
                     </div>
                 </div>
 
-                <button @click="openModal()" class="px-4 py-2 bg-[#2A7A4B] hover:bg-navy-800 text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                <button @click="openModal()" class="px-4 py-2 bg-[#2A7A4B] hover:bg-green-800 text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     Buat Promo Baru
                 </button>
@@ -58,9 +58,9 @@
                                     <p v-else class="text-[11px] text-[#5A7A9A] mt-0.5">Tanpa minimal pembelian</p>
                                 </td>
                                 <td class="px-5 py-3">
-                                    <span v-if="promo.discount_type === 'percentage'" class="text-[13px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">{{ promo.discount_value }}%</span>
-                                    <span v-else class="text-[13px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(promo.discount_value) }}</span>
-                                    <span class="block text-[10px] text-[#5A7A9A] uppercase mt-0.5">{{ promo.discount_type === 'percentage' ? 'Persentase' : 'Nominal' }}</span>
+                                    <span v-if="promo.type === 'percentage'" class="text-[13px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">{{ promo.value }}%</span>
+                                    <span v-else class="text-[13px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(promo.value) }}</span>
+                                    <span class="block text-[10px] text-[#5A7A9A] uppercase mt-0.5">{{ promo.type === 'percentage' ? 'Persentase' : 'Nominal' }}</span>
                                 </td>
                                 <td class="px-5 py-3">
                                     <p class="text-[12px] text-[#1A2332]">{{ formatDate(promo.start_date) }}</p>
@@ -107,14 +107,14 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Tipe Diskon <span class="text-[#B83B2A]">*</span></label>
-                            <select v-model="form.discount_type" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] bg-white">
+                            <select v-model="form.type" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] bg-white">
                                 <option value="percentage">Persen (%)</option>
                                 <option value="nominal">Nominal (Rp)</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nilai Potongan <span class="text-[#B83B2A]">*</span></label>
-                            <input type="number" v-model="form.discount_value" required min="1" :placeholder="form.discount_type === 'percentage' ? 'Maks 100' : 'Cth: 15000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
+                            <input type="number" v-model="form.value" required min="1" :placeholder="form.type === 'percentage' ? 'Maks 100' : 'Cth: 15000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2A7A4B] text-[#1A2332] font-['JetBrains_Mono']">
                         </div>
                     </div>
 
@@ -173,7 +173,6 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-// --- Note: Sesuaikan nama endpoint ini dengan rute di routes/api.php backend Anda ---
 const apiBase = 'https://api.etres.my.id/api/v1/discounts'; 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
@@ -190,7 +189,9 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedId = ref(null);
-const form = reactive({ name: '', discount_type: 'percentage', discount_value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
+
+// PERBAIKAN: discount_type jadi type, discount_value jadi value
+const form = reactive({ name: '', type: 'percentage', value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
 
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
@@ -230,22 +231,22 @@ const openModal = (promo = null) => {
     if (promo) {
         selectedId.value = promo.id;
         form.name = promo.name;
-        form.discount_type = promo.discount_type;
-        form.discount_value = promo.discount_value;
+        form.type = promo.type; // PERBAIKAN
+        form.value = promo.value; // PERBAIKAN
         form.min_purchase = promo.min_purchase || 0;
         form.start_date = promo.start_date ? promo.start_date.split('T')[0] : '';
         form.end_date = promo.end_date ? promo.end_date.split('T')[0] : '';
         form.is_active = !!promo.is_active;
     } else {
         selectedId.value = null;
-        Object.assign(form, { name: '', discount_type: 'percentage', discount_value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
+        Object.assign(form, { name: '', type: 'percentage', value: '', min_purchase: 0, start_date: '', end_date: '', is_active: true });
     }
     isModalOpen.value = true;
 };
 const closeModal = () => { isModalOpen.value = false; };
 
 const submitForm = async () => {
-    if (form.discount_type === 'percentage' && form.discount_value > 100) {
+    if (form.type === 'percentage' && form.value > 100) {
         alert.show = false;
         setTimeout(() => showAlert("Diskon persentase tidak boleh lebih dari 100%", "error"), 100);
         return;
