@@ -12,9 +12,9 @@
                     </div>
                 </div>
 
-                <button @click="openModal()" class="px-4 py-2 bg-[#2A7A4B] hover:bg-green-800 text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                    Buat Promo Baru
+                    Tambah Promo Baru
                 </button>
             </div>
 

@@ -10,6 +10,7 @@ import MenuManagement from '../pages/menumanagement.vue';
 import Analytics from '../pages/analytics.vue';
 import OutletSetting from '../pages/outletsetting.vue';
 import PromoManagement from '../pages/promomanagement.vue';
+import TableManagement from '../pages/tablemanagement.vue';
 import TransactionHistory from '../pages/transactionhistory.vue';
 
 const routes = [
@@ -98,6 +99,15 @@ const routes = [
             requiresAuth: true, 
             title: 'Manajemen Promo', 
             desc: 'Atur diskon dan penawaran menarik untuk pelanggan' 
+        } 
+    },
+    { 
+        path: '/tables', 
+        component: TableManagement, 
+        meta: { 
+            requiresAuth: true, 
+            title: 'Manajemen Meja', 
+            desc: 'Atur nomor meja dan status ketersediaan' 
         } 
     },
     {

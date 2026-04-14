@@ -116,6 +116,19 @@
                             </svg>
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Promo</span>
                         </router-link>
+
+                        <router-link
+                            to="/tables"
+                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            exact-active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                            :class="[$route.path === '/tables' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/tables' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Meja</span>
+                        </router-link>
                     </li>
                 </ul>
             </nav>
