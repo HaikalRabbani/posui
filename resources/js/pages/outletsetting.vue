@@ -65,7 +65,6 @@
                                 <td class="px-5 py-3 font-semibold text-[#1B4F8A] text-[13px] font-['JetBrains_Mono']">
                                     #{{ outlet.id }}
                                 </td>
-                                
                                 <td class="px-5 py-3 font-semibold text-[#1A2332] text-[14px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0">
@@ -122,15 +121,19 @@
                 <form @submit.prevent="submitOutlet" class="p-6 space-y-4">
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Outlet <span class="text-[#B83B2A]">*</span></label>
-                        <input type="text" v-model="formOutlet.name" required placeholder="Contoh: Cabang Sudirman" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332]">
+                        <input type="text" v-model="formOutlet.name" @input="formErrorsOutlet.name = false" placeholder="Contoh: Cabang Sudirman" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrorsOutlet.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                        <span v-if="formErrorsOutlet.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama outlet wajib diisi.</span>
                     </div>
 
                     <div v-if="currentUserRole === 'developer'">
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Pemilik (Manager) <span class="text-[#B83B2A]">*</span></label>
-                        <select v-model="formOutlet.user_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
-                            <option value="">Pilih Manager</option>
+                        <select v-model="formOutlet.user_id" @change="formErrorsOutlet.user_id = false" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332] bg-white', formErrorsOutlet.user_id ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                            <option value="" disabled>Pilih Manager</option>
                             <option v-for="mgr in managers" :key="mgr.id" :value="mgr.id">{{ mgr.name }}</option>
                         </select>
+                        <span v-if="formErrorsOutlet.user_id" class="text-[#B83B2A] text-[11px] mt-1 block">Manager wajib dipilih.</span>
                     </div>
 
                     <div>
@@ -216,7 +219,8 @@
                                             </div>
                                         </td>
                                         <td class="p-3">
-                                            <input type="text" v-model="prod.price" @input="formatProductNumber(prod.indexInOriginal, 'price')" :disabled="!prod.selected" placeholder="Cth: 15.000" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-bold text-[#1B4F8A] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent">
+                                            <input type="text" v-model="prod.price" @input="formatProductNumber(prod.indexInOriginal, 'price'); prod.error = false" :disabled="!prod.selected" placeholder="Cth: 15.000" 
+                                                :class="['w-full px-2 py-1.5 text-[12px] font-[\'JetBrains_Mono\'] font-bold text-[#1B4F8A] border rounded outline-none disabled:bg-transparent disabled:border-transparent transition-colors', prod.error ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2A7A4B]']">
                                         </td>
                                         <td class="p-3">
                                             <input type="text" v-model="prod.stock" @input="formatProductNumber(prod.indexInOriginal, 'stock')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-semibold text-[#1A2332] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent text-center">
@@ -288,6 +292,9 @@ const currentPage = ref(1);
 const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
 const formOutlet = reactive({ name: '', address_outlet: '', phone_number_outlet: '', user_id: '' });
 
+// UX VALIDASI: FORM OUTLET
+const formErrorsOutlet = reactive({ name: false, user_id: false });
+
 const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
 
 // --- STATE MENU MANAGER ---
@@ -328,7 +335,10 @@ const filteredMenuForm = computed(() => {
 });
 
 const toggleAllMenus = () => {
-    filteredMenuForm.value.forEach(m => m.selected = isAllSelected.value);
+    filteredMenuForm.value.forEach(m => {
+        m.selected = isAllSelected.value;
+        if (!m.selected) m.error = false; 
+    });
 };
 
 // --- API CALLS ---
@@ -362,6 +372,10 @@ const fetchInitialData = async () => {
 };
 
 const openOutletModal = (item = null) => {
+    // RESET UX MERAH
+    formErrorsOutlet.name = false;
+    formErrorsOutlet.user_id = false;
+
     outletModal.isEdit = !!item;
     if (item) {
         outletModal.id = item.id;
@@ -380,6 +394,16 @@ const openOutletModal = (item = null) => {
 };
 
 const submitOutlet = async () => {
+    // VALIDASI KOSONG
+    formErrorsOutlet.name = !formOutlet.name.trim();
+    if (currentUserRole.value === 'developer') {
+        formErrorsOutlet.user_id = !formOutlet.user_id;
+    }
+
+    if (formErrorsOutlet.name || (currentUserRole.value === 'developer' && formErrorsOutlet.user_id)) {
+        return;
+    }
+
     outletModal.isSubmitting = true;
     try {
         const payload = { ...formOutlet }; 
@@ -439,6 +463,7 @@ const openMenuManager = async (outlet) => {
                     indexInOriginal: idx, 
                     id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
                     selected: true,
+                    error: false, // TAMBAH STATUS ERROR
                     price: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.price),
                     stock: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.stock),
                 };
@@ -446,7 +471,7 @@ const openMenuManager = async (outlet) => {
                 return {
                     indexInOriginal: idx,
                     id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
-                    selected: false, price: '', stock: '0'
+                    selected: false, error: false, price: '', stock: '0'
                 };
             }
         });
@@ -463,17 +488,25 @@ const openMenuManager = async (outlet) => {
 };
 
 const saveOutletMenu = async () => {
+    // VALIDASI MERAH DI TABEL MENU
+    let hasInvalidData = false;
+    menuForm.value.forEach(m => {
+        if (m.selected && !m.price.toString().trim()) {
+            m.error = true;
+            hasInvalidData = true;
+        } else {
+            m.error = false;
+        }
+    });
+
+    if (hasInvalidData) {
+        showAlert('Terdapat menu yang belum diisi harga jualnya!', 'error');
+        return;
+    }
+
     menuModal.isSaving = true;
     try {
         const selectedMenus = menuForm.value.filter(m => m.selected);
-        
-        let hasInvalidData = false;
-        selectedMenus.forEach(m => { if (!m.price) hasInvalidData = true; });
-        if (hasInvalidData) {
-            alert('Semua menu yang dicentang wajib diisi Harga Jualnya!');
-            menuModal.isSaving = false;
-            return;
-        }
 
         const payload = {
             products: selectedMenus.map(m => {

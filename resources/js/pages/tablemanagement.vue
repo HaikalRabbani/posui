@@ -2,8 +2,8 @@
     <AdminLayout>
         <div class="space-y-6 font-['Poppins'] pb-10">
             
-            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-[#D4E4F4] pb-4">
-                <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#D4E4F4] pb-4">
+                <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <div class="relative w-full sm:w-64">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -17,9 +17,9 @@
                     </select>
                 </div>
 
-                <button @click="openModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                <button @click="openModal()" class="w-fit px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                    Tambah Meja Baru
+                    Tambah Meja
                 </button>
             </div>
 
@@ -116,16 +116,20 @@
                 <form @submit.prevent="submitForm" class="p-6 space-y-4">
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Outlet <span class="text-[#B83B2A]">*</span></label>
-                        <select v-model="form.outlet_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:border-[#2E7DD6] outline-none bg-white">
+                        <select v-model="form.outlet_id" @change="formErrors.outlet_id = false" 
+                            :class="['w-full px-3 py-2 text-[13px] rounded-lg border outline-none bg-white transition-colors', formErrors.outlet_id ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
                             <option value="" disabled>Pilih Outlet</option>
                             <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                         </select>
+                        <span v-if="formErrors.outlet_id" class="text-[#B83B2A] text-[11px] mt-1 block">Outlet penempatan wajib dipilih.</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Meja <span class="text-[#B83B2A]">*</span></label>
-                            <input type="text" v-model="form.name" required placeholder="Cth: Meja 1, VIP A" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:border-[#2E7DD6] outline-none">
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nomor Meja <span class="text-[#B83B2A]">*</span></label>
+                            <input type="text" v-model="form.name" @input="formErrors.name = false" placeholder="Cth: Meja 1, VIP A" 
+                                :class="['w-full px-3 py-2 text-[13px] rounded-lg border outline-none transition-colors', formErrors.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                            <span v-if="formErrors.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nomor meja wajib diisi.</span>
                         </div>
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Kode Meja</label>
@@ -211,7 +215,7 @@ const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedId = ref(null);
 
-// Form Sesuai Model Terbaru
+// Form State
 const form = reactive({ 
     name: '', 
     code: '', 
@@ -220,6 +224,8 @@ const form = reactive({
     status: 'available', 
     is_active: true 
 });
+// UX Validasi Form
+const formErrors = reactive({ outlet_id: false, name: false });
 
 const deleteModal = reactive({ show: false, id: null, tableName: '', isDeleting: false });
 
@@ -251,6 +257,10 @@ const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; fetch
 const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage.value++; fetchTables(); } };
 
 const openModal = (table = null) => {
+    // Reset Form Error Red Border
+    formErrors.outlet_id = false;
+    formErrors.name = false;
+
     isEditMode.value = !!table;
     if (table) {
         selectedId.value = table.id;
@@ -270,12 +280,20 @@ const openModal = (table = null) => {
 const closeModal = () => { isModalOpen.value = false; };
 
 const submitForm = async () => {
+    // Pengecekan Field Kosong
+    formErrors.outlet_id = !form.outlet_id;
+    formErrors.name = !form.name.trim();
+
+    // Hentikan fungsi jika ada kotak merah (belum diisi)
+    if (formErrors.outlet_id || formErrors.name) {
+        return;
+    }
+
     isSubmitting.value = true;
     try {
         const url = isEditMode.value ? `${apiBase}/tables/${selectedId.value}` : `${apiBase}/tables`;
         const method = isEditMode.value ? 'put' : 'post';
         
-        // Backend tidak butuh qr_token, model yang akan urus
         await axios[method](url, form, { headers: authHeaders() });
         
         showAlert(`Meja berhasil ${isEditMode.value ? 'diperbarui' : 'disimpan'}!`, 'success');
@@ -306,7 +324,7 @@ const printQr = (table) => {
     printWindow.document.write(`
         <html><head><title>Print QR ${table.name}</title>
         <style>
-            body { font-family: 'Arial', sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
+            body { font-family: 'popins', sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
             .card { background: white; border: 2px dashed #8AAFCC; border-radius: 20px; padding: 40px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
             h1 { margin: 0; color: #1B4F8A; font-size: 45px; text-transform: uppercase; }
             h2 { margin: 5px 0 20px 0; color: #5A7A9A; font-size: 20px; font-weight: normal; }

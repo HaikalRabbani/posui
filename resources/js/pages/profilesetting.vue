@@ -55,19 +55,23 @@
                             
                             <div class="md:col-span-2">
                                 <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Nama Lengkap <span class="text-[#B83B2A]">*</span></label>
-                                <input v-model="formProfile.name" type="text" required class="w-full px-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
+                                <input v-model="formProfile.name" @input="formErrorsProfile.name = false" type="text" 
+                                    :class="['w-full px-4 py-2.5 text-[14px] rounded-lg border outline-none transition-colors text-[#1A2332]', formErrorsProfile.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                                <span v-if="formErrorsProfile.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama lengkap wajib diisi.</span>
                             </div>
                             
                             <div class="md:col-span-2">
                                 <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Alamat Email <span class="text-[#B83B2A]">*</span></label>
-                                <input v-model="formProfile.email" type="email" required class="w-full px-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
+                                <input v-model="formProfile.email" @input="formErrorsProfile.email = false" type="email" 
+                                    :class="['w-full px-4 py-2.5 text-[14px] rounded-lg border outline-none transition-colors text-[#1A2332]', formErrorsProfile.email ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                                <span v-if="formErrorsProfile.email" class="text-[#B83B2A] text-[11px] mt-1 block">Alamat email valid wajib diisi.</span>
                             </div>
 
                             <div>
                                 <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Nomor Telepon</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">+62</span>
-                                    <input v-model="formProfile.phone_number" type="tel" placeholder="81234567890" class="w-full pl-12 pr-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
+                                    <input v-model="formProfile.phone_number" @input="formatPhoneNumber" type="tel" placeholder="81234567890" class="w-full pl-12 pr-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors font-['JetBrains_Mono'] placeholder-[#8AAFCC]">
                                 </div>
                             </div>
 
@@ -141,9 +145,10 @@ const isSaving = ref(false);
 const isSavingSecurity = ref(false);
 const alert = reactive({ show: false, message: '', type: 'success' });
 
-// State Form
+// State Form & Validasi
 const formProfile = ref({ name: '', email: '', phone_number: '', role: '' });
 const formSecurity = ref({ newPassword: '', confirmPassword: '' });
+const formErrorsProfile = reactive({ name: false, email: false });
 
 // State Image
 const profileImageInput = ref(null);
@@ -165,6 +170,15 @@ const onImageChange = (e) => {
         imageFile.value = file;
         imagePreview.value = URL.createObjectURL(file);
     }
+};
+
+// Filter untuk menghapus angka '0' di awal input nomor telepon
+const formatPhoneNumber = () => {
+    if (formProfile.value.phone_number.startsWith('0')) {
+        formProfile.value.phone_number = formProfile.value.phone_number.substring(1);
+    }
+    // Hanya izinkan angka
+    formProfile.value.phone_number = formProfile.value.phone_number.replace(/[^0-9]/g, '');
 };
 
 // Header Profile Initials
@@ -196,6 +210,8 @@ const showAlert = (message, type = 'success') => {
 const fetchProfile = async () => {
     imageFile.value = null;
     imagePreview.value = null;
+    formErrorsProfile.name = false;
+    formErrorsProfile.email = false;
 
     try {
         const response = await axios.get(`${apiBase}/me`, { headers: authHeaders() });
@@ -218,6 +234,14 @@ const fetchProfile = async () => {
 
 // Simpan Data Profil dengan FormData
 const saveProfile = async () => {
+    // Validasi kosong
+    formErrorsProfile.name = !formProfile.value.name.trim();
+    formErrorsProfile.email = !formProfile.value.email.trim();
+
+    if (formErrorsProfile.name || formErrorsProfile.email) {
+        return;
+    }
+
     isSaving.value = true;
     alert.show = false;
 
