@@ -14,31 +14,41 @@
             </transition>
 
             <div class="flex gap-4 border-b border-[#D4E4F4]">
-                <button 
-                    @click="activeTab = 'jadwal'" 
-                    class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2"
-                    :class="activeTab === 'jadwal' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
+                <button @click="activeTab = 'jadwal'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2" :class="activeTab === 'jadwal' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
                     Pengaturan Jadwal
                 </button>
-                <button 
-                    @click="activeTab = 'laporan'" 
-                    class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2"
-                    :class="activeTab === 'laporan' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
+                <button @click="activeTab = 'laporan'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2" :class="activeTab === 'laporan' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
                     Laporan Audit Kasir
                 </button>
             </div>
 
             <div v-if="activeTab === 'jadwal'" class="animate-[fadeIn_0.3s_ease-out]">
                 <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
-                    <div class="p-4 border-b border-[#D4E4F4] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7FAFD]">
-                        <div>
-                            <h3 class="text-[15px] font-bold text-[#1A2332]">Jadwal Shift Master</h3>
-                            <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur jam kerja dan ploting karyawan yang bertugas.</p>
+                    
+                    <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-[15px] font-bold text-[#1A2332]">Jadwal Shift Master</h3>
+                                <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur jam kerja dan ploting karyawan yang bertugas.</p>
+                            </div>
+                            <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                Tambah Jadwal
+                            </button>
                         </div>
-                        <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Tambah Jadwal Shift
-                        </button>
+
+                        <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-[#D4E4F4]">
+                            <div class="relative w-full sm:w-64">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                <input type="text" v-model="searchScheduleQuery" placeholder="Cari nama shift..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
+                            </div>
+                            <select v-if="outlets.length > 1" v-model="selectedScheduleOutlet" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
+                                <option value="">Semua Outlet</option>
+                                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -46,6 +56,7 @@
                             <thead>
                                 <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Shift</th>
+                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Jam Kerja</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Karyawan Bertugas</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
@@ -53,16 +64,19 @@
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
                                 <tr v-if="isLoadingSchedules">
-                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse">Memuat jadwal shift...</td>
+                                    <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse font-medium">Memuat jadwal shift...</td>
                                 </tr>
-                                <tr v-else-if="schedules.length === 0">
-                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC]">Belum ada jadwal shift yang dibuat.</td>
+                                <tr v-else-if="filteredSchedules.length === 0">
+                                    <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada jadwal shift yang sesuai filter.</td>
                                 </tr>
-                                <tr v-else v-for="schedule in schedules" :key="schedule.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                <tr v-else v-for="schedule in filteredSchedules" :key="schedule.id" class="hover:bg-[#F7FAFD] transition-colors">
                                     <td class="px-5 py-3 font-bold text-[#1A2332] text-[13px]">{{ schedule.name }}</td>
+                                    <td class="px-5 py-3 text-[12px] font-medium text-[#1A2332]">
+                                        {{ getOutletName(schedule.outlet_id) }}
+                                    </td>
                                     <td class="px-5 py-3">
                                         <span class="inline-block px-2.5 py-1 bg-[#EBF3FB] text-[#1B4F8A] rounded-lg text-[12px] font-bold font-['JetBrains_Mono'] border border-[#D4E4F4]">
-                                            {{ schedule.start_time.substring(0,5) }} - {{ schedule.end_time.substring(0,5) }}
+                                            {{ (schedule.start_time || '').substring(0,5) }} - {{ (schedule.end_time || '').substring(0,5) }}
                                         </span>
                                     </td>
                                     <td class="px-5 py-3">
@@ -74,8 +88,8 @@
                                         </div>
                                     </td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
-                                        <button @click="openScheduleModal(schedule)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                        <button @click="confirmDeleteSchedule(schedule)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <button @click="openScheduleModal(schedule)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Jadwal"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                        <button @click="confirmDeleteSchedule(schedule)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Jadwal"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -109,9 +123,9 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </div>
-                                <input type="text" v-model="searchQuery" placeholder="Cari nama kasir..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
+                                <input type="text" v-model="searchReportQuery" placeholder="Cari nama kasir..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
                             </div>
-                            <select v-if="outlets.length > 1" v-model="selectedOutlet" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
+                            <select v-if="outlets.length > 1" v-model="selectedReportOutlet" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
                                 <option value="">Semua Outlet</option>
                                 <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                             </select>
@@ -138,10 +152,10 @@
                                 <tr v-if="isLoadingReports">
                                     <td colspan="6" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse font-medium">Memuat data laporan shift...</td>
                                 </tr>
-                                <tr v-else-if="filteredShifts.length === 0">
+                                <tr v-else-if="filteredReports.length === 0">
                                     <td colspan="6" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data audit ditemukan.</td>
                                 </tr>
-                                <tr v-else v-for="shift in paginatedShifts" :key="shift.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                <tr v-else v-for="shift in paginatedReports" :key="shift.id" class="hover:bg-[#F7FAFD] transition-colors">
                                     <td class="px-5 py-3">
                                         <p class="text-[13px] font-bold text-[#1A2332]">{{ shift.user?.name || 'User Terhapus' }}</p>
                                         <p class="text-[11px] text-[#5A7A9A]">{{ shift.outlet?.name || 'Outlet' }}</p>
@@ -305,13 +319,15 @@ const employees = ref([]);
 const schedules = ref([]);
 const isLoadingSchedules = ref(true);
 const scheduleModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-const formSchedule = reactive({ outlet_id: '', name: '', start_time: '', end_time: '', user_ids: [] });
+const formSchedule = reactive({ outlet_id: '', name: '', start_time: '08:00', end_time: '16:00', user_ids: [] });
+const searchScheduleQuery = ref('');
+const selectedScheduleOutlet = ref('');
 
 // --- STATE TAB 2: LAPORAN KASIR ---
 const shifts = ref([]);
 const isLoadingReports = ref(true);
-const searchQuery = ref('');
-const selectedOutlet = ref('');
+const searchReportQuery = ref('');
+const selectedReportOutlet = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedShift = ref(null);
@@ -323,13 +339,17 @@ const formatDateTime = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 };
+const getOutletName = (id) => {
+    const out = outlets.value.find(o => o.id === id);
+    return out ? out.name : 'Outlet Tidak Diketahui';
+};
 
 // --- DATA FETCHING ---
 const fetchInitialData = async () => {
     try {
         const [resOutlets, resUsers] = await Promise.all([
             axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() }),
-            axios.get(`${apiBase}/users`, { headers: authHeaders() }) 
+            axios.get(`${apiBase}/users?limit=1000`, { headers: authHeaders() }) 
         ]);
         outlets.value = resOutlets.data.data?.data || resOutlets.data.data || [];
         
@@ -339,7 +359,7 @@ const fetchInitialData = async () => {
         if (outlets.value.length === 1) {
             formSchedule.outlet_id = outlets.value[0].id;
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Gagal menarik data awal:", e); }
 };
 
 const fetchSchedules = async () => {
@@ -358,7 +378,7 @@ const fetchReports = async () => {
     try {
         const res = await axios.get(`${apiBase}/shift-karyawans`, { headers: authHeaders() });
         shifts.value = res.data.data?.data || res.data.data || res.data || [];
-    } catch (e) { console.error(e); } 
+    } catch (e) { console.error("Gagal menarik laporan kasir:", e); } 
     finally { isLoadingReports.value = false; }
 };
 
@@ -369,12 +389,18 @@ const openScheduleModal = (item = null) => {
         scheduleModal.id = item.id;
         formSchedule.outlet_id = item.outlet_id;
         formSchedule.name = item.name;
-        formSchedule.start_time = item.start_time.substring(0,5);
-        formSchedule.end_time = item.end_time.substring(0,5);
+        formSchedule.start_time = item.start_time ? item.start_time.substring(0,5) : '08:00';
+        formSchedule.end_time = item.end_time ? item.end_time.substring(0,5) : '16:00';
         formSchedule.user_ids = item.users ? item.users.map(u => u.id) : [];
     } else {
         scheduleModal.id = null;
-        formSchedule.name = ''; formSchedule.start_time = '08:00'; formSchedule.end_time = '16:00'; formSchedule.user_ids = [];
+        formSchedule.name = ''; 
+        formSchedule.start_time = '08:00'; 
+        formSchedule.end_time = '16:00'; 
+        formSchedule.user_ids = [];
+        if (outlets.value.length === 1) {
+            formSchedule.outlet_id = outlets.value[0].id;
+        }
     }
     scheduleModal.show = true;
 };
@@ -385,12 +411,23 @@ const submitSchedule = async () => {
         const url = scheduleModal.isEdit ? `${apiBase}/shifts/${scheduleModal.id}` : `${apiBase}/shifts`;
         const method = scheduleModal.isEdit ? 'put' : 'post';
         
-        await axios[method](url, formSchedule, { headers: authHeaders() });
+        const payload = {
+            ...formSchedule,
+            start_time: formSchedule.start_time.substring(0, 5),
+            end_time: formSchedule.end_time.substring(0, 5),
+        };
+        
+        await axios[method](url, payload, { headers: authHeaders() });
         showAlert(`Jadwal Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
         scheduleModal.show = false;
         fetchSchedules();
     } catch (e) {
-        showAlert("Gagal menyimpan jadwal. Pastikan API backend telah berjalan.", "error");
+        let errorMsg = "Gagal menyimpan jadwal. Pastikan field terisi dengan benar.";
+        if (e.response && e.response.data && e.response.data.message) {
+             errorMsg = e.response.data.message; 
+        }
+        showAlert(errorMsg, "error");
+        console.error("Detail Error Submit:", e.response?.data);
     } finally { scheduleModal.isSubmitting = false; }
 };
 
@@ -409,26 +446,37 @@ const executeDelete = async () => {
         if (deleteModal.type === 'schedule') fetchSchedules();
         else fetchReports();
     } catch (e) {
-        showAlert("Gagal menghapus data.", "error");
+        showAlert("Gagal menghapus data. Cek koneksi API.", "error");
+        console.error("Detail Delete Error:", e.response?.data);
     } finally { deleteModal.isDeleting = false; }
 };
 
+// --- COMPUTEDS (TAB 1) ---
+const filteredSchedules = computed(() => {
+    const query = searchScheduleQuery.value.toLowerCase();
+    return schedules.value.filter(s => {
+        const matchName = (s.name || '').toLowerCase().includes(query);
+        const matchOutlet = selectedScheduleOutlet.value === '' || s.outlet_id == selectedScheduleOutlet.value;
+        return matchName && matchOutlet;
+    });
+});
+
 // --- COMPUTEDS (TAB 2) ---
-const filteredShifts = computed(() => {
-    const query = searchQuery.value.toLowerCase();
+const filteredReports = computed(() => {
+    const query = searchReportQuery.value.toLowerCase();
     return shifts.value.filter(s => {
         const matchSearch = (s.user?.name || '').toLowerCase().includes(query);
-        const matchOutlet = selectedOutlet.value === '' || s.outlet_id == selectedOutlet.value;
+        const matchOutlet = selectedReportOutlet.value === '' || s.outlet_id == selectedReportOutlet.value;
         return matchSearch && matchOutlet;
     });
 });
 
 const activeShiftsCount = computed(() => shifts.value.filter(s => s.status === 'active').length);
 const totalDifference = computed(() => shifts.value.reduce((acc, curr) => acc + (parseInt(curr.difference) || 0), 0));
-const totalPages = computed(() => Math.ceil(filteredShifts.value.length / itemsPerPage.value));
-const paginatedShifts = computed(() => {
+const totalPages = computed(() => Math.ceil(filteredReports.value.length / itemsPerPage.value));
+const paginatedReports = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
-    return filteredShifts.value.slice(start, start + itemsPerPage.value);
+    return filteredReports.value.slice(start, start + itemsPerPage.value);
 });
 
 // Fetch data when switching tabs
@@ -439,7 +487,7 @@ watch(activeTab, (newVal) => {
 
 onMounted(async () => {
     await fetchInitialData();
-    fetchSchedules(); // Tab jadwal aktif by default
+    fetchSchedules(); 
 });
 </script>
 
