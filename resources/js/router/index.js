@@ -12,6 +12,7 @@ import OutletSetting from '../pages/outletsetting.vue';
 import PromoManagement from '../pages/promomanagement.vue';
 import TableManagement from '../pages/tablemanagement.vue';
 import TransactionHistory from '../pages/transactionhistory.vue';
+import Shiftmanagement from '../pages/shiftmanagement.vue';
 
 const routes = [
     {
@@ -94,6 +95,7 @@ const routes = [
     },
     { 
         path: '/promotions', 
+        name: 'PromoManagement',
         component: PromoManagement, 
         meta: { 
             requiresAuth: true, 
@@ -103,12 +105,18 @@ const routes = [
     },
     { 
         path: '/tables', 
+        name: 'TableManagement',
         component: TableManagement, 
         meta: { 
             requiresAuth: true, 
             title: 'Manajemen Meja', 
             desc: 'Atur nomor meja dan status ketersediaan' 
         } 
+    },
+    {
+        path: '/shift-management',
+        name: 'ShiftManagement',
+        component: Shiftmanagement
     },
     {
         path: '/transactions',

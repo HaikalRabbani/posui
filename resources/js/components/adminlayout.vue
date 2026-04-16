@@ -130,6 +130,11 @@
                             </svg>
                             <span v-if="!isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Meja</span>
                         </router-link>
+
+                        <router-link v-if="userRole !== 'developer'" to="/shift-management" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group" :class="[$route.path === '/shift-management' ? 'bg-[#EBF3FB] text-[#1B4F8A] shadow-sm font-semibold' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']">
+                            <svg class="w-5 h-5 transition-colors" :class="[$route.path === '/shift-management' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#1B4F8A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span class="text-[14px]">Jadwal & Shift</span>
+                        </router-link>
                     </li>
                 </ul>
             </nav>
