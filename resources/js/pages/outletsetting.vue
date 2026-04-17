@@ -1,17 +1,17 @@
 <template>
     <AdminLayout>
-        <div class="space-y-6 font-['Poppins'] pb-10">
+        <transition name="fade">
+            <div v-if="alert.show" :class="[
+                'fixed top-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 max-w-sm transition-all duration-300',
+                alert.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+            ]">
+                <svg v-if="alert.type === 'success'" class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <svg v-else class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p class="text-[13px] font-medium font-['Poppins']">{{ alert.message }}</p>
+            </div>
+        </transition>
 
-            <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-                <div v-if="alert.show" :class="['p-3 rounded-lg border text-[13px] font-medium flex items-center justify-between gap-2', alert.type === 'error' ? 'bg-red-50 border-[#B83B2A] text-[#B83B2A]' : 'bg-green-50 border-[#2A7A4B] text-[#2A7A4B]' ]">
-                    <div class="flex items-center gap-2">
-                        <svg v-if="alert.type === 'error'" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <svg v-else class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>{{ alert.message }}</span>
-                    </div>
-                    <button @click="alert.show = false" class="focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-                </div>
-            </transition>
+        <div class="space-y-6 font-['Poppins'] pb-10">
 
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
                 
@@ -85,15 +85,23 @@
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
                                     
-                                    <button v-if="currentUserRole !== 'developer'" @click="openMenuManager(outlet)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Katalog Menu Outlet">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                                        Kelola Menu
-                                    </button>
+                                    <template v-if="currentUserRole !== 'developer'">
+                                        <button @click="openTaxManager(outlet)" class="text-[#1B4F8A] hover:text-blue-800 p-1.5 transition-colors mr-2 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Pajak Outlet">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" /></svg>
+                                            Pajak & Biaya
+                                        </button>
+
+                                        <button @click="openMenuManager(outlet)" class="text-[#2A7A4B] hover:text-green-800 p-1.5 transition-colors mr-2 bg-green-50 hover:bg-green-100 border border-green-100 rounded-lg inline-flex items-center gap-1.5 text-[11px] font-bold px-3" title="Kelola Katalog Menu Outlet">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                            Kelola Menu
+                                        </button>
+                                    </template>
 
                                     <button @click="openOutletModal(outlet)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Data Outlet">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                     </button>
-                                    <button @click="confirmDelete(outlet)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Outlet">
+
+                                    <button @click="confirmDelete(outlet, 'outlet')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Outlet">
                                         <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </td>
@@ -151,6 +159,122 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div v-if="taxModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/60 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden border border-[#D4E4F4] flex flex-col max-h-[90vh] animate-[fadeIn_0.2s_ease-out]">
+                
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD] flex-shrink-0">
+                    <div>
+                        <h3 class="text-[18px] font-bold text-[#1A2332] flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#1B4F8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" /></svg>
+                            Pajak & Biaya Tambahan: {{ taxModal.outletName }}
+                        </h3>
+                        <p class="text-[12px] text-[#5A7A9A] mt-0.5">Kelola PPN, Service Charge, atau biaya tambahan lainnya untuk cabang ini.</p>
+                    </div>
+                    <button @click="taxModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] p-1.5 border border-[#D4E4F4] rounded bg-white shadow-sm transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+
+                <div class="overflow-y-auto flex-1 bg-[#F0F4F8] p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
+                    
+                    <div class="w-full lg:w-1/3 flex-shrink-0">
+                        <div class="bg-white border border-[#D4E4F4] rounded-xl p-5 shadow-sm">
+                            <h4 class="text-[14px] font-bold text-[#1A2332] mb-4 border-b border-[#D4E4F4] pb-2">
+                                {{ taxModal.isEdit ? 'Edit Pajak/Biaya' : 'Tambah Baru' }}
+                            </h4>
+                            
+                            <form @submit.prevent="submitTax" class="space-y-4">
+                                <div>
+                                    <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama (Cth: PPN, Service) <span class="text-[#B83B2A]">*</span></label>
+                                    <input type="text" v-model="formTax.name" @input="formErrorsTax.name = false" placeholder="Masukkan nama..." 
+                                        :class="['w-full px-3 py-2 text-[13px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrorsTax.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                                    <span v-if="formErrorsTax.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama wajib diisi.</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Tipe Perhitungan <span class="text-[#B83B2A]">*</span></label>
+                                    <select v-model="formTax.type" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
+                                        <option value="percentage">Persentase (%)</option>
+                                        <option value="fixed">Nominal Tetap (Rp)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Besaran <span class="text-[#B83B2A]">*</span></label>
+                                    <div class="relative">
+                                        <span v-if="formTax.type === 'fixed'" class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">Rp</span>
+                                        <input type="number" step="any" v-model="formTax.rate" @input="formErrorsTax.rate = false" :placeholder="formTax.type === 'percentage' ? '10' : '5000'" 
+                                            :class="['w-full py-2 text-[13px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formTax.type === 'fixed' ? 'pl-9 pr-3' : 'px-3', formErrorsTax.rate ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
+                                        <span v-if="formTax.type === 'percentage'" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-bold text-[13px]">%</span>
+                                    </div>
+                                    <span v-if="formErrorsTax.rate" class="text-[#B83B2A] text-[11px] mt-1 block">Besaran wajib diisi angka.</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Status <span class="text-[#B83B2A]">*</span></label>
+                                    <select v-model="formTax.active" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
+                                        <option :value="true">Aktif (Diterapkan)</option>
+                                        <option :value="false">Nonaktif</option>
+                                    </select>
+                                </div>
+
+                                <div class="pt-2 flex gap-2">
+                                    <button v-if="taxModal.isEdit" type="button" @click="resetTaxForm" class="w-full py-2 text-[13px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
+                                    <button type="submit" :disabled="taxModal.isSubmitting" class="w-full py-2 bg-[#1B4F8A] hover:bg-blue-900 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors">
+                                        {{ taxModal.isSubmitting ? 'Loading...' : (taxModal.isEdit ? 'Simpan' : 'Tambah') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 bg-white border border-[#D4E4F4] rounded-xl overflow-hidden shadow-sm flex flex-col">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-[#F7FAFD]">
+                                <tr class="border-b border-[#D4E4F4]">
+                                    <th class="p-3 pl-5 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama & Tipe</th>
+                                    <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Besaran</th>
+                                    <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
+                                    <th class="p-3 pr-5 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#EBF3FB]">
+                                <tr v-if="taxModal.isLoading">
+                                    <td colspan="4" class="p-6 text-center text-[13px] text-[#8AAFCC] animate-pulse">Menarik data pajak outlet...</td>
+                                </tr>
+                                <tr v-else-if="outletTaxes.length === 0">
+                                    <td colspan="4" class="p-6 text-center text-[13px] text-[#8AAFCC]">Outlet ini belum memiliki pengaturan pajak/biaya tambahan.</td>
+                                </tr>
+                                <tr v-else v-for="tax in outletTaxes" :key="tax.id" class="hover:bg-[#F7FAFD] transition-colors">
+                                    <td class="p-3 pl-5">
+                                        <p class="text-[13px] font-bold text-[#1A2332]">{{ tax.name }}</p>
+                                        <p class="text-[11px] text-[#5A7A9A]">{{ tax.type === 'percentage' ? 'Persentase' : 'Nominal Tetap' }}</p>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="text-[13px] font-semibold text-[#1B4F8A] font-['JetBrains_Mono'] bg-[#EBF3FB] px-2 py-1 rounded border border-[#D4E4F4]">
+                                            {{ tax.type === 'percentage' ? parseFloat(tax.rate) + '%' : 'Rp ' + formatRupiah(tax.rate) }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', tax.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500']">
+                                            {{ tax.active ? 'Aktif' : 'Nonaktif' }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 pr-5 text-right whitespace-nowrap">
+                                        <button @click="editTax(tax)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit">
+                                            <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </button>
+                                        <button @click="confirmDelete(tax, 'tax')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus">
+                                            <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
             </div>
         </div>
 
@@ -253,8 +377,10 @@
                 <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Outlet?</h3>
-                <p class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Semua riwayat dan pengaturan menu cabang ini akan hilang.</p>
+                <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Data?</h3>
+                <p v-if="deleteModal.type === 'outlet'" class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>? Semua riwayat dan pengaturan menu cabang ini akan hilang.</p>
+                <p v-if="deleteModal.type === 'tax'" class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus pajak/biaya <span class="font-semibold text-[#1A2332]">"{{ deleteModal.name }}"</span>?</p>
+                
                 <div class="flex justify-center gap-3">
                     <button @click="deleteModal.show = false" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
                     <button @click="executeDelete" :disabled="deleteModal.isDeleting" class="px-4 py-2 w-full text-[14px] font-semibold text-white bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 rounded-lg transition-colors">
@@ -295,13 +421,19 @@ const formOutlet = reactive({ name: '', address_outlet: '', phone_number_outlet:
 // UX VALIDASI: FORM OUTLET
 const formErrorsOutlet = reactive({ name: false, user_id: false });
 
-const deleteModal = reactive({ show: false, id: null, name: '', isDeleting: false });
+const deleteModal = reactive({ show: false, id: null, name: '', type: 'outlet', isDeleting: false });
 
 // --- STATE MENU MANAGER ---
 const menuModal = reactive({ show: false, outletId: null, outletName: '', isLoading: false, isSaving: false, selectedStations: [] });
 const menuForm = ref([]);
 const masterProducts = ref([]);
 const isAllSelected = ref(false);
+
+// --- STATE TAX MANAGER ---
+const taxModal = reactive({ show: false, outletId: null, outletName: '', isEdit: false, isSubmitting: false, isLoading: false });
+const outletTaxes = ref([]);
+const formTax = reactive({ id: null, name: '', rate: '', type: 'percentage', active: true });
+const formErrorsTax = reactive({ name: false, rate: false });
 
 // --- COMPUTED & UTILS ---
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
@@ -341,7 +473,7 @@ const toggleAllMenus = () => {
     });
 };
 
-// --- API CALLS ---
+// --- API CALLS MAIN ---
 const fetchInitialData = async () => {
     isLoading.value = true;
     try {
@@ -372,11 +504,10 @@ const fetchInitialData = async () => {
 };
 
 const openOutletModal = (item = null) => {
-    // RESET UX MERAH
     formErrorsOutlet.name = false;
     formErrorsOutlet.user_id = false;
-
     outletModal.isEdit = !!item;
+    
     if (item) {
         outletModal.id = item.id;
         formOutlet.name = item.name; 
@@ -394,15 +525,11 @@ const openOutletModal = (item = null) => {
 };
 
 const submitOutlet = async () => {
-    // VALIDASI KOSONG
     formErrorsOutlet.name = !formOutlet.name.trim();
     if (currentUserRole.value === 'developer') {
         formErrorsOutlet.user_id = !formOutlet.user_id;
     }
-
-    if (formErrorsOutlet.name || (currentUserRole.value === 'developer' && formErrorsOutlet.user_id)) {
-        return;
-    }
+    if (formErrorsOutlet.name || (currentUserRole.value === 'developer' && formErrorsOutlet.user_id)) return;
 
     outletModal.isSubmitting = true;
     try {
@@ -422,21 +549,84 @@ const submitOutlet = async () => {
     } finally { outletModal.isSubmitting = false; }
 };
 
-const confirmDelete = (item) => {
-    deleteModal.id = item.id; deleteModal.name = item.name; deleteModal.show = true;
+
+// --- TAX MANAGER LOGIC ---
+const resetTaxForm = () => {
+    formTax.id = null;
+    formTax.name = '';
+    formTax.rate = '';
+    formTax.type = 'percentage';
+    formTax.active = true;
+    formErrorsTax.name = false;
+    formErrorsTax.rate = false;
+    taxModal.isEdit = false;
 };
 
-const executeDelete = async () => {
-    deleteModal.isDeleting = true;
-    try {
-        await axios.delete(`${apiBase}/outlets/${deleteModal.id}`, { headers: authHeaders() });
-        showAlert('Outlet berhasil dihapus!', 'success');
-        deleteModal.show = false;
-        fetchInitialData();
-    } catch (error) {
-        showAlert('Gagal menghapus outlet.', 'error');
-    } finally { deleteModal.isDeleting = false; }
+const openTaxManager = async (outlet) => {
+    taxModal.outletId = outlet.id;
+    taxModal.outletName = outlet.name;
+    taxModal.show = true;
+    resetTaxForm();
+    await fetchTaxesForOutlet(outlet.id);
 };
+
+const fetchTaxesForOutlet = async (outletId) => {
+    taxModal.isLoading = true;
+    try {
+        const res = await axios.get(`${apiBase}/taxes`, { headers: authHeaders() });
+        // Saring secara lokal berdasarkan ID Outlet (karena backend mengambil semua milik manager)
+        outletTaxes.value = res.data.filter(t => t.outlet_id === outletId);
+    } catch (e) {
+        showAlert('Gagal mengambil pengaturan pajak/biaya.', 'error');
+    } finally {
+        taxModal.isLoading = false;
+    }
+};
+
+const editTax = (tax) => {
+    formTax.id = tax.id;
+    formTax.name = tax.name;
+    formTax.rate = parseFloat(tax.rate);
+    formTax.type = tax.type;
+    formTax.active = tax.active;
+    formErrorsTax.name = false;
+    formErrorsTax.rate = false;
+    taxModal.isEdit = true;
+};
+
+const submitTax = async () => {
+    formErrorsTax.name = !formTax.name.trim();
+    formErrorsTax.rate = formTax.rate === '' || isNaN(formTax.rate);
+
+    if (formErrorsTax.name || formErrorsTax.rate) return;
+
+    taxModal.isSubmitting = true;
+    try {
+        const payload = {
+            name: formTax.name,
+            rate: parseFloat(formTax.rate),
+            type: formTax.type,
+            active: formTax.active,
+            outlet_id: taxModal.outletId
+        };
+
+        if (taxModal.isEdit) {
+            await axios.put(`${apiBase}/taxes/${formTax.id}`, payload, { headers: authHeaders() });
+            showAlert('Pajak/Biaya berhasil diperbarui!', 'success');
+        } else {
+            await axios.post(`${apiBase}/taxes`, payload, { headers: authHeaders() });
+            showAlert('Pajak/Biaya berhasil ditambahkan!', 'success');
+        }
+        
+        resetTaxForm();
+        await fetchTaxesForOutlet(taxModal.outletId);
+    } catch (error) {
+        showAlert(error.response?.data?.message || 'Gagal menyimpan pengaturan pajak.', 'error');
+    } finally { 
+        taxModal.isSubmitting = false; 
+    }
+};
+
 
 // --- MENU MANAGER LOGIC ---
 const openMenuManager = async (outlet) => {
@@ -463,7 +653,7 @@ const openMenuManager = async (outlet) => {
                     indexInOriginal: idx, 
                     id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
                     selected: true,
-                    error: false, // TAMBAH STATUS ERROR
+                    error: false,
                     price: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.price),
                     stock: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.stock),
                 };
@@ -488,7 +678,6 @@ const openMenuManager = async (outlet) => {
 };
 
 const saveOutletMenu = async () => {
-    // VALIDASI MERAH DI TABEL MENU
     let hasInvalidData = false;
     menuForm.value.forEach(m => {
         if (m.selected && !m.price.toString().trim()) {
@@ -507,7 +696,6 @@ const saveOutletMenu = async () => {
     menuModal.isSaving = true;
     try {
         const selectedMenus = menuForm.value.filter(m => m.selected);
-
         const payload = {
             products: selectedMenus.map(m => {
                 const pureStock = getRawNumber(m.stock);
@@ -529,6 +717,38 @@ const saveOutletMenu = async () => {
     } finally { menuModal.isSaving = false; }
 };
 
+
+// --- GLOBAL DELETE LOGIC ---
+const confirmDelete = (item, type) => {
+    deleteModal.type = type;
+    deleteModal.id = item.id; 
+    deleteModal.name = item.name; 
+    deleteModal.show = true;
+};
+
+const executeDelete = async () => {
+    deleteModal.isDeleting = true;
+    try {
+        if (deleteModal.type === 'outlet') {
+            await axios.delete(`${apiBase}/outlets/${deleteModal.id}`, { headers: authHeaders() });
+            showAlert('Outlet berhasil dihapus!', 'success');
+            deleteModal.show = false;
+            fetchInitialData();
+        } 
+        else if (deleteModal.type === 'tax') {
+            await axios.delete(`${apiBase}/taxes/${deleteModal.id}`, { headers: authHeaders() });
+            showAlert('Pajak/Biaya berhasil dihapus!', 'success');
+            deleteModal.show = false;
+            // Refresh tabel tax tanpa menutup modal utamanya
+            await fetchTaxesForOutlet(taxModal.outletId);
+        }
+    } catch (error) {
+        showAlert('Gagal menghapus data.', 'error');
+    } finally { 
+        deleteModal.isDeleting = false; 
+    }
+};
+
 onMounted(() => fetchInitialData());
 </script>
 
@@ -539,5 +759,16 @@ onMounted(() => fetchInitialData());
 }
 input[type=checkbox] {
     cursor: pointer;
+}
+
+/* Animasi Fade & Slide Down untuk Alert Float */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

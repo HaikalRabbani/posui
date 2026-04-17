@@ -1,5 +1,16 @@
 <template>
     <AdminLayout>
+        <transition name="fade">
+            <div v-if="customAlert.show" :class="[
+                'fixed top-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 max-w-sm transition-all duration-300',
+                customAlert.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+            ]">
+                <svg v-if="customAlert.type === 'success'" class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <svg v-else class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p class="text-[13px] font-medium font-['Poppins']">{{ customAlert.message }}</p>
+            </div>
+        </transition>
+
         <div class="space-y-6 font-['Poppins'] pb-10">
             
             <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
@@ -182,13 +193,28 @@
                             </ul>
 
                             <div class="mt-4">
-                                <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Alasan Pembatalan / Perubahan <span class="text-red-500">*</span></label>
-                                <textarea v-model="cancelReason" rows="2" placeholder="Contoh: Barang tumpah, pelanggan cancel..." class="w-full px-3 py-2 text-[13px] border border-[#D4E4F4] rounded-lg focus:outline-none focus:border-[#2E7DD6] resize-none"></textarea>
+                                <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">
+                                    Alasan Pembatalan / Perubahan <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="cancelReason" 
+                                    @input="formErrors.cancelReason = false"
+                                    rows="2" 
+                                    placeholder="Contoh: Barang tumpah, pelanggan cancel..." 
+                                    :class="[
+                                        'w-full px-3 py-2 text-[13px] border rounded-lg focus:outline-none resize-none transition-colors duration-200',
+                                        formErrors.cancelReason ? 'border-red-500 bg-red-50 focus:border-red-500' : 'border-[#D4E4F4] focus:border-[#2E7DD6]'
+                                    ]"
+                                ></textarea>
+                                <p v-if="formErrors.cancelReason" class="text-[11px] text-red-500 mt-1 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Alasan pembatalan wajib diisi!
+                                </p>
                             </div>
                             
                             <div class="flex justify-end gap-2 pt-2">
                                 <button @click="cancelEdit" class="px-4 py-2 text-[12px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal Edit</button>
-                                <button @click="saveEdit" :disabled="!cancelReason.trim() || isSaving" class="px-4 py-2 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg transition-colors">
+                                <button @click="saveEdit" :disabled="isSaving" class="px-4 py-2 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg transition-colors">
                                     {{ isSaving ? 'Menyimpan...' : 'Simpan Perubahan' }}
                                 </button>
                             </div>
@@ -226,12 +252,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
+
+// Notification & Form States
+const customAlert = reactive({ show: false, message: '', type: 'success' });
+const formErrors = reactive({ cancelReason: false });
+
+const showAlert = (message, type = 'success') => {
+    customAlert.message = message;
+    customAlert.type = type;
+    customAlert.show = true;
+    setTimeout(() => { customAlert.show = false; }, 3000);
+};
 
 // State
 const transactions = ref([]);
@@ -264,27 +301,25 @@ const fetchTransactions = async () => {
         const params = {
             page: currentPage.value,
             limit: itemsPerPage.value,
-            invoice_number: searchQuery.value, // Disesuaikan dengan penamaan parameter di Controller baru
+            invoice_number: searchQuery.value,
             status: filterStatus.value === 'all' ? '' : filterStatus.value
         };
 
         const response = await axios.get(`${apiBase}/history-transactions`, { headers: authHeaders(), params });
         const respData = response.data;
         
-        // Laravel mereturn langsung paginasi di root JSON
         const dataArray = respData.data || [];
         totalPages.value = respData.last_page || 1;
         totalData.value = respData.total || dataArray.length;
 
-        // Pemetaan (Mapping) sesuai struktur HistoryTransaction.php
         transactions.value = dataArray.map(history => {
             return {
-                id: history.order_id, // Tetap gunakan order_id untuk payload Edit/Void
+                id: history.order_id,
                 history_id: history.id,
                 invoice: history.invoice_number || '-',
-                cashier: history.cashier?.name || 'Kasir', // Diambil langsung dari History
-                table: history.order?.table?.name || null, // Meja tetap di dalam Order
-                outlet: history.outlet?.name || 'Cabang Tidak Diketahui', // NAMA OUTLET SEKARANG MUNCUL
+                cashier: history.cashier?.name || 'Kasir',
+                table: history.order?.table?.name || null,
+                outlet: history.outlet?.name || 'Cabang Tidak Diketahui',
                 status: history.status,
                 date: history.paid_at ? new Date(history.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
                 total_price: history.total_price,
@@ -301,7 +336,7 @@ const fetchTransactions = async () => {
         });
 
     } catch (error) {
-        console.error("Gagal mengambil data riwayat", error);
+        showAlert("Gagal mengambil data riwayat transaksi.", "error");
     } finally {
         isLoading.value = false;
     }
@@ -321,21 +356,29 @@ const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage
 
 // Modal Logic
 const openDetail = (tx) => { selectedTx.value = tx; isEditMode.value = false; };
-const closeDetail = () => { selectedTx.value = null; isEditMode.value = false; };
+const closeDetail = () => { selectedTx.value = null; isEditMode.value = false; formErrors.cancelReason = false; };
 
 const enableEditMode = () => {
     isEditMode.value = true; 
     cancelReason.value = '';
+    formErrors.cancelReason = false;
     editData.value.items = selectedTx.value.items.map(item => ({
         ...item, original_qty: item.qty, qty: item.qty - (item.cancelled_qty || 0)
     }));
 };
-const cancelEdit = () => { isEditMode.value = false; };
+const cancelEdit = () => { isEditMode.value = false; formErrors.cancelReason = false; };
 const increaseQty = (index) => { if (editData.value.items[index].qty < editData.value.items[index].original_qty) editData.value.items[index].qty++; };
 const decreaseQty = (index) => { if (editData.value.items[index].qty > 0) editData.value.items[index].qty--; };
 
 // SIMPAN KE BACKEND API
 const saveEdit = async () => {
+    // Validasi Form Kosong
+    if (!cancelReason.value.trim()) {
+        formErrors.cancelReason = true;
+        showAlert("Alasan pembatalan atau perubahan wajib diisi!", "error");
+        return;
+    }
+
     isSaving.value = true;
     const payload = {
         reason: cancelReason.value,
@@ -355,7 +398,7 @@ const saveEdit = async () => {
     });
 
     if (payload.items.length === 0) {
-        alert("Tidak ada perubahan kuantitas item.");
+        showAlert("Tidak ada perubahan kuantitas item.", "error");
         isSaving.value = false;
         return;
     }
@@ -365,13 +408,13 @@ const saveEdit = async () => {
             headers: authHeaders()
         });
 
-        alert("Pesanan berhasil diubah!");
+        showAlert("Pesanan berhasil diubah!", "success");
         isEditMode.value = false;
         closeDetail();
-        fetchTransactions(); // Reload data dari DB untuk tampilan terbaru
+        fetchTransactions();
 
     } catch (error) {
-        alert(error.response?.data?.message || "Gagal menyimpan perubahan ke server");
+        showAlert(error.response?.data?.message || "Gagal menyimpan perubahan ke server", "error");
     } finally {
         isSaving.value = false;
     }
@@ -407,3 +450,15 @@ const printReceipt = () => {
 
 onMounted(() => fetchTransactions());
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
