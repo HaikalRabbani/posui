@@ -70,11 +70,17 @@
                             <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Pendapatan Bersih</p>
                             <h3 class="text-[22px] font-black text-[#1B4F8A] font-['JetBrains_Mono'] relative z-10">Rp {{ formatRupiah(analyticsData.summary.revenue) }}</h3>
+                            <p v-if="analyticsData.summary.revenue_growth !== null" class="text-[10px] mt-1 relative z-10 font-bold" :class="analyticsData.summary.revenue_growth >= 0 ? 'text-green-600' : 'text-red-500'">
+                                {{ analyticsData.summary.revenue_growth >= 0 ? '+' : '' }}{{ analyticsData.summary.revenue_growth }}% dari periode lalu
+                            </p>
                         </div>
                         <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
                             <div class="absolute right-0 top-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Jumlah Transaksi</p>
                             <h3 class="text-[22px] font-black text-[#2A7A4B] font-['JetBrains_Mono'] relative z-10">{{ formatRupiah(analyticsData.summary.transactions) }}</h3>
+                            <p v-if="analyticsData.summary.trx_growth !== null" class="text-[10px] mt-1 relative z-10 font-bold" :class="analyticsData.summary.trx_growth >= 0 ? 'text-green-600' : 'text-red-500'">
+                                {{ analyticsData.summary.trx_growth >= 0 ? '+' : '' }}{{ analyticsData.summary.trx_growth }}% dari periode lalu
+                            </p>
                         </div>
                         <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
                             <div class="absolute right-0 top-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
@@ -91,7 +97,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col">
                             <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
-                                <h3 class="text-[14px] font-bold text-[#1A2332]">Tren Pendapatan</h3>
+                                <h3 class="text-[14px] font-bold text-[#1A2332]">Tren Pendapatan Harian</h3>
                             </div>
                             <div class="p-6 flex-1 flex flex-col h-64">
                                 <div v-if="analyticsData.revenue_chart.length === 0" class="flex-1 flex items-center justify-center text-[13px] text-[#8AAFCC]">Tidak ada data.</div>
@@ -100,7 +106,7 @@
                                         <div class="border-b border-dashed border-[#D4E4F4] w-full h-0" v-for="i in 4" :key="i"></div>
                                     </div>
                                     <div v-for="(day, idx) in analyticsData.revenue_chart" :key="idx" class="relative flex-1 flex flex-col items-center justify-end h-full group z-10">
-                                        <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[10px] py-1 px-2 rounded whitespace-nowrap pointer-events-none font-['JetBrains_Mono']">
+                                        <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[10px] py-1 px-2 rounded whitespace-nowrap pointer-events-none font-['JetBrains_Mono'] z-50">
                                             Rp {{ formatRupiah(day.revenue) }}
                                         </div>
                                         <div class="w-full max-w-[30px] bg-gradient-to-t from-[#2E7DD6] to-[#60A5FA] rounded-t-sm transition-all duration-500 ease-out" 
@@ -114,7 +120,7 @@
                             <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
                                 <h3 class="text-[14px] font-bold text-[#1A2332]">Metode Pembayaran</h3>
                             </div>
-                            <div class="p-5 flex-1 overflow-y-auto">
+                            <div class="p-5 flex-1 overflow-y-auto max-h-[300px]">
                                 <div v-if="analyticsData.payment_methods.length === 0" class="py-10 flex items-center justify-center text-[13px] text-[#8AAFCC]">Belum ada transaksi.</div>
                                 <div v-else class="space-y-4">
                                     <div v-for="(pm, idx) in analyticsData.payment_methods" :key="idx" class="flex items-center justify-between bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
@@ -126,7 +132,7 @@
                                         </div>
                                         <div class="text-right">
                                             <p class="text-[14px] font-bold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(pm.total) }}</p>
-                                            <p class="text-[10px] text-[#5A7A9A]">{{ pm.count }} Transaksi</p>
+                                            <p class="text-[10px] text-[#5A7A9A]">{{ pm.count }} Transaksi ({{ pm.percentage }}%)</p>
                                         </div>
                                     </div>
                                 </div>
@@ -190,12 +196,13 @@
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase">Nama Produk</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase">Kategori</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Qty Terjual</th>
+                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Harga Rata-rata</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Total Pendapatan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
                                 <tr v-if="analyticsData.top_products.length === 0">
-                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC]">Belum ada produk yang terjual.</td>
+                                    <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC]">Belum ada produk yang terjual.</td>
                                 </tr>
                                 <tr v-else v-for="(prod, idx) in analyticsData.top_products" :key="idx" class="hover:bg-[#F7FAFD]">
                                     <td class="px-5 py-3 text-[13px] font-bold text-[#1A2332]">
@@ -203,9 +210,10 @@
                                         <div v-if="idx < 3" class="inline-block ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-700 text-[9px] rounded font-bold uppercase">Top {{ idx+1 }}</div>
                                     </td>
                                     <td class="px-5 py-3 text-[12px] font-medium text-[#5A7A9A]">
-                                        <span class="bg-[#F0F4F8] border border-[#D4E4F4] px-2 py-1 rounded-md">{{ prod.category || 'Lainnya' }}</span>
+                                        <span class="bg-[#F0F4F8] border border-[#D4E4F4] px-2 py-1 rounded-md">{{ prod.category }}</span>
                                     </td>
                                     <td class="px-5 py-3 text-[13px] font-bold text-[#2A7A4B] font-['JetBrains_Mono'] text-right">{{ prod.sold }} x</td>
+                                    <td class="px-5 py-3 text-[13px] text-[#5A7A9A] font-['JetBrains_Mono'] text-right">Rp {{ formatRupiah(prod.avg_price) }}</td>
                                     <td class="px-5 py-3 text-[13px] font-semibold text-[#1B4F8A] font-['JetBrains_Mono'] text-right">Rp {{ formatRupiah(prod.revenue) }}</td>
                                 </tr>
                             </tbody>
@@ -299,7 +307,7 @@ const filters = reactive({
 
 // Data Structure (Expanded for Full Reports)
 const analyticsData = reactive({
-    summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0 },
+    summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0, revenue_growth: 0, trx_growth: 0 },
     revenue_chart: [], 
     sales_report: [], // Detailed Table Data
     top_products: [], // Product Table Data
@@ -321,10 +329,6 @@ const maxRevenueChart = computed(() => {
 
 // Utility
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
-const formatShortDate = (dateString) => {
-    const d = new Date(dateString);
-    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-};
 const formatLongDate = (dateString) => {
     const d = new Date(dateString);
     return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -351,7 +355,7 @@ const fetchAnalytics = async () => {
         const res = await axios.get(`${apiBase}/reports`, { headers: authHeaders(), params });
         const data = res.data;
 
-        analyticsData.summary = data.summary || { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0 };
+        analyticsData.summary = data.summary || { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0, revenue_growth: 0, trx_growth: 0 };
         analyticsData.revenue_chart = data.revenue_chart || [];
         analyticsData.sales_report = data.sales_report || [];
         analyticsData.top_products = data.top_products || [];
@@ -375,7 +379,7 @@ const exportData = async (format) => {
             end_date: filters.end_date,
             outlet_id: filters.outlet_id,
             format: format,
-            report_type: activeTab.value // Kirim info tab apa yang sedang dibuka
+            report_type: activeTab.value 
         }).toString();
         
         window.open(`${apiBase}/reports/export?${params}&token=${localStorage.getItem('auth_token')}`, '_blank');
