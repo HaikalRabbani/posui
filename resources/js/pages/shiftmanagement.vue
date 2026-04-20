@@ -50,7 +50,7 @@
                                 </div>
                                 <input type="text" v-model="searchScheduleQuery" placeholder="Cari nama shift..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
                             </div>
-                            <select v-if="outlets.length > 1" v-model="selectedScheduleOutlet" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
+                            <select v-model="selectedScheduleOutlet" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6] min-w-[150px]">
                                 <option value="">Semua Outlet</option>
                                 <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                             </select>
@@ -108,7 +108,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white border border-[#D4E4F4] p-5 rounded-xl shadow-sm">
                         <p class="text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Total Laporan</p>
-                        <h3 class="text-[24px] font-bold text-[#1A2332] font-['JetBrains_Mono']">{{ shifts.length }}</h3>
+                        <h3 class="text-[24px] font-bold text-[#1A2332] font-['JetBrains_Mono']">{{ filteredReports.length }}</h3>
                     </div>
                     <div class="bg-white border border-[#D4E4F4] p-5 rounded-xl shadow-sm">
                         <p class="text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Shift Aktif Berjalan</p>
@@ -131,7 +131,7 @@
                                 </div>
                                 <input type="text" v-model="searchReportQuery" placeholder="Cari nama kasir..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors">
                             </div>
-                            <select v-if="outlets.length > 1" v-model="selectedReportOutlet" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
+                            <select v-model="selectedReportOutlet" @change="currentPage = 1" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6] min-w-[150px]">
                                 <option value="">Semua Outlet</option>
                                 <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
                             </select>
@@ -406,6 +406,8 @@ const fetchInitialData = async () => {
         
         if (outlets.value.length === 1) {
             formSchedule.outlet_id = outlets.value[0].id;
+            selectedScheduleOutlet.value = outlets.value[0].id;
+            selectedReportOutlet.value = outlets.value[0].id;
         }
     } catch (e) { console.error("Gagal menarik data awal:", e); }
 };
@@ -545,6 +547,7 @@ const filteredSchedules = computed(() => {
 });
 
 // --- COMPUTEDS (TAB 2) ---
+// Memisahkan filter agar Statiska menggunakan data yang sudah ter-filter Outlet
 const filteredReports = computed(() => {
     const query = searchReportQuery.value.toLowerCase();
     return shifts.value.filter(s => {
@@ -554,8 +557,10 @@ const filteredReports = computed(() => {
     });
 });
 
-const activeShiftsCount = computed(() => shifts.value.filter(s => s.status === 'active').length);
-const totalDifference = computed(() => shifts.value.reduce((acc, curr) => acc + (parseInt(curr.difference) || 0), 0));
+// PERBAIKAN STATS: Semua Stats sekarang menggunakan filteredReports bukan shifts mentah
+const activeShiftsCount = computed(() => filteredReports.value.filter(s => s.status === 'active').length);
+const totalDifference = computed(() => filteredReports.value.reduce((acc, curr) => acc + (parseInt(curr.difference) || 0), 0));
+
 const totalPages = computed(() => Math.ceil(filteredReports.value.length / itemsPerPage.value));
 const paginatedReports = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
