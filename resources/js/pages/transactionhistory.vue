@@ -55,7 +55,7 @@
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">No. Invoice</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Waktu Pesanan</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Meja / Tipe</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Meja / Kasir</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Total Tagihan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
@@ -241,9 +241,26 @@
                         </div>
                     </div>
 
-                    <div v-if="!isEditMode" class="border-t border-dashed border-[#8AAFCC] pt-3 flex justify-between items-center">
-                        <p class="text-[14px] font-bold text-[#1A2332]">Total Tagihan Akhir</p>
-                        <p class="text-[18px] font-bold text-[#2A7A4B] font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedTx.total_price) }}</p>
+                    <div v-if="!isEditMode" class="mt-4">
+                        <div class="border-t border-[#D4E4F4] pt-3 space-y-2 mb-3">
+                            <div class="flex justify-between items-center text-[13px] text-[#5A7A9A]">
+                                <p>Subtotal</p>
+                                <p class="font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedTx.subtotal_price) }}</p>
+                            </div>
+                            <div v-if="selectedTx.discount_amount > 0" class="flex justify-between items-center text-[13px] text-[#B83B2A]">
+                                <p>Diskon</p>
+                                <p class="font-['JetBrains_Mono']">- Rp {{ formatRupiah(selectedTx.discount_amount) }}</p>
+                            </div>
+                            <div v-if="selectedTx.tax_amount > 0" class="flex justify-between items-center text-[13px] text-[#5A7A9A]">
+                                <p>Pajak</p>
+                                <p class="font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedTx.tax_amount) }}</p>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-dashed border-[#8AAFCC] pt-3 flex justify-between items-center">
+                            <p class="text-[14px] font-bold text-[#1A2332]">Total Tagihan Akhir</p>
+                            <p class="text-[18px] font-bold text-[#2A7A4B] font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedTx.total_price) }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -318,7 +335,13 @@ const fetchTransactions = async () => {
                 outlet: history.outlet?.name || 'Cabang Tidak Diketahui',
                 status: history.status,
                 date: history.paid_at ? new Date(history.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
-                total_price: history.total_price, // Nilai asli dari backend
+                
+                // DATA HARGA BARU DIPETAKAN DISINI
+                subtotal_price: history.subtotal_price || 0,
+                discount_amount: history.discount_amount || 0,
+                tax_amount: history.tax_amount || 0,
+                total_price: history.total_price || 0,
+                
                 payment_method: history.payment_method || 'Tunai',
                 items: history.order?.items ? history.order.items.map(item => ({
                     id: item.id,
@@ -415,12 +438,14 @@ const saveEdit = async () => {
     }
 };
 
-// Cetak Struk (Menggunakan total tagihan asli)
+// Cetak Struk
 const printReceipt = () => {
     if (!selectedTx.value) return;
     const tx = selectedTx.value;
     const total = tx.total_price; 
     let itemsHtml = '';
+    
+    // Rincian Item
     tx.items.forEach(item => {
         const validQty = item.qty - (item.cancelled_qty || 0);
         if (validQty > 0) {
@@ -430,6 +455,15 @@ const printReceipt = () => {
         }
     });
 
+    // Rincian Tagihan (Subtotal, Diskon, Pajak)
+    let summaryHtml = `<div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;"><span>Subtotal</span><span>Rp ${formatRupiah(tx.subtotal_price)}</span></div>`;
+    if (tx.discount_amount > 0) {
+        summaryHtml += `<div style="display: flex; justify-content: space-between; font-size: 12px;"><span>Diskon</span><span>- Rp ${formatRupiah(tx.discount_amount)}</span></div>`;
+    }
+    if (tx.tax_amount > 0) {
+        summaryHtml += `<div style="display: flex; justify-content: space-between; font-size: 12px;"><span>Pajak</span><span>Rp ${formatRupiah(tx.tax_amount)}</span></div>`;
+    }
+
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     printWindow.document.write(`
         <html><head><title>Struk - ${tx.invoice}</title>
@@ -437,6 +471,7 @@ const printReceipt = () => {
         </head><body><h2 style="text-align:center; margin:0;">POS F&B</h2><div class="line"></div>
         <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
         ${itemsHtml}<div class="line"></div>
+        ${summaryHtml}<div class="line"></div>
         <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL AKHIR</span><span>Rp ${formatRupiah(total)}</span></div>
         <script>window.onload = () => { window.print(); window.close(); }<\/script></body></html>
     `);
