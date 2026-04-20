@@ -60,43 +60,12 @@
             </div>
 
             <div v-else class="space-y-6 pt-2">
-                <div class="bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl shadow-sm p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] rounded-lg px-3 py-1.5">
-                            <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <input type="date" v-model="filters.start_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
-                            <span class="text-[12px] text-[#8AAFCC] font-bold">-</span>
-                            <input type="date" v-model="filters.end_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
-                        </div>
-
-                        <select v-if="userRole !== 'karyawan'" v-model="filters.outlet_id" @change="fetchAnalytics" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6] font-medium min-w-[150px]">
-                            <option value="">Semua Cabang</option>
-                            <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
-                        </select>
-                    </div>
-
-                    <div class="relative">
-                        <button @click="showExportMenu = !showExportMenu" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            Ekspor Data
-                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </button>
-                        
-                        <transition name="fade">
-                            <div v-if="showExportMenu" class="absolute right-0 mt-2 w-32 bg-white border border-[#D4E4F4] rounded-xl shadow-lg py-2 z-50 overflow-hidden">
-                                <button @click="exportData('pdf')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#EBF3FB] hover:text-[#1B4F8A] transition-colors border-b border-[#D4E4F4]">PDF</button>
-                                <button @click="exportData('excel')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#EBF3FB] hover:text-[#1B4F8A] transition-colors border-b border-[#D4E4F4]">Excel</button>
-                                <button @click="exportData('csv')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#EBF3FB] hover:text-[#1B4F8A] transition-colors">CSV</button>
-                            </div>
-                        </transition>
-                    </div>
-                </div>
-
+                
                 <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
                     <div class="w-8 h-8 border-4 border-[#D4E4F4] border-t-[#2E7DD6] rounded-full animate-spin mb-4"></div>
                     <p class="text-[13px] font-medium text-[#8AAFCC] animate-pulse">Menarik data analitik...</p>
                 </div>
-
+                
                 <div v-else class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm">
@@ -116,7 +85,23 @@
                             <h3 class="text-[24px] font-black text-[#1A2332] font-['JetBrains_Mono']">{{ formatRupiah(analyticsData.summary.items_sold) }}</h3>
                         </div>
                     </div>
-
+                    
+                    <div class="bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl shadow-sm p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                            <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] rounded-lg px-3 py-1.5">
+                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <input type="date" v-model="filters.start_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
+                                <span class="text-[12px] text-[#8AAFCC] font-bold">-</span>
+                                <input type="date" v-model="filters.end_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
+                            </div>
+    
+                            <select v-if="userRole !== 'karyawan'" v-model="filters.outlet_id" @change="fetchAnalytics" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6] font-medium min-w-[150px]">
+                                <option value="">Semua Cabang</option>
+                                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
                         <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm col-span-1 lg:col-span-2 flex flex-col">

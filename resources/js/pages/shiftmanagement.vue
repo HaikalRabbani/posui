@@ -31,10 +31,16 @@
                                 <h3 class="text-[15px] font-bold text-[#1A2332]">Jadwal Shift Master</h3>
                                 <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur jam kerja dan ploting karyawan yang bertugas.</p>
                             </div>
-                            <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                Tambah Jadwal
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button @click="openAutoGenerateModal()" class="px-4 py-2 bg-[#EBF3FB] border border-[#D4E4F4] hover:bg-[#D4E4F4] text-[#1B4F8A] text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                    Auto Generate
+                                </button>
+                                <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                    Tambah Jadwal
+                                </button>
+                            </div>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-[#D4E4F4]">
@@ -158,7 +164,10 @@
                                 <tr v-else v-for="shift in paginatedReports" :key="shift.id" class="hover:bg-[#F7FAFD] transition-colors">
                                     <td class="px-5 py-3">
                                         <p class="text-[13px] font-bold text-[#1A2332]">{{ shift.user?.name || 'User Terhapus' }}</p>
-                                        <p class="text-[11px] text-[#5A7A9A]">{{ shift.outlet?.name || 'Outlet' }}</p>
+                                        <p class="text-[11px] text-[#5A7A9A] mt-0.5">
+                                            <span class="font-bold text-[#2E7DD6]">{{ shift.shift?.name || 'Tanpa Jadwal' }}</span> 
+                                            • {{ shift.outlet?.name || 'Outlet' }}
+                                        </p>
                                     </td>
                                     <td class="px-5 py-3">
                                         <p class="text-[12px] text-[#1A2332]">{{ formatDateTime(shift.started_at) }}</p>
@@ -246,6 +255,34 @@
             </div>
         </div>
 
+        <div v-if="autoGenModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-[#D4E4F4]">
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                    <h3 class="text-[16px] font-bold text-[#1A2332]">Auto-Generate Jadwal</h3>
+                    <button @click="autoGenModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 text-[#C4860A] p-3 rounded-lg flex items-start gap-3">
+                        <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <p class="text-[12px] font-medium leading-relaxed">Peringatan: Melakukan auto-generate akan mereset jadwal shift karyawan yang sudah ada di outlet ini, dan membaginya ulang secara rata.</p>
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Pilih Outlet</label>
+                        <select v-model="autoGenModal.outlet_id" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                            <option value="" disabled>Pilih Outlet...</option>
+                            <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="px-6 py-4 flex justify-end gap-2 border-t border-[#D4E4F4] bg-[#F7FAFD]">
+                    <button @click="autoGenModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
+                    <button @click="executeAutoGenerate" :disabled="autoGenModal.isGenerating || !autoGenModal.outlet_id" class="px-4 py-2 bg-[#1B4F8A] hover:bg-[#1A2332] disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors">
+                        {{ autoGenModal.isGenerating ? 'Memproses...' : 'Generate Sekarang' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div v-if="selectedShift" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-[#D4E4F4]">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
@@ -254,9 +291,17 @@
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-y-2 text-[13px]">
-                        <span class="text-[#5A7A9A]">Nama Kasir</span><span class="text-[#1A2332] font-bold text-right">{{ selectedShift.user?.name }}</span>
-                        <span class="text-[#5A7A9A]">Mulai Shift</span><span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ formatDateTime(selectedShift.started_at) }}</span>
-                        <span class="text-[#5A7A9A]">Selesai Shift</span><span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ selectedShift.ended_at ? formatDateTime(selectedShift.ended_at) : 'Masih Aktif' }}</span>
+                        <span class="text-[#5A7A9A]">Nama Kasir</span>
+                        <span class="text-[#1A2332] font-bold text-right">{{ selectedShift.user?.name }}</span>
+                        
+                        <span class="text-[#5A7A9A]">Jadwal Shift</span>
+                        <span class="text-[#1B4F8A] font-bold text-right">{{ selectedShift.shift?.name || 'Tanpa Jadwal' }}</span>
+                        
+                        <span class="text-[#5A7A9A]">Mulai Kerja</span>
+                        <span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ formatDateTime(selectedShift.started_at) }}</span>
+                        
+                        <span class="text-[#5A7A9A]">Selesai Kerja</span>
+                        <span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ selectedShift.ended_at ? formatDateTime(selectedShift.ended_at) : 'Masih Aktif' }}</span>
                     </div>
                     <div class="p-4 bg-[#F7FAFD] rounded-lg border border-[#D4E4F4] space-y-2 font-['JetBrains_Mono'] text-[13px]">
                         <div class="flex justify-between text-[#5A7A9A]"><span>Modal Awal</span><span>Rp {{ formatRupiah(selectedShift.opening_balance) }}</span></div>
@@ -322,6 +367,9 @@ const scheduleModal = reactive({ show: false, isEdit: false, id: null, isSubmitt
 const formSchedule = reactive({ outlet_id: '', name: '', start_time: '08:00', end_time: '16:00', user_ids: [] });
 const searchScheduleQuery = ref('');
 const selectedScheduleOutlet = ref('');
+
+// Auto-Generate State
+const autoGenModal = reactive({ show: false, outlet_id: '', isGenerating: false });
 
 // --- STATE TAB 2: LAPORAN KASIR ---
 const shifts = ref([]);
@@ -422,6 +470,7 @@ const submitSchedule = async () => {
         scheduleModal.show = false;
         fetchSchedules();
     } catch (e) {
+        // Tangkap pesan Error (Termasuk error double shift yang kita set dari controller Backend)
         let errorMsg = "Gagal menyimpan jadwal. Pastikan field terisi dengan benar.";
         if (e.response && e.response.data && e.response.data.message) {
              errorMsg = e.response.data.message; 
@@ -429,6 +478,40 @@ const submitSchedule = async () => {
         showAlert(errorMsg, "error");
         console.error("Detail Error Submit:", e.response?.data);
     } finally { scheduleModal.isSubmitting = false; }
+};
+
+// --- AUTO GENERATE LOGIC ---
+const openAutoGenerateModal = () => {
+    if (outlets.value.length === 1) {
+        autoGenModal.outlet_id = outlets.value[0].id;
+    } else {
+        autoGenModal.outlet_id = '';
+    }
+    autoGenModal.show = true;
+};
+
+const executeAutoGenerate = async () => {
+    if (!autoGenModal.outlet_id) return;
+    
+    autoGenModal.isGenerating = true;
+    try {
+        const res = await axios.post(`${apiBase}/shifts/auto-generate`, {
+            outlet_id: autoGenModal.outlet_id
+        }, { headers: authHeaders() });
+        
+        showAlert(res.data.message || 'Jadwal berhasil digenerate otomatis secara merata.', 'success');
+        autoGenModal.show = false;
+        fetchSchedules(); // Refresh tabel jadwal
+    } catch (e) {
+        let errorMsg = "Gagal men-generate jadwal otomatis.";
+        if (e.response && e.response.data && e.response.data.message) {
+             errorMsg = e.response.data.message; 
+        }
+        showAlert(errorMsg, "error");
+        console.error("Detail Auto-Generate Error:", e.response?.data);
+    } finally {
+        autoGenModal.isGenerating = false;
+    }
 };
 
 // --- DELETE LOGIC ---
