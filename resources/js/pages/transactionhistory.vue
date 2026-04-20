@@ -56,7 +56,7 @@
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Waktu Pesanan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Meja / Tipe</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Total Harga</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Total Tagihan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
@@ -80,7 +80,7 @@
                                     <span v-else class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-bold">Takeaway</span>
                                     <p class="text-[11px] text-[#8AAFCC] mt-0.5">Kasir: {{ tx.cashier }}</p>
                                 </td>
-                                <td class="px-5 py-3 text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(calculateTotal(tx)) }}</td>
+                                <td class="px-5 py-3 text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(tx.total_price) }}</td>
                                 <td class="px-5 py-3 text-[13px]">
                                     <span :class="[
                                         'px-2.5 py-1 text-[11px] font-bold rounded-full border uppercase tracking-wider',
@@ -242,8 +242,8 @@
                     </div>
 
                     <div v-if="!isEditMode" class="border-t border-dashed border-[#8AAFCC] pt-3 flex justify-between items-center">
-                        <p class="text-[14px] font-bold text-[#1A2332]">Total Tagihan</p>
-                        <p class="text-[18px] font-bold text-[#2A7A4B] font-['JetBrains_Mono']">Rp {{ formatRupiah(calculateTotal(selectedTx)) }}</p>
+                        <p class="text-[14px] font-bold text-[#1A2332]">Total Tagihan Akhir</p>
+                        <p class="text-[18px] font-bold text-[#2A7A4B] font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedTx.total_price) }}</p>
                     </div>
                 </div>
             </div>
@@ -289,10 +289,6 @@ let searchTimeout = null;
 
 // Utilities
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
-const calculateTotal = (tx) => {
-    if (!tx || !tx.items) return 0;
-    return tx.items.reduce((sum, item) => sum + ((item.qty - (item.cancelled_qty || 0)) * item.price), 0);
-};
 
 // API Fetching
 const fetchTransactions = async () => {
@@ -322,7 +318,7 @@ const fetchTransactions = async () => {
                 outlet: history.outlet?.name || 'Cabang Tidak Diketahui',
                 status: history.status,
                 date: history.paid_at ? new Date(history.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
-                total_price: history.total_price,
+                total_price: history.total_price, // Nilai asli dari backend
                 payment_method: history.payment_method || 'Tunai',
                 items: history.order?.items ? history.order.items.map(item => ({
                     id: item.id,
@@ -372,7 +368,6 @@ const decreaseQty = (index) => { if (editData.value.items[index].qty > 0) editDa
 
 // SIMPAN KE BACKEND API
 const saveEdit = async () => {
-    // Validasi Form Kosong
     if (!cancelReason.value.trim()) {
         formErrors.cancelReason = true;
         showAlert("Alasan pembatalan atau perubahan wajib diisi!", "error");
@@ -420,11 +415,11 @@ const saveEdit = async () => {
     }
 };
 
-// Cetak Struk
+// Cetak Struk (Menggunakan total tagihan asli)
 const printReceipt = () => {
     if (!selectedTx.value) return;
     const tx = selectedTx.value;
-    const total = calculateTotal(tx);
+    const total = tx.total_price; 
     let itemsHtml = '';
     tx.items.forEach(item => {
         const validQty = item.qty - (item.cancelled_qty || 0);
@@ -442,7 +437,7 @@ const printReceipt = () => {
         </head><body><h2 style="text-align:center; margin:0;">POS F&B</h2><div class="line"></div>
         <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
         ${itemsHtml}<div class="line"></div>
-        <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL</span><span>Rp ${formatRupiah(total)}</span></div>
+        <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL AKHIR</span><span>Rp ${formatRupiah(total)}</span></div>
         <script>window.onload = () => { window.print(); window.close(); }<\/script></body></html>
     `);
     printWindow.document.close();

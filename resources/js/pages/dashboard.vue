@@ -1,335 +1,332 @@
 <template>
     <AdminLayout>
+        <transition name="fade">
+            <div v-if="alert.show" :class="[
+                'fixed top-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 max-w-sm transition-all duration-300',
+                alert.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
+            ]">
+                <svg v-if="alert.type === 'success'" class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <svg v-else class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p class="text-[13px] font-medium font-['Poppins']">{{ alert.message }}</p>
+            </div>
+        </transition>
+
         <div class="space-y-6 font-['Poppins'] pb-10">
+            
+            <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative z-10">
+                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <div class="flex items-center gap-2 bg-[#F7FAFD] border border-[#D4E4F4] rounded-lg px-3 py-1.5">
+                        <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <input type="date" v-model="filters.start_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
+                        <span class="text-[12px] text-[#8AAFCC] font-bold">-</span>
+                        <input type="date" v-model="filters.end_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
+                    </div>
 
-            <div v-if="isLoadingRole" class="flex justify-center items-center py-20">
-                <span class="text-[#8AAFCC] text-[14px] animate-pulse font-medium">Memuat data dashboard...</span>
+                    <select v-if="userRole !== 'karyawan'" v-model="filters.outlet_id" @change="fetchAnalytics" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6] font-medium min-w-[150px]">
+                        <option value="">Semua Cabang</option>
+                        <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                    </select>
+                </div>
+
+                <div class="relative">
+                    <button @click="showExportMenu = !showExportMenu" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Ekspor Laporan
+                        <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    
+                    <transition name="fade">
+                        <div v-if="showExportMenu" class="absolute right-0 mt-2 w-40 bg-white border border-[#D4E4F4] rounded-xl shadow-lg py-2 z-50">
+                            <button @click="exportData('pdf')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#F0F4F8] hover:text-[#1B4F8A] transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                Format PDF
+                            </button>
+                            <button @click="exportData('excel')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#F0F4F8] hover:text-[#1B4F8A] transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                Format Excel
+                            </button>
+                            <button @click="exportData('csv')" class="w-full text-left px-4 py-2 text-[13px] text-[#1A2332] hover:bg-[#F0F4F8] hover:text-[#1B4F8A] transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                Format CSV
+                            </button>
+                        </div>
+                    </transition>
+                </div>
             </div>
 
-            <div v-else-if="userRole === 'developer'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-[fadeIn_0.5s_ease-out]">
-                <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-[#EBF3FB] text-[#1B4F8A] flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-medium text-[#5A7A9A] uppercase tracking-wider mb-1">Total Outlet Terdaftar</p>
-                        <p class="text-[22px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ devStats.total_outlets }}</p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-green-50 text-[#2A7A4B] flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-medium text-[#5A7A9A] uppercase tracking-wider mb-1">Total Manager / Owner</p>
-                        <p class="text-[22px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ devStats.total_managers }}</p>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-medium text-[#5A7A9A] uppercase tracking-wider mb-1">Total Kasir Aktif</p>
-                        <p class="text-[22px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ devStats.total_karyawan }}</p>
-                    </div>
-                </div>
+            <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
+                <div class="w-8 h-8 border-4 border-[#D4E4F4] border-t-[#2E7DD6] rounded-full animate-spin mb-4"></div>
+                <p class="text-[13px] font-medium text-[#8AAFCC] animate-pulse">Menarik data analitik dari server...</p>
             </div>
 
-            <div v-else class="space-y-6 animate-[fadeIn_0.5s_ease-out]">
+            <div v-else class="space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#EBF3FB] flex items-center justify-center text-[#1B4F8A]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Total Pendapatan</p>
-                            <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp {{ formatRupiah(summary.total_revenue) }}</p>
-                        </div>
+                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Total Pendapatan</p>
+                        <h3 class="text-[22px] font-black text-[#1B4F8A] font-['JetBrains_Mono'] relative z-10">Rp {{ formatRupiah(analyticsData.summary.revenue) }}</h3>
                     </div>
-
-                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-[#2A7A4B]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Order Selesai</p>
-                            <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ summary.completed_orders }}</p>
-                        </div>
+                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Jumlah Transaksi</p>
+                        <h3 class="text-[22px] font-black text-[#2A7A4B] font-['JetBrains_Mono'] relative z-10">{{ formatRupiah(analyticsData.summary.transactions) }}</h3>
                     </div>
-
-                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Avg. Order Value</p>
-                            <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">Rp {{ formatRupiah(summary.avg_order_value) }}</p>
-                        </div>
+                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Rata-rata Transaksi</p>
+                        <h3 class="text-[22px] font-black text-[#B83B2A] font-['JetBrains_Mono'] relative z-10">Rp {{ formatRupiah(analyticsData.summary.avg_order) }}</h3>
                     </div>
-
-                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Jam Tersibuk</p>
-                            <p class="text-[20px] font-bold text-[#1A2332] font-['JetBrains_Mono'] leading-none">{{ summary.busiest_hour }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="userRole && userRole !== 'developer'" class="flex items-center gap-2">
-                    <button @click="exportData('csv')" :disabled="isExporting" class="px-3 py-1.5 bg-[#2A7A4B] hover:bg-green-700 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        CSV
-                    </button>
-                    <button @click="exportData('pdf')" :disabled="isExporting" class="px-3 py-1.5 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                        PDF
-                    </button>
-                    <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] p-1.5 rounded-lg shadow-sm ml-2">
-                        <span class="pl-2 text-[12px] text-[#5A7A9A] font-medium">Periode:</span>
-                        <select v-model="selectedPeriod" @change="fetchAnalytics" class="border-none bg-transparent text-[#1A2332] text-[12px] font-semibold focus:outline-none cursor-pointer pr-4">
-                            <option value="today">Hari Ini</option>
-                            <option value="7days">7 Hari Terakhir</option>
-                            <option value="30days">30 Hari Terakhir</option>
-                            <option value="this_month">Bulan Ini</option>
-                        </select>
+                    <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-24 h-24 bg-purple-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1 relative z-10">Total Item Terjual</p>
+                        <h3 class="text-[22px] font-black text-purple-700 font-['JetBrains_Mono'] relative z-10">{{ formatRupiah(analyticsData.summary.items_sold) }}</h3>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white border border-[#D4E4F4] rounded-xl shadow-sm p-5">
-                        <div class="mb-6">
-                            <h3 class="text-[16px] font-semibold text-[#1A2332]">Grafik Pendapatan</h3>
-                            <p class="text-[12px] text-[#5A7A9A]">Tren total pendapatan harian</p>
+                    
+                    <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm col-span-1 lg:col-span-2 flex flex-col">
+                        <div class="p-5 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
+                            <h3 class="text-[14px] font-bold text-[#1A2332]">Tren Pendapatan</h3>
                         </div>
-                        <div class="h-[300px] w-full">
-                            <Bar v-if="!isLoadingAnalytics" :data="barChartData" :options="barChartOptions" />
-                            <div v-else class="w-full h-full flex items-center justify-center">
-                                <span class="text-[#8AAFCC] text-[13px] animate-pulse">Memuat grafik...</span>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <div v-if="analyticsData.revenue_chart.length === 0" class="flex-1 flex items-center justify-center text-[13px] text-[#8AAFCC]">Tidak ada data di periode ini.</div>
+                            
+                            <div v-else class="relative flex-1 flex items-end gap-2 sm:gap-4 h-64 pt-6">
+                                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
+                                    <div class="border-b border-dashed border-[#D4E4F4] w-full h-0"></div>
+                                    <div class="border-b border-dashed border-[#D4E4F4] w-full h-0"></div>
+                                    <div class="border-b border-dashed border-[#D4E4F4] w-full h-0"></div>
+                                    <div class="border-b border-[#D4E4F4] w-full h-0"></div>
+                                </div>
+                                
+                                <div v-for="(day, idx) in analyticsData.revenue_chart" :key="idx" class="relative flex-1 flex flex-col items-center justify-end h-full group z-10">
+                                    <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[10px] py-1 px-2 rounded whitespace-nowrap pointer-events-none font-['JetBrains_Mono']">
+                                        Rp {{ formatRupiah(day.revenue) }}
+                                    </div>
+                                    <div class="w-full max-w-[40px] bg-gradient-to-t from-[#2E7DD6] to-[#60A5FA] rounded-t-sm transition-all duration-500 ease-out" 
+                                         :style="`height: ${(day.revenue / maxRevenueChart) * 100}%`"></div>
+                                    <span class="text-[10px] text-[#5A7A9A] mt-2 font-medium truncate max-w-full">{{ formatShortDate(day.date) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm p-5 flex flex-col">
-                        <div class="mb-6">
-                            <h3 class="text-[16px] font-semibold text-[#1A2332]">Metode Pembayaran</h3>
-                            <p class="text-[12px] text-[#5A7A9A]">Proporsi penggunaan metode bayar</p>
+                    <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col">
+                        <div class="p-5 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
+                            <h3 class="text-[14px] font-bold text-[#1A2332]">Produk Terlaris</h3>
                         </div>
-                        <div class="flex-1 flex items-center justify-center relative min-h-[250px]">
-                            <Pie v-if="!isLoadingAnalytics" :data="paymentChartData" :options="paymentChartOptions" />
-                            <div v-else class="w-full h-full flex items-center justify-center">
-                                <span class="text-[#8AAFCC] text-[13px] animate-pulse">Memuat grafik...</span>
+                        <div class="p-5 flex-1 overflow-y-auto max-h-[350px]">
+                            <div v-if="analyticsData.top_products.length === 0" class="h-full flex items-center justify-center text-[13px] text-[#8AAFCC]">Tidak ada data penjualan.</div>
+                            
+                            <div v-else class="space-y-4">
+                                <div v-for="(prod, idx) in analyticsData.top_products" :key="idx">
+                                    <div class="flex justify-between items-end mb-1">
+                                        <p class="text-[12px] font-bold text-[#1A2332] truncate pr-2">{{ prod.name }}</p>
+                                        <p class="text-[11px] font-semibold text-[#2A7A4B] font-['JetBrains_Mono'] whitespace-nowrap">{{ prod.sold }} Porsi</p>
+                                    </div>
+                                    <div class="w-full h-2 bg-[#F0F4F8] rounded-full overflow-hidden">
+                                        <div class="h-full bg-[#2A7A4B] rounded-full" :style="`width: ${(prod.sold / maxProductSold) * 100}%`"></div>
+                                    </div>
+                                    <p class="text-[10px] text-[#8AAFCC] mt-1 text-right font-['JetBrains_Mono']">Rp {{ formatRupiah(prod.revenue) }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                        <h3 class="text-[14px] font-semibold text-[#1A2332]">Produk Terlaris (Top 5)</h3>
+                    <div v-if="userRole !== 'karyawan' && !filters.outlet_id" class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm col-span-1 lg:col-span-2 flex flex-col">
+                        <div class="p-5 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
+                            <h3 class="text-[14px] font-bold text-[#1A2332]">Kinerja Tiap Cabang</h3>
+                        </div>
+                        <div class="p-6">
+                            <div v-if="analyticsData.outlet_performance.length === 0" class="py-10 flex items-center justify-center text-[13px] text-[#8AAFCC]">Data cabang tidak tersedia.</div>
+                            
+                            <div v-else class="space-y-5">
+                                <div v-for="(out, idx) in analyticsData.outlet_performance" :key="idx">
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <p class="text-[13px] font-bold text-[#1A2332] flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-[#1B4F8A]"></span>
+                                            {{ out.name }}
+                                        </p>
+                                        <p class="text-[13px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(out.revenue) }}</p>
+                                    </div>
+                                    <div class="w-full h-2.5 bg-[#F0F4F8] rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-[#2E7DD6] to-[#1B4F8A] rounded-full" :style="`width: ${(out.revenue / maxOutletRevenue) * 100}%`"></div>
+                                    </div>
+                                    <p class="text-[10px] text-[#5A7A9A] mt-1">{{ out.transactions }} Transaksi</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-[#D4E4F4]">
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Menu</th>
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Quantity Terjual</th>
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Total Revenue</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="isLoadingAnalytics" class="border-b border-[#EBF3FB]">
-                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse">Memuat data performa produk...</td>
-                                </tr>
-                                <tr v-else-if="topMenus.length === 0" class="border-b border-[#EBF3FB]">
-                                    <td colspan="3" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC]">Belum ada data penjualan pada periode ini.</td>
-                                </tr>
-                                <tr v-else v-for="(item, index) in topMenus" :key="index" class="border-b border-[#EBF3FB] hover:bg-[#F7FAFD]">
-                                    <td class="px-5 py-3 text-[13px] font-medium text-[#1A2332] flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center text-[11px] font-bold">{{ index + 1 }}</span>
-                                        {{ item.name }}
-                                    </td>
-                                    <td class="px-5 py-3 text-[13px] font-semibold text-[#1A2332] text-right font-['JetBrains_Mono']">{{ item.qty }}</td>
-                                    <td class="px-5 py-3 text-[13px] font-semibold text-[#2A7A4B] text-right font-['JetBrains_Mono']">Rp {{ formatRupiah(item.revenue) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                    <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col" :class="{'lg:col-span-3': userRole === 'karyawan' || filters.outlet_id}">
+                        <div class="p-5 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
+                            <h3 class="text-[14px] font-bold text-[#1A2332]">Metode Pembayaran</h3>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-center">
+                            <div v-if="analyticsData.payment_methods.length === 0" class="py-10 flex items-center justify-center text-[13px] text-[#8AAFCC]">Belum ada transaksi.</div>
+                            
+                            <div v-else class="space-y-4">
+                                <div v-for="(pm, idx) in analyticsData.payment_methods" :key="idx" class="flex items-center gap-4 bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
+                                    <div class="w-10 h-10 rounded-full bg-white border border-[#D4E4F4] flex items-center justify-center text-[#1B4F8A] shadow-sm shrink-0">
+                                        <svg v-if="pm.method.toLowerCase() === 'cash'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        <svg v-else-if="pm.method.toLowerCase() === 'qris'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[12px] font-bold text-[#5A7A9A] uppercase tracking-wider">{{ pm.method }}</p>
+                                        <p class="text-[15px] font-bold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(pm.total) }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[11px] font-bold bg-blue-50 text-[#1B4F8A] px-2 py-1 rounded">
+                                            {{ Math.round((pm.total / analyticsData.summary.revenue) * 100) || 0 }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
-
         </div>
     </AdminLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-// --- Import ChartJS (Untuk Analitik Manager) ---
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
-import { Bar, Pie } from 'vue-chartjs';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
-ChartJS.defaults.font.family = "'Poppins', sans-serif";
-ChartJS.defaults.color = '#5A7A9A';
-
-// --- State Global ---
-const apiBase = 'https://api.etres.my.id/api/v1';
-const isLoadingRole = ref(true);
-const isLoadingAnalytics = ref(true);
-const isExporting = ref(false);
-
-const userName = ref('...');
-const userRole = ref('');
-
-const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
+const apiBase = 'https://api.etres.my.id/api/v1'; 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
+const userRole = ref(localStorage.getItem('user_role') || 'karyawan');
 
-// --- State Developer ---
-const devStats = ref({ total_outlets: 0, total_managers: 0, total_karyawan: 0 });
+// Notification State
+const alert = reactive({ show: false, message: '', type: 'success' });
+const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 
-// --- State Analitik (Manager / Kasir) ---
-const selectedPeriod = ref('7days'); 
-const summary = ref({ total_revenue: 0, completed_orders: 0, avg_order_value: 0, busiest_hour: '-' });
-const topMenus = ref([]);
-const barChartData = ref({ labels: [], datasets: [] });
-const paymentChartData = ref({ labels: [], datasets: [] });
+// State
+const isLoading = ref(true);
+const outlets = ref([]);
+const showExportMenu = ref(false);
 
-// --- Opsi Chart ---
-const barChartOptions = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: {
-            backgroundColor: '#1A2332', titleFont: { family: 'Poppins', size: 13 },
-            bodyFont: { family: 'JetBrains Mono', size: 14, weight: 'bold' },
-            padding: 12, cornerRadius: 8,
-            callbacks: { label: function(context) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw); } }
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true, grid: { color: '#EBF3FB', drawBorder: false },
-            ticks: { font: { family: 'JetBrains Mono', size: 11 }, callback: function(value) { if (value >= 1000000) return (value / 1000000) + 'Jt'; if (value >= 1000) return (value / 1000) + 'k'; return value; } }
-        },
-        x: { grid: { display: false }, ticks: { font: { size: 12 } } }
-    }
+// Filter Defaults (Bulan Ini)
+const today = new Date();
+const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+const filters = reactive({
+    start_date: firstDay.toISOString().split('T')[0],
+    end_date: today.toISOString().split('T')[0],
+    outlet_id: ''
+});
+
+// Data Structure
+const analyticsData = reactive({
+    summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0 },
+    revenue_chart: [], 
+    top_products: [], 
+    payment_methods: [], 
+    outlet_performance: [] 
+});
+
+// Computed Data untuk CSS Charts (Proporsional)
+const maxRevenueChart = computed(() => {
+    if (analyticsData.revenue_chart.length === 0) return 1;
+    return Math.max(...analyticsData.revenue_chart.map(d => d.revenue)) || 1;
+});
+const maxProductSold = computed(() => {
+    if (analyticsData.top_products.length === 0) return 1;
+    return Math.max(...analyticsData.top_products.map(p => p.sold)) || 1;
+});
+const maxOutletRevenue = computed(() => {
+    if (analyticsData.outlet_performance.length === 0) return 1;
+    return Math.max(...analyticsData.outlet_performance.map(out => out.revenue)) || 1;
+});
+
+// Utility
+const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
+const formatShortDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 };
-const paymentChartOptions = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
-        tooltip: {
-            backgroundColor: '#1A2332', titleFont: { family: 'Poppins', size: 13 }, bodyFont: { family: 'Poppins', size: 13 },
-            callbacks: { label: function(context) { return ` ${context.label}: ${context.raw}%`; } }
-        }
-    }
-};
 
-// --- FUNGSI MENGAMBIL DATA AWAL ---
-const fetchDashboardData = async () => {
-    isLoadingRole.value = true;
+// API Fetching
+const fetchOutlets = async () => {
+    if (userRole.value === 'karyawan') return; // Karyawan tidak butuh dropdown
     try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return;
-
-        const resUser = await axios.get(`${apiBase}/me`, { headers: authHeaders() });
-        userName.value = resUser.data.user.name;
-        userRole.value = resUser.data.user.role;
-
-        if (userRole.value === 'developer') {
-            // Data sementara untuk Developer sebelum endpoint resminya dibuat
-            devStats.value = { total_outlets: 12, total_managers: 8, total_karyawan: 45 };
-        } else {
-            // Lanjut mengambil data analitik untuk Manager / Karyawan
-            await fetchAnalytics();
-        }
-    } catch (error) {
-        console.error("Gagal memuat info dashboard:", error);
-    } finally {
-        isLoadingRole.value = false;
-    }
+        const res = await axios.get(`${apiBase}/outlets?limit=100`, { headers: authHeaders() });
+        outlets.value = res.data.data?.data || res.data.data || [];
+    } catch (e) { console.error("Gagal load outlet"); }
 };
 
-// --- FUNGSI MENGAMBIL DATA ANALITIK ---
 const fetchAnalytics = async () => {
-    isLoadingAnalytics.value = true;
+    isLoading.value = true;
     try {
-        const response = await axios.get(`${apiBase}/analytics?period=${selectedPeriod.value}`, { headers: authHeaders() });
-        const data = response.data;
-        
-        summary.value = {
-            total_revenue: data?.summary?.total_revenue || 0,
-            completed_orders: data?.summary?.completed_orders || 0,
-            avg_order_value: data?.summary?.avg_order_value || 0,
-            busiest_hour: data?.summary?.busiest_hour || '-'
-        };
-        topMenus.value = data?.top_menus || [];
-
-        barChartData.value = {
-            labels: data?.chart_bar?.labels || [],
-            datasets: [{ label: 'Pendapatan (Rp)', backgroundColor: '#2E7DD6', hoverBackgroundColor: '#1B4F8A', borderRadius: 4, data: data?.chart_bar?.values || [] }]
+        const params = {
+            start_date: filters.start_date,
+            end_date: filters.end_date,
+            outlet_id: filters.outlet_id
         };
 
-        paymentChartData.value = {
-            labels: data?.chart_pie?.labels || [],
-            datasets: [{ backgroundColor: ['#1B4F8A', '#2E7DD6', '#6BAEE8'], borderWidth: 2, borderColor: '#FFFFFF', hoverOffset: 4, data: data?.chart_pie?.values || [] }]
-        };
+        // KONEKSI API MENGGUNAKAN /reports
+        const res = await axios.get(`${apiBase}/reports`, { headers: authHeaders(), params });
+        const data = res.data;
+
+        analyticsData.summary = data.summary || { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0 };
+        analyticsData.revenue_chart = data.revenue_chart || [];
+        analyticsData.top_products = data.top_products || [];
+        analyticsData.payment_methods = data.payment_methods || [];
+        analyticsData.outlet_performance = data.outlet_performance || [];
+
     } catch (error) {
-        console.error("Gagal mengambil data analitik:", error);
-        summary.value = { total_revenue: 0, completed_orders: 0, avg_order_value: 0, busiest_hour: '-' };
-        topMenus.value = [];
-        barChartData.value = { labels: [], datasets: [{ data: [] }] };
-        paymentChartData.value = { labels: [], datasets: [{ data: [] }] };
+        console.error(error);
+        showAlert("Gagal mengambil data laporan.", "error");
+        
+        // --- FALLBACK KOSONG ---
+        analyticsData.summary = { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0 };
+        analyticsData.revenue_chart = [];
+        analyticsData.top_products = [];
+        analyticsData.payment_methods = [];
+        analyticsData.outlet_performance = [];
     } finally {
-        isLoadingAnalytics.value = false;
+        isLoading.value = false;
     }
 };
 
-// --- FUNGSI EXPORT (Manager / Kasir) ---
+// Export Function
 const exportData = async (format) => {
-    isExporting.value = true;
+    showExportMenu.value = false;
     try {
-        const response = await axios.get(`${apiBase}/analytics/export`, {
-            params: { period: selectedPeriod.value, format: format },
-            headers: authHeaders(),
-            responseType: 'blob'
-        });
-
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
+        const params = new URLSearchParams({
+            start_date: filters.start_date,
+            end_date: filters.end_date,
+            outlet_id: filters.outlet_id,
+            format: format
+        }).toString();
         
-        const dateStr = new Date().toISOString().slice(0,10);
-        link.setAttribute('download', `Report_Analitik_${dateStr}.${format}`);
-        document.body.appendChild(link);
-        link.click();
+        window.open(`${apiBase}/reports/export?${params}&token=${localStorage.getItem('auth_token')}`, '_blank');
         
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error(`Gagal export ${format}:`, error);
-        alert(`Gagal mengekspor data ke ${format.toUpperCase()}. Pastikan API export sudah disiapkan.`);
-    } finally {
-        isExporting.value = false;
+        showAlert(`Mengekspor laporan ke format ${format.toUpperCase()}...`, "success");
+    } catch (e) {
+        showAlert(`Gagal mengekspor laporan.`, "error");
     }
 };
 
-onMounted(() => {
-    fetchDashboardData();
+onMounted(async () => {
+    await fetchOutlets();
+    fetchAnalytics();
 });
 </script>
 
 <style scoped>
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Transisi Fade untuk Dropdown & Toast */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>
