@@ -55,7 +55,7 @@
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">No. Invoice</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Waktu Pesanan</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Meja / Kasir</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Info Pesanan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Total Tagihan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
@@ -78,7 +78,9 @@
                                 <td class="px-5 py-3 text-[13px] font-medium text-[#1A2332]">
                                     <span v-if="tx.table" class="px-2 py-0.5 bg-[#EBF3FB] text-[#1B4F8A] rounded text-[11px] font-bold">Meja {{ tx.table }}</span>
                                     <span v-else class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[11px] font-bold">Takeaway</span>
-                                    <p class="text-[11px] text-[#8AAFCC] mt-0.5">Kasir: {{ tx.cashier }}</p>
+                                    <p class="text-[11px] text-[#8AAFCC] mt-0.5">
+                                        <span class="font-semibold text-[#5A7A9A]">{{ tx.customer_name }}</span> &bull; Ksr: {{ tx.cashier }}
+                                    </p>
                                 </td>
                                 <td class="px-5 py-3 text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah(tx.total_price) }}</td>
                                 <td class="px-5 py-3 text-[13px]">
@@ -137,14 +139,19 @@
                 </div>
 
                 <div class="p-6 overflow-y-auto space-y-4">
-                    <div class="flex justify-between items-center p-3 bg-[#EBF3FB] rounded-lg border border-[#D4E4F4]">
+                    
+                    <div class="grid grid-cols-3 gap-2 p-3 bg-[#EBF3FB] rounded-lg border border-[#D4E4F4]">
                         <div>
+                            <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase">Pelanggan</p>
+                            <p class="text-[13px] font-bold text-[#1A2332] truncate" :title="selectedTx.customer_name">{{ selectedTx.customer_name }}</p>
+                        </div>
+                        <div class="text-center border-l border-r border-[#D4E4F4]">
                             <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase">Kasir</p>
-                            <p class="text-[13px] font-bold text-[#1A2332]">{{ selectedTx.cashier }}</p>
+                            <p class="text-[13px] font-bold text-[#1A2332] truncate" :title="selectedTx.cashier">{{ selectedTx.cashier }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-[11px] font-semibold text-[#5A7A9A] uppercase">Tipe</p>
-                            <p class="text-[13px] font-bold text-[#1B4F8A]">{{ selectedTx.table ? `Meja ${selectedTx.table}` : 'Takeaway' }}</p>
+                            <p class="text-[13px] font-bold text-[#1B4F8A] truncate">{{ selectedTx.table ? `Meja ${selectedTx.table}` : 'Takeaway' }}</p>
                         </div>
                     </div>
 
@@ -330,13 +337,14 @@ const fetchTransactions = async () => {
                 id: history.order_id,
                 history_id: history.id,
                 invoice: history.invoice_number || '-',
+                // MENARIK NAMA PELANGGAN DARI DATABASE
+                customer_name: history.customer_name || history.order?.customer_name || 'Pelanggan Umum',
                 cashier: history.cashier?.name || 'Kasir',
                 table: history.order?.table?.name || null,
                 outlet: history.outlet?.name || 'Cabang Tidak Diketahui',
                 status: history.status,
                 date: history.paid_at ? new Date(history.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
                 
-                // DATA HARGA BARU DIPETAKAN DISINI
                 subtotal_price: history.subtotal_price || 0,
                 discount_amount: history.discount_amount || 0,
                 tax_amount: history.tax_amount || 0,
@@ -464,12 +472,13 @@ const printReceipt = () => {
         summaryHtml += `<div style="display: flex; justify-content: space-between; font-size: 12px;"><span>Pajak</span><span>Rp ${formatRupiah(tx.tax_amount)}</span></div>`;
     }
 
+    // MENAMBAHKAN NAMA PELANGGAN KE STRUK
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     printWindow.document.write(`
         <html><head><title>Struk - ${tx.invoice}</title>
         <style>body { font-family: monospace; width: 300px; padding: 20px; } .line { border-top: 1px dashed #000; margin: 10px 0; }</style>
         </head><body><h2 style="text-align:center; margin:0;">POS F&B</h2><div class="line"></div>
-        <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
+        <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Pelanggan: ${tx.customer_name}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
         ${itemsHtml}<div class="line"></div>
         ${summaryHtml}<div class="line"></div>
         <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL AKHIR</span><span>Rp ${formatRupiah(total)}</span></div>
