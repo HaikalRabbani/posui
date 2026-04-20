@@ -273,7 +273,9 @@ const IconSales = markRaw({ template: '<svg fill="none" stroke="currentColor" vi
 const IconProducts = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>' });
 const IconStaff = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>' });
 
-const apiBase = 'https://api.etres.my.id/api/v1'; 
+// Gunakan URL env untuk development, fallback ke production / localhost
+const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://api.etres.my.id/api/v1'; 
+
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 const userRole = ref(localStorage.getItem('user_role') || 'karyawan');
 
@@ -296,26 +298,32 @@ const tabs = [
 
 const activeTabName = computed(() => tabs.find(t => t.id === activeTab.value)?.name || 'Laporan');
 
+// Utility Tanggal (Aman Zona Waktu Lokal)
+const formatDateLocal = (date) => {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 // Filter Defaults (Bulan Ini)
 const today = new Date();
 const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
 const filters = reactive({
-    start_date: firstDay.toISOString().split('T')[0],
-    end_date: today.toISOString().split('T')[0],
+    start_date: formatDateLocal(firstDay),
+    end_date: formatDateLocal(today),
     outlet_id: ''
 });
 
-// Data Structure (Expanded for Full Reports)
+// Data Structure
 const analyticsData = reactive({
     summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0, revenue_growth: 0, trx_growth: 0 },
     revenue_chart: [], 
-    sales_report: [], // Detailed Table Data
-    top_products: [], // Product Table Data
-    cashier_performance: [], // Staff Table Data
+    sales_report: [],
+    top_products: [],
+    cashier_performance: [],
     payment_methods: []
 });
 
-// Computed Totals for Sales Table Footer
+// Computed Totals
 const totalSalesTrx = computed(() => analyticsData.sales_report.reduce((sum, item) => sum + item.transactions, 0));
 const totalSalesGross = computed(() => analyticsData.sales_report.reduce((sum, item) => sum + item.gross, 0));
 const totalSalesDiscount = computed(() => analyticsData.sales_report.reduce((sum, item) => sum + item.discount, 0));
@@ -327,7 +335,7 @@ const maxRevenueChart = computed(() => {
     return Math.max(...analyticsData.revenue_chart.map(d => d.revenue)) || 1;
 });
 
-// Utility
+// Utility Rupiah
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
 const formatLongDate = (dateString) => {
     const d = new Date(dateString);
