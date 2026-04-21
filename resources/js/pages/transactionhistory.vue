@@ -167,14 +167,19 @@
 
                         <ul v-if="!isEditMode" class="space-y-3">
                             <li v-for="(item, i) in selectedTx.items" :key="i" class="flex justify-between items-start">
-                                <div>
+                                <div class="flex-1 pr-4">
                                     <p class="text-[13px] font-medium text-[#1A2332]" :class="{'line-through text-[#8AAFCC]': item.qty === item.cancelled_qty}">{{ item.name }}</p>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 mt-0.5">
                                         <p class="text-[11px] text-[#5A7A9A]">{{ item.qty - item.cancelled_qty }}x @ Rp {{ formatRupiah(item.price) }}</p>
                                         <span v-if="item.cancelled_qty > 0" class="text-[10px] text-[#B83B2A] bg-red-50 px-1.5 rounded">{{ item.cancelled_qty }} dibatalkan</span>
                                     </div>
-                                </div>
-                                <p class="text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono']">Rp {{ formatRupiah((item.qty - item.cancelled_qty) * item.price) }}</p>
+                                    
+                                    <div v-if="item.notes" class="mt-1 flex items-start gap-1">
+                                        <svg class="w-3.5 h-3.5 text-[#8AAFCC] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        <p class="text-[11px] text-[#5A7A9A] italic">{{ item.notes }}</p>
+                                    </div>
+                                    </div>
+                                <p class="text-[13px] font-semibold text-[#1A2332] font-['JetBrains_Mono'] mt-0.5">Rp {{ formatRupiah((item.qty - item.cancelled_qty) * item.price) }}</p>
                             </li>
                         </ul>
 
@@ -337,7 +342,6 @@ const fetchTransactions = async () => {
                 id: history.order_id,
                 history_id: history.id,
                 invoice: history.invoice_number || '-',
-                // MENARIK NAMA PELANGGAN DARI DATABASE
                 customer_name: history.customer_name || history.order?.customer_name || 'Pelanggan Umum',
                 cashier: history.cashier?.name || 'Kasir',
                 table: history.order?.table?.name || null,
@@ -356,7 +360,8 @@ const fetchTransactions = async () => {
                     name: item.product?.name || 'Item Terhapus',
                     qty: item.qty,
                     cancelled_qty: item.cancelled_qty || 0,
-                    price: item.price
+                    price: item.price,
+                    notes: item.notes || null // TAMBAHAN DATA NOTES DARI API
                 })) : [],
                 logs: history.order?.logs || [] 
             };
@@ -472,7 +477,6 @@ const printReceipt = () => {
         summaryHtml += `<div style="display: flex; justify-content: space-between; font-size: 12px;"><span>Pajak</span><span>Rp ${formatRupiah(tx.tax_amount)}</span></div>`;
     }
 
-    // MENAMBAHKAN NAMA PELANGGAN KE STRUK
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     printWindow.document.write(`
         <html><head><title>Struk - ${tx.invoice}</title>
