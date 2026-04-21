@@ -96,23 +96,29 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white rounded-xl border border-[#D4E4F4] shadow-sm flex flex-col">
-                            <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
+                            <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl flex justify-between items-center">
                                 <h3 class="text-[14px] font-bold text-[#1A2332]">Tren Pendapatan Harian</h3>
+                                <div class="flex items-center gap-2 text-[10px] text-[#5A7A9A] font-medium">
+                                    <div class="w-2.5 h-2.5 bg-[#2E7DD6] rounded-sm"></div> Pendapatan Bersih
+                                </div>
                             </div>
-                            <div class="p-6 flex-1 flex flex-col h-64">
+                            <div class="p-6 flex-1 flex flex-col h-64 relative">
                                 <div v-if="analyticsData.revenue_chart.length === 0" class="flex-1 flex items-center justify-center text-[13px] text-[#8AAFCC]">Tidak ada data.</div>
-                                <div v-else class="relative flex-1 flex items-end gap-2 h-full pt-6">
+                                <div v-else class="relative flex-1 flex items-end gap-2 h-full pt-6 border-b border-[#D4E4F4]">
                                     <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
                                         <div class="border-b border-dashed border-[#D4E4F4] w-full h-0" v-for="i in 4" :key="i"></div>
                                     </div>
                                     <div v-for="(day, idx) in analyticsData.revenue_chart" :key="idx" class="relative flex-1 flex flex-col items-center justify-end h-full group z-10">
-                                        <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[10px] py-1 px-2 rounded whitespace-nowrap pointer-events-none font-['JetBrains_Mono'] z-50">
-                                            Rp {{ formatRupiah(day.revenue) }}
+                                        <div class="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[11px] p-2 rounded shadow-lg whitespace-nowrap pointer-events-none z-50 text-center">
+                                            <span class="font-bold border-b border-white/20 pb-1 mb-1 block">{{ formatLongDate(day.date) }}</span>
+                                            <span class="font-['JetBrains_Mono'] block">Net: Rp {{ formatRupiah(day.revenue) }}</span>
+                                            <span class="text-[#8AAFCC] text-[10px]">Trx: {{ day.transactions }}</span>
                                         </div>
-                                        <div class="w-full max-w-[30px] bg-gradient-to-t from-[#2E7DD6] to-[#60A5FA] rounded-t-sm transition-all duration-500 ease-out" 
+                                        <div class="w-full max-w-[30px] bg-gradient-to-t from-[#2E7DD6] to-[#60A5FA] rounded-t-sm transition-all duration-500 ease-out group-hover:from-[#1B4F8A] group-hover:to-[#2E7DD6]" 
                                              :style="`height: ${(day.revenue / maxRevenueChart) * 100}%`"></div>
                                     </div>
                                 </div>
+                                <p class="text-[10px] text-[#8AAFCC] mt-3 italic">*Tiap batang merepresentasikan total penjualan bersih per hari.</p>
                             </div>
                         </div>
 
@@ -186,8 +192,9 @@
                 </div>
 
                 <div v-if="activeTab === 'products'" class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
-                    <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD]">
+                    <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] flex justify-between items-center">
                         <h3 class="text-[14px] font-bold text-[#1A2332]">Laporan Penjualan Per Produk</h3>
+                        <span class="text-[11px] font-medium text-[#5A7A9A] bg-white border border-[#D4E4F4] px-2 py-1 rounded">Nilai diambil dari harga kotor sebelum diskon (Gross)</span>
                     </div>
                     <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
                         <table class="w-full text-left border-collapse">
@@ -197,7 +204,7 @@
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase">Kategori</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Qty Terjual</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Harga Rata-rata</th>
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Total Pendapatan</th>
+                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Total Kotor (Gross)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
@@ -232,7 +239,7 @@
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase">Nama Kasir</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase">Cabang / Outlet</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Trx Ditangani</th>
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Uang Diterima</th>
+                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase text-right">Uang Diterima (Bersih)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
@@ -257,6 +264,35 @@
                     </div>
                 </div>
 
+                <div v-if="activeTab === 'shifts'" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm">
+                            <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1">Total Shift Selesai</p>
+                            <h3 class="text-[22px] font-black text-[#1A2332] font-['JetBrains_Mono']">{{ analyticsData.shift_summary.total_shifts }} Shift</h3>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm">
+                            <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1">Rata-rata Selisih Kas (Variance)</p>
+                            <h3 class="text-[22px] font-black font-['JetBrains_Mono']" :class="analyticsData.shift_summary.avg_variance < 0 ? 'text-red-600' : 'text-green-600'">
+                                Rp {{ formatRupiah(analyticsData.shift_summary.avg_variance) }}
+                            </h3>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm">
+                            <p class="text-[12px] font-semibold text-[#5A7A9A] mb-1">Total Selisih Kas Keseluruhan</p>
+                            <h3 class="text-[22px] font-black font-['JetBrains_Mono']" :class="analyticsData.shift_summary.total_variance < 0 ? 'text-red-600' : 'text-green-600'">
+                                Rp {{ formatRupiah(analyticsData.shift_summary.total_variance) }}
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="bg-[#FFF8E6] border border-[#FFE082] p-4 rounded-xl flex gap-3 shadow-sm">
+                        <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <p class="text-[13px] text-amber-900 leading-relaxed">
+                            <strong>Informasi:</strong> Selisih kas (Variance) menunjukkan perbedaan antara catatan uang di sistem dengan uang fisik yang dilaporkan kasir saat penutupan shift. <br>
+                            - <span class="text-green-600 font-bold">Positif (+)</span>: Uang fisik lebih banyak dari sistem.<br>
+                            - <span class="text-red-600 font-bold">Negatif (-)</span>: Uang fisik kurang/hilang.
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </AdminLayout>
@@ -272,6 +308,7 @@ const IconDashboard = markRaw({ template: '<svg fill="none" stroke="currentColor
 const IconSales = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' });
 const IconProducts = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>' });
 const IconStaff = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>' });
+const IconShift = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' }); // Icon Baru untuk Shift
 
 // Gunakan URL env untuk development, fallback ke production / localhost
 const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://api.etres.my.id/api/v1'; 
@@ -293,7 +330,8 @@ const tabs = [
     { id: 'summary', name: 'Ringkasan', icon: IconDashboard },
     { id: 'sales', name: 'Lap. Penjualan', icon: IconSales },
     { id: 'products', name: 'Kinerja Produk', icon: IconProducts },
-    { id: 'staff', name: 'Kinerja Kasir', icon: IconStaff }
+    { id: 'staff', name: 'Kinerja Kasir', icon: IconStaff },
+    { id: 'shifts', name: 'Kinerja Shift', icon: IconShift } // Penambahan Tab Shift
 ];
 
 const activeTabName = computed(() => tabs.find(t => t.id === activeTab.value)?.name || 'Laporan');
@@ -313,14 +351,15 @@ const filters = reactive({
     outlet_id: ''
 });
 
-// Data Structure
+// Data Structure (Menyesuaikan dengan JSON dari Controller baru)
 const analyticsData = reactive({
     summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0, total_discount: 0, total_tax: 0, revenue_growth: 0, trx_growth: 0 },
     revenue_chart: [], 
     sales_report: [],
     top_products: [],
     cashier_performance: [],
-    payment_methods: []
+    payment_methods: [],
+    shift_summary: { avg_shift_revenue: 0, total_shift_revenue: 0, total_shifts: 0, avg_variance: 0, total_variance: 0 }
 });
 
 // Computed Totals
@@ -369,6 +408,7 @@ const fetchAnalytics = async () => {
         analyticsData.top_products = data.top_products || [];
         analyticsData.cashier_performance = data.cashier_performance || [];
         analyticsData.payment_methods = data.payment_methods || [];
+        analyticsData.shift_summary = data.shift_summary || { avg_shift_revenue: 0, total_shift_revenue: 0, total_shifts: 0, avg_variance: 0, total_variance: 0 };
 
     } catch (error) {
         console.error(error);
@@ -386,15 +426,47 @@ const exportData = async (format) => {
             start_date: filters.start_date,
             end_date: filters.end_date,
             outlet_id: filters.outlet_id,
-            format: format,
-            report_type: activeTab.value 
+            format: format, // Mengirim 'pdf' atau 'excel' ke backend
+            report_type: activeTab.value // Mengirim jenis section (summary, products, dll)
         }).toString();
         
-        window.open(`${apiBase}/reports/export?${params}&token=${localStorage.getItem('auth_token')}`, '_blank');
+        // Notifikasi opsional jika Anda menggunakan sistem alert
+        // showAlert(`Menyiapkan laporan ${activeTabName.value} dalam format ${format.toUpperCase()}...`, "success");
+
+        const response = await axios.get(`${apiBase}/reports/export?${params}`, {
+            headers: authHeaders(),
+            responseType: 'blob' // PENTING: Harus ada agar PDF dan file biner lainnya tidak rusak
+        });
+
+        // 1. Logika Penentuan Ekstensi & Nama File Dinamis
+        // Fallback ekstensi default jika backend tidak mengirim header nama file
+        let defaultExtension = format === 'pdf' ? 'pdf' : 'csv'; // Bisa diubah ke 'xlsx' jika backend pakai Laravel Excel
+        let fileName = `Laporan_${activeTab.value}_${filters.start_date}.${defaultExtension}`;
+
+        // Coba tangkap nama file persis dari backend (jika dikirim via header Content-Disposition)
+        const contentDisposition = response.headers['content-disposition'];
+        if (contentDisposition) {
+            const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+            if (fileNameMatch && fileNameMatch.length === 2) {
+                fileName = fileNameMatch[1];
+            }
+        }
+
+        // 2. Proses Pemicu Download (Blob)
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName); // Menerapkan nama file dinamis
+        document.body.appendChild(link);
+        link.click();
         
-        showAlert(`Mengekspor ${activeTabName.value} ke ${format.toUpperCase()}...`, "success");
+        // 3. Bersihkan memori browser setelah terunduh
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
     } catch (e) {
-        showAlert(`Gagal mengekspor laporan.`, "error");
+        console.error(e);
+        showAlert(`Gagal mengekspor laporan ke format ${format.toUpperCase()}.`, "error");
     }
 };
 
