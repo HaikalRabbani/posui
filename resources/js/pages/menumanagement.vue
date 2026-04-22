@@ -49,7 +49,7 @@
                             </button>
                             
                             <button @click="openStationModal" class="bg-white border border-[#D4E4F4] text-[#5A7A9A] hover:bg-[#F0F4F8] hover:text-[#1B4F8A] px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                                 Station
                             </button>
 
@@ -208,14 +208,14 @@
                     <div>
                         <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Nama Menu</label>
                         <input type="text" v-model="form.name" @input="formErrors.name = false" maxlength="100" placeholder="Contoh: Nasi Goreng" 
-                            :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.name ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
+                            :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.name ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
                         <span v-if="formErrors.name" class="text-[#B83B2A] text-[11px] mt-1 block">Nama menu wajib diisi.</span>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Kategori</label>
-                            <select v-model="form.category_id" @change="formErrors.category_id = false" :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.category_id ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']">
+                            <select v-model="form.category_id" @change="formErrors.category_id = false" :class="['w-full px-3 py-2 text-[14px] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.category_id ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']">
                                 <option value="" disabled>Pilih Kategori</option>
                                 <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                             </select>
@@ -233,7 +233,7 @@
                     <div>
                         <label class="block text-[13px] font-medium text-[#5A7A9A] mb-1">Harga Modal / Base Cost (Rp)</label>
                         <input type="text" v-model="form.cost_price" @input="formatInputNumber('cost_price')" placeholder="10.000" 
-                            :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.cost_price ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
+                            :class="['w-full px-3 py-2 text-[14px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formErrors.cost_price ? 'border-[#B83B2A] bg-red-50' : 'border-[#D4E4F4] focus:border-[#2E7DD6] bg-white']" />
                         <span v-if="formErrors.cost_price" class="text-[#B83B2A] text-[11px] mt-1 block">Modal wajib diisi.</span>
                     </div>
 
@@ -246,15 +246,18 @@
                         <label class="block text-[12px] font-semibold text-[#1A2332] mb-2">Foto / Gambar Menu</label>
                         
                         <div class="flex items-center gap-4">
-                            <div v-if="imagePreview" class="w-14 h-14 rounded-lg border border-[#D4E4F4] overflow-hidden bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <div v-if="imagePreview" class="relative w-14 h-14 rounded-lg border border-[#D4E4F4] overflow-hidden bg-white flex items-center justify-center flex-shrink-0 shadow-sm group">
                                 <img :src="imagePreview" class="w-full h-full object-cover" />
+                                <button type="button" @click.prevent="removeImage" class="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center transition-all" title="Hapus Gambar">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
                             </div>
                             <div v-else class="w-14 h-14 rounded-lg bg-[#F0F4F8] flex items-center justify-center border border-dashed border-[#8AAFCC] flex-shrink-0">
                                 <svg class="w-5 h-5 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             </div>
                             
                             <div class="flex-1">
-                                <input type="file" @change="handleFileUpload" accept="image/jpeg, image/png, image/jpg" class="w-full text-[13px] text-[#5A7A9A] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#EBF3FB] file:text-[#1B4F8A] hover:file:bg-[#D4E4F4] transition-colors" />
+                                <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/jpeg, image/png, image/jpg" class="w-full text-[13px] text-[#5A7A9A] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#EBF3FB] file:text-[#1B4F8A] hover:file:bg-[#D4E4F4] transition-colors" />
                             </div>
                         </div>
                     </div>
@@ -384,14 +387,18 @@ const filterCategory = ref('');
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
 
+// Ref input file untuk reset manual
+const fileInput = ref(null);
+
 // State Form Master Menu
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedProductId = ref(null);
-const imagePreview = ref(null); // Preview dari URL atau File Lokal
+const imagePreview = ref(null); 
 const form = reactive({ 
     name: '', category_id: '', station_id: '', cost_price: '', description: '', 
-    image: null // Hanya berisi file objek jika upload
+    image: null,
+    remove_image: false 
 });
 const formErrors = reactive({ name: false, category_id: false, cost_price: false });
 
@@ -419,7 +426,17 @@ const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
         form.image = file; 
+        form.remove_image = false; // Jika upload baru, pastikan flag hapus mati
         imagePreview.value = URL.createObjectURL(file);
+    }
+};
+
+const removeImage = () => {
+    imagePreview.value = null;
+    form.image = null;
+    form.remove_image = true; // Tandai untuk dihapus di backend
+    if (fileInput.value) {
+        fileInput.value.value = ''; // Reset input file visual
     }
 };
 
@@ -519,21 +536,22 @@ const openViewModal = (item) => { viewModal.data = item; viewModal.show = true; 
 const openModal = (item = null) => {
     formErrors.name = false; formErrors.category_id = false; formErrors.cost_price = false;
     modalAlert.show = false;
+    form.remove_image = false; // Reset flag
+    if (fileInput.value) fileInput.value.value = '';
     
     if (item) {
         isEditMode.value = true; selectedProductId.value = item.id;
         form.name = item.name; form.category_id = item.category_id; form.station_id = item.station_id || '';
         form.description = item.description || ''; 
         
-        form.image = null; // Direset agar user harus pilih file baru jika ingin merubah foto
+        form.image = null; 
         form.cost_price = item.cost_price ? new Intl.NumberFormat('id-ID').format(item.cost_price) : '0'; 
         
-        // Deteksi TAMPILAN jika image berupa URL asli dari internet atau gambar lokal server
         if (item.image) {
             if (item.image.startsWith('http')) {
-                imagePreview.value = item.image; // Tampilkan URL lurus
+                imagePreview.value = item.image;
             } else {
-                imagePreview.value = `https://api.etres.my.id/storage/${item.image}`; // Tambahkan path Storage
+                imagePreview.value = `https://api.etres.my.id/storage/${item.image}`;
             }
         } else {
             imagePreview.value = null;
@@ -565,7 +583,11 @@ const submitForm = async () => {
         formData.append('cost_price', form.cost_price.toString().replace(/\./g, '') || 0);
         formData.append('description', form.description || '');
         
-        // Cukup append 'image' jika ada file yang baru dipilih
+        // Kirim flag remove_image jika bernilai true
+        if (form.remove_image) {
+            formData.append('remove_image', '1');
+        }
+
         if (form.image) {
             formData.append('image', form.image);
         }
@@ -625,7 +647,6 @@ onMounted(() => { fetchAllData(); });
 </script>
 
 <style scoped>
-/* Animasi Fade & Slide Down untuk Alert Float */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
