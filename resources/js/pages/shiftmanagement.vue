@@ -13,32 +13,30 @@
 
         <div class="space-y-6 font-['Poppins'] pb-10">
 
-            <div class="flex gap-4 border-b border-[#D4E4F4]">
-                <button @click="activeTab = 'jadwal'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2" :class="activeTab === 'jadwal' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
-                    Pengaturan Jadwal
+            <div class="flex gap-4 border-b border-[#D4E4F4] overflow-x-auto custom-scrollbar">
+                <button @click="activeTab = 'master'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2 whitespace-nowrap" :class="activeTab === 'master' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
+                    Master Shift
                 </button>
-                <button @click="activeTab = 'laporan'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2" :class="activeTab === 'laporan' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
+                <button @click="activeTab = 'kalender'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2 whitespace-nowrap" :class="activeTab === 'kalender' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
+                    Kalender Jadwal
+                </button>
+                <button @click="activeTab = 'laporan'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2 whitespace-nowrap" :class="activeTab === 'laporan' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
                     Laporan Audit Kasir
                 </button>
             </div>
 
-            <div v-if="activeTab === 'jadwal'" class="animate-[fadeIn_0.3s_ease-out]">
+            <div v-if="activeTab === 'master'" class="animate-[fadeIn_0.3s_ease-out]">
                 <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden flex flex-col">
-                    
                     <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h3 class="text-[15px] font-bold text-[#1A2332]">Jadwal Shift Master</h3>
-                                <p class="text-[12px] text-[#5A7A9A] mt-0.5">Atur jam kerja dan ploting karyawan yang bertugas.</p>
+                                <h3 class="text-[15px] font-bold text-[#1A2332]">Daftar Master Shift</h3>
+                                <p class="text-[12px] text-[#5A7A9A] mt-0.5">Buat dan atur jam kerja dasar untuk outlet.</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button @click="openAutoGenerateModal()" class="px-4 py-2 bg-[#EBF3FB] border border-[#D4E4F4] hover:bg-[#D4E4F4] text-[#1B4F8A] text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                                    Auto Generate
-                                </button>
                                 <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                    Tambah Jadwal
+                                    Tambah Master Shift
                                 </button>
                             </div>
                         </div>
@@ -64,19 +62,23 @@
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Shift</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Outlet</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Jam Kerja</th>
-                                    <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Karyawan Bertugas</th>
                                     <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#EBF3FB]">
                                 <tr v-if="isLoadingSchedules">
-                                    <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse font-medium">Memuat jadwal shift...</td>
+                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] animate-pulse font-medium">Memuat master shift...</td>
                                 </tr>
                                 <tr v-else-if="filteredSchedules.length === 0">
-                                    <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada jadwal shift yang sesuai filter.</td>
+                                    <td colspan="4" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada master shift yang sesuai filter.</td>
                                 </tr>
                                 <tr v-else v-for="schedule in filteredSchedules" :key="schedule.id" class="hover:bg-[#F7FAFD] transition-colors">
-                                    <td class="px-5 py-3 font-bold text-[#1A2332] text-[13px]">{{ schedule.name }}</td>
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <div :class="`w-3 h-3 rounded-full ${getShiftColorClass(schedule.id, true)}`"></div>
+                                            <span class="font-bold text-[#1A2332] text-[13px]">{{ schedule.name }}</span>
+                                        </div>
+                                    </td>
                                     <td class="px-5 py-3 text-[12px] font-medium text-[#1A2332]">
                                         {{ getOutletName(schedule.outlet_id) }}
                                     </td>
@@ -85,21 +87,66 @@
                                             {{ (schedule.start_time || '').substring(0,5) }} - {{ (schedule.end_time || '').substring(0,5) }}
                                         </span>
                                     </td>
-                                    <td class="px-5 py-3">
-                                        <div class="flex flex-wrap gap-1.5">
-                                            <span v-for="user in schedule.users" :key="user.id" class="text-[11px] bg-white border border-[#D4E4F4] text-[#5A7A9A] px-2 py-0.5 rounded shadow-sm">
-                                                {{ user.name }}
-                                            </span>
-                                            <span v-if="!schedule.users || schedule.users.length === 0" class="text-[11px] text-[#B83B2A] italic">Belum ada karyawan</span>
-                                        </div>
-                                    </td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
-                                        <button @click="openScheduleModal(schedule)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Jadwal"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                        <button @click="confirmDeleteSchedule(schedule)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Jadwal"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <button @click="openScheduleModal(schedule)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Shift"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                        <button @click="confirmDelete(schedule, 'master')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Shift"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else-if="activeTab === 'kalender'" class="animate-[fadeIn_0.3s_ease-out] space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#D4E4F4] shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <button @click="prevMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+                        <h2 class="text-[16px] font-bold text-[#1A2332] w-40 text-center">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
+                        <button @click="nextMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select v-model="selectedCalendarOutlet" @change="fetchCalendarSchedules" class="border border-[#D4E4F4] bg-[#F7FAFD] text-[#1A2332] text-[13px] font-medium rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6]">
+                            <option value="">Semua Outlet</option>
+                            <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                        </select>
+                        <button @click="openAutoGenerateModal()" class="px-4 py-2 bg-[#EBF3FB] border border-[#D4E4F4] hover:bg-[#D4E4F4] text-[#1B4F8A] text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                            Auto Generate
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
+                    <div class="grid grid-cols-7 bg-[#F7FAFD] border-b border-[#D4E4F4]">
+                        <div v-for="day in ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']" :key="day" class="py-3 text-center text-[12px] font-bold text-[#5A7A9A] uppercase tracking-wider border-r border-[#D4E4F4] last:border-r-0">
+                            {{ day }}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 bg-[#D4E4F4] gap-px border-t-0">
+                        <div v-for="(cell, idx) in calendarGrid" :key="idx" 
+                             @click="openDayModal(cell.date)"
+                             :class="[
+                                'min-h-[120px] p-2 bg-white hover:bg-[#F7FAFD] transition-colors cursor-pointer group',
+                                !cell.isCurrent ? 'opacity-50' : '',
+                                isToday(cell.date) ? 'ring-2 ring-inset ring-[#2E7DD6]' : ''
+                             ]">
+                            <div class="flex justify-between items-start mb-2">
+                                <span :class="['text-[13px] font-bold w-6 h-6 flex items-center justify-center rounded-full', isToday(cell.date) ? 'bg-[#2E7DD6] text-white' : 'text-[#1A2332]']">
+                                    {{ cell.date.getDate() }}
+                                </span>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                </div>
+                            </div>
+                            <div class="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar pr-1">
+                                <div v-for="sched in getSchedulesForDate(cell.date)" :key="sched.id" 
+                                     :class="`text-[10px] px-1.5 py-1 rounded border truncate font-medium ${getShiftColorClass(sched.shift_id, false)}`">
+                                    <div class="font-bold truncate text-[11px]">{{ sched.user?.name || 'Karyawan' }}</div>
+                                    <div class="truncate opacity-90 text-[9px]">{{ sched.shift?.name }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,7 +235,7 @@
                                     </td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
                                         <button @click="selectedShift = shift" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Detail Audit"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-                                        <button @click="confirmDeleteReport(shift)" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <button @click="confirmDelete(shift, 'report')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -210,7 +257,7 @@
         <div v-if="scheduleModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-[#D4E4F4]">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-bold text-[#1A2332]">{{ scheduleModal.isEdit ? 'Edit Jadwal Shift' : 'Buat Jadwal Shift' }}</h3>
+                    <h3 class="text-[16px] font-bold text-[#1A2332]">{{ scheduleModal.isEdit ? 'Edit Master Shift' : 'Buat Master Shift' }}</h3>
                     <button @click="scheduleModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
                 <form @submit.prevent="submitSchedule" class="p-6 space-y-4">
@@ -235,23 +282,72 @@
                             <input type="time" v-model="formSchedule.end_time" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Assign Karyawan (Opsional)</label>
-                        <div class="space-y-2 p-3 border border-[#D4E4F4] rounded-lg bg-[#F0F4F8] max-h-40 overflow-y-auto custom-scrollbar">
-                            <label v-for="emp in employees" :key="emp.id" class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-[#D4E4F4] hover:border-[#2E7DD6] transition-colors">
-                                <input type="checkbox" :value="emp.id" v-model="formSchedule.user_ids" class="w-4 h-4 text-[#2E7DD6] rounded focus:ring-0">
-                                <span class="text-[13px] font-medium text-[#1A2332]">{{ emp.name }}</span>
-                            </label>
-                            <div v-if="employees.length === 0" class="text-center text-[12px] text-[#8AAFCC] py-2">Tidak ada karyawan di outlet ini.</div>
-                        </div>
-                    </div>
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
                         <button type="button" @click="scheduleModal.show = false" class="px-4 py-2 text-[13px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
                         <button type="submit" :disabled="scheduleModal.isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors">
-                            {{ scheduleModal.isSubmitting ? 'Loading...' : 'Simpan Jadwal' }}
+                            {{ scheduleModal.isSubmitting ? 'Loading...' : 'Simpan Shift' }}
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div v-if="dayModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-[#D4E4F4]">
+                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+                    <h3 class="text-[16px] font-bold text-[#1A2332]">Jadwal: {{ formattedModalDate }}</h3>
+                    <button @click="dayModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <form @submit.prevent="submitDaySchedule" class="space-y-3 bg-[#F0F4F8] p-4 rounded-xl border border-[#D4E4F4]">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Pilih Shift</label>
+                                <select v-model="dayModal.form.shift_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                                    <option value="" disabled>Pilih shift...</option>
+                                    <option v-for="shift in filteredSchedules" :key="shift.id" :value="shift.id">{{ shift.name }} ({{ (shift.start_time||'').substring(0,5) }}-{{ (shift.end_time||'').substring(0,5) }})</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Karyawan</label>
+                                <select v-model="dayModal.form.user_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                                    <option value="" disabled>Pilih karyawan...</option>
+                                    <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-1">
+                            <button type="submit" :disabled="dayModal.isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                {{ dayModal.isSubmitting ? 'Menyimpan...' : 'Tambahkan Karyawan' }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <div>
+                        <h4 class="text-[13px] font-bold text-[#1A2332] border-b border-[#D4E4F4] pb-2 mb-3">Daftar Penugasan Hari Ini</h4>
+                        <div v-if="dayModal.schedules.length === 0" class="text-center text-[12px] text-[#8AAFCC] py-4 bg-gray-50 rounded-lg border border-dashed border-[#D4E4F4]">
+                            Belum ada jadwal penugasan untuk hari ini.
+                        </div>
+                        <div v-else class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                            <div v-for="sched in dayModal.schedules" :key="sched.id" class="flex items-center justify-between p-3 bg-white border border-[#D4E4F4] rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div :class="`px-2 py-1 rounded text-[10px] font-bold border whitespace-nowrap ${getShiftColorClass(sched.shift_id, false)}`">
+                                        {{ sched.shift?.name || 'Unknown' }}
+                                    </div>
+                                    <div>
+                                        <p class="text-[13px] font-bold text-[#1A2332]">{{ sched.user?.name || 'User Terhapus' }}</p>
+                                        <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ sched.shift?.start_time?.substring(0,5) }} - {{ sched.shift?.end_time?.substring(0,5) }}</p>
+                                    </div>
+                                </div>
+                                <button @click="confirmDelete(sched, 'schedule_calendar')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg shrink-0" title="Hapus Penugasan">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -264,7 +360,7 @@
                 <div class="p-6 space-y-4">
                     <div class="bg-orange-50 border border-orange-200 text-[#C4860A] p-3 rounded-lg flex items-start gap-3">
                         <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        <p class="text-[12px] font-medium leading-relaxed">Peringatan: Melakukan auto-generate akan mereset jadwal shift karyawan yang sudah ada di outlet ini, dan membaginya ulang secara rata.</p>
+                        <p class="text-[12px] font-medium leading-relaxed">Peringatan: Melakukan auto-generate akan mereset jadwal shift karyawan di bulan ini, dan membaginya ulang secara rata.</p>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Pilih Outlet</label>
@@ -332,7 +428,7 @@
                     <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <h3 class="text-[18px] font-bold text-[#1A2332] mb-2">Hapus Data?</h3>
-                <p class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus data {{ deleteModal.type === 'schedule' ? 'jadwal shift' : 'laporan audit' }} ini?</p>
+                <p class="text-[14px] text-[#5A7A9A] mb-6">Yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex justify-center gap-3">
                     <button @click="deleteModal.show = false" class="px-4 py-2 w-full text-[14px] font-medium text-[#5A7A9A] bg-[#F0F4F8] hover:bg-[#D4E4F4] rounded-lg transition-colors">Batal</button>
                     <button @click="executeDelete" :disabled="deleteModal.isDeleting" class="px-4 py-2 w-full text-[14px] font-semibold text-white bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 rounded-lg transition-colors">
@@ -353,25 +449,44 @@ import AdminLayout from '../components/adminlayout.vue';
 const apiBase = 'https://api.etres.my.id/api/v1';
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
-const activeTab = ref('jadwal'); // 'jadwal' | 'laporan'
+const activeTab = ref('kalender'); 
 const alert = reactive({ show: false, message: '', type: 'success' });
 const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 
 const outlets = ref([]);
 const employees = ref([]);
 
-// --- STATE TAB 1: JADWAL SHIFT ---
+// --- STATE TAB 1: MASTER SHIFT ---
 const schedules = ref([]);
 const isLoadingSchedules = ref(true);
 const scheduleModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-const formSchedule = reactive({ outlet_id: '', name: '', start_time: '08:00', end_time: '16:00', user_ids: [] });
+const formSchedule = reactive({ outlet_id: '', name: '', start_time: '08:00', end_time: '16:00' });
 const searchScheduleQuery = ref('');
 const selectedScheduleOutlet = ref('');
 
 // Auto-Generate State
 const autoGenModal = reactive({ show: false, outlet_id: '', isGenerating: false });
 
-// --- STATE TAB 2: LAPORAN KASIR ---
+// --- STATE TAB 2: KALENDER JADWAL KARYAWAN ---
+const currentDate = ref(new Date());
+const currentMonth = computed(() => currentDate.value.getMonth());
+const currentYear = computed(() => currentDate.value.getFullYear());
+const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+const selectedCalendarOutlet = ref('');
+
+const allCalendarSchedules = ref([]); // Data kalender sekarang flat array dari endpoint schedules
+const dayModal = reactive({ show: false, date: null, schedules: [], form: { shift_id: '', user_id: '' }, isSubmitting: false });
+
+// Warna dinamis untuk shift badges
+const shiftColors = [
+    'bg-blue-50 text-[#1B4F8A] border-blue-200',
+    'bg-green-50 text-[#2A7A4B] border-green-200',
+    'bg-orange-50 text-[#C4860A] border-orange-200',
+    'bg-purple-50 text-purple-700 border-purple-200',
+    'bg-teal-50 text-teal-700 border-teal-200'
+];
+
+// --- STATE TAB 3: LAPORAN KASIR ---
 const shifts = ref([]);
 const isLoadingReports = ref(true);
 const searchReportQuery = ref('');
@@ -380,16 +495,37 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedShift = ref(null);
 
-const deleteModal = reactive({ show: false, id: null, type: 'schedule', isDeleting: false });
+const deleteModal = reactive({ show: false, id: null, type: '', isDeleting: false });
 
+// --- UTILS ---
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const formatDateTime = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 };
+const formatDateForApi = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+};
 const getOutletName = (id) => {
     const out = outlets.value.find(o => o.id === id);
     return out ? out.name : 'Outlet Tidak Diketahui';
+};
+const getShiftColorClass = (shiftId, isDot = false) => {
+    const index = schedules.value.findIndex(s => s.id === shiftId);
+    if (index === -1) return isDot ? 'bg-gray-400' : 'bg-gray-50 text-gray-700 border-gray-200';
+    
+    if (isDot) {
+        return shiftColors[index % shiftColors.length].split(' ')[1].replace('text-', 'bg-');
+    }
+    return shiftColors[index % shiftColors.length];
 };
 
 // --- DATA FETCHING ---
@@ -400,14 +536,15 @@ const fetchInitialData = async () => {
             axios.get(`${apiBase}/users?limit=1000`, { headers: authHeaders() }) 
         ]);
         outlets.value = resOutlets.data.data?.data || resOutlets.data.data || [];
-        
         const allUsers = resUsers.data.data?.data || resUsers.data.data || resUsers.data || [];
         employees.value = allUsers.filter(u => u.role === 'karyawan');
         
         if (outlets.value.length === 1) {
-            formSchedule.outlet_id = outlets.value[0].id;
-            selectedScheduleOutlet.value = outlets.value[0].id;
-            selectedReportOutlet.value = outlets.value[0].id;
+            const outId = outlets.value[0].id;
+            formSchedule.outlet_id = outId;
+            selectedScheduleOutlet.value = outId;
+            selectedCalendarOutlet.value = outId;
+            selectedReportOutlet.value = outId;
         }
     } catch (e) { console.error("Gagal menarik data awal:", e); }
 };
@@ -418,9 +555,31 @@ const fetchSchedules = async () => {
         const res = await axios.get(`${apiBase}/shifts`, { headers: authHeaders() });
         schedules.value = res.data.data?.data || res.data.data || res.data || [];
     } catch (e) {
-        console.warn("Gagal menarik data jadwal shift.", e);
+        console.warn("Gagal menarik data master shift.", e);
         schedules.value = [];
     } finally { isLoadingSchedules.value = false; }
+};
+
+const fetchCalendarSchedules = async () => {
+    try {
+        if (!calendarGrid.value || calendarGrid.value.length === 0) return;
+
+        const startDate = formatDateForApi(calendarGrid.value[0].date);
+        const endDate = formatDateForApi(calendarGrid.value[calendarGrid.value.length - 1].date);
+        
+        const params = { start_date: startDate, end_date: endDate };
+        if (selectedCalendarOutlet.value) params.outlet_id = selectedCalendarOutlet.value;
+
+        const res = await axios.get(`${apiBase}/schedules`, { 
+            params,
+            headers: authHeaders() 
+        });
+        
+        // Backend telah di-update untuk me-return flat array yang mudah dibaca Vue
+        allCalendarSchedules.value = res.data.data || [];
+    } catch (e) {
+        console.error("Gagal menarik data kalender:", e);
+    }
 };
 
 const fetchReports = async () => {
@@ -432,7 +591,82 @@ const fetchReports = async () => {
     finally { isLoadingReports.value = false; }
 };
 
-// --- JADWAL SHIFT LOGIC ---
+// --- KALENDER LOGIC ---
+const calendarGrid = computed(() => {
+    const year = currentYear.value;
+    const month = currentMonth.value;
+    const firstDay = new Date(year, month, 1).getDay(); 
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const grid = [];
+    for (let i = firstDay - 1; i >= 0; i--) {
+        grid.push({ date: new Date(year, month - 1, daysInPrevMonth - i), isCurrent: false });
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+        grid.push({ date: new Date(year, month, i), isCurrent: true });
+    }
+    const remaining = 42 - grid.length;
+    for (let i = 1; i <= remaining; i++) {
+        grid.push({ date: new Date(year, month + 1, i), isCurrent: false });
+    }
+    return grid;
+});
+
+const prevMonth = () => {
+    currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1);
+    fetchCalendarSchedules();
+};
+const nextMonth = () => {
+    currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1);
+    fetchCalendarSchedules();
+};
+
+const getSchedulesForDate = (date) => {
+    const dateStr = formatDateForApi(date);
+    return allCalendarSchedules.value.filter(s => {
+        const matchDate = s.date === dateStr;
+        const matchOutlet = selectedCalendarOutlet.value === '' || s.outlet_id == selectedCalendarOutlet.value;
+        return matchDate && matchOutlet;
+    });
+};
+
+const formattedModalDate = computed(() => {
+    if (!dayModal.date) return '';
+    return dayModal.date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+});
+
+const openDayModal = (dateObj) => {
+    dayModal.date = dateObj;
+    dayModal.schedules = getSchedulesForDate(dateObj);
+    dayModal.form.shift_id = '';
+    dayModal.form.user_id = '';
+    dayModal.show = true;
+};
+
+const submitDaySchedule = async () => {
+    dayModal.isSubmitting = true;
+    try {
+        const payload = {
+            outlet_id: selectedCalendarOutlet.value || outlets.value[0]?.id,
+            shift_id: dayModal.form.shift_id,
+            user_ids: [dayModal.form.user_id],
+            date: formatDateForApi(dayModal.date)
+        };
+        await axios.post(`${apiBase}/schedules`, payload, { headers: authHeaders() });
+        showAlert("Berhasil menambahkan jadwal karyawan.", "success");
+        await fetchCalendarSchedules();
+        dayModal.schedules = getSchedulesForDate(dayModal.date); 
+        dayModal.form.shift_id = '';
+        dayModal.form.user_id = '';
+    } catch (e) {
+        showAlert(e.response?.data?.message || "Gagal menambahkan jadwal karyawan.", "error");
+    } finally {
+        dayModal.isSubmitting = false;
+    }
+};
+
+// --- MASTER SHIFT LOGIC ---
 const openScheduleModal = (item = null) => {
     scheduleModal.isEdit = !!item;
     if (item) {
@@ -441,13 +675,11 @@ const openScheduleModal = (item = null) => {
         formSchedule.name = item.name;
         formSchedule.start_time = item.start_time ? item.start_time.substring(0,5) : '08:00';
         formSchedule.end_time = item.end_time ? item.end_time.substring(0,5) : '16:00';
-        formSchedule.user_ids = item.users ? item.users.map(u => u.id) : [];
     } else {
         scheduleModal.id = null;
         formSchedule.name = ''; 
         formSchedule.start_time = '08:00'; 
         formSchedule.end_time = '16:00'; 
-        formSchedule.user_ids = [];
         if (outlets.value.length === 1) {
             formSchedule.outlet_id = outlets.value[0].id;
         }
@@ -468,17 +700,11 @@ const submitSchedule = async () => {
         };
         
         await axios[method](url, payload, { headers: authHeaders() });
-        showAlert(`Jadwal Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
+        showAlert(`Master Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
         scheduleModal.show = false;
         fetchSchedules();
     } catch (e) {
-        // Tangkap pesan Error (Termasuk error double shift yang kita set dari controller Backend)
-        let errorMsg = "Gagal menyimpan jadwal. Pastikan field terisi dengan benar.";
-        if (e.response && e.response.data && e.response.data.message) {
-             errorMsg = e.response.data.message; 
-        }
-        showAlert(errorMsg, "error");
-        console.error("Detail Error Submit:", e.response?.data);
+        showAlert(e.response?.data?.message || "Gagal menyimpan master shift.", "error");
     } finally { scheduleModal.isSubmitting = false; }
 };
 
@@ -501,38 +727,43 @@ const executeAutoGenerate = async () => {
             outlet_id: autoGenModal.outlet_id
         }, { headers: authHeaders() });
         
-        showAlert(res.data.message || 'Jadwal berhasil digenerate otomatis secara merata.', 'success');
+        showAlert(res.data.message || 'Jadwal berhasil digenerate otomatis.', 'success');
         autoGenModal.show = false;
-        fetchSchedules(); // Refresh tabel jadwal
+        fetchCalendarSchedules();
     } catch (e) {
-        let errorMsg = "Gagal men-generate jadwal otomatis.";
-        if (e.response && e.response.data && e.response.data.message) {
-             errorMsg = e.response.data.message; 
-        }
-        showAlert(errorMsg, "error");
-        console.error("Detail Auto-Generate Error:", e.response?.data);
+        showAlert(e.response?.data?.message || "Gagal men-generate jadwal otomatis.", "error");
     } finally {
         autoGenModal.isGenerating = false;
     }
 };
 
 // --- DELETE LOGIC ---
-const confirmDeleteSchedule = (item) => { deleteModal.id = item.id; deleteModal.type = 'schedule'; deleteModal.show = true; };
-const confirmDeleteReport = (item) => { deleteModal.id = item.id; deleteModal.type = 'report'; deleteModal.show = true; };
+const confirmDelete = (item, type) => { 
+    deleteModal.id = item.id; 
+    deleteModal.type = type; 
+    deleteModal.show = true; 
+};
 
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
-        const endpoint = deleteModal.type === 'schedule' ? 'shifts' : 'shift-karyawans';
-        await axios.delete(`${apiBase}/${endpoint}/${deleteModal.id}`, { headers: authHeaders() });
+        let endpoint = '';
+        if (deleteModal.type === 'master') endpoint = `shifts/${deleteModal.id}`;
+        else if (deleteModal.type === 'schedule_calendar') endpoint = `schedules/${deleteModal.id}`;
+        else if (deleteModal.type === 'report') endpoint = `shift-karyawans/${deleteModal.id}`;
+
+        await axios.delete(`${apiBase}/${endpoint}`, { headers: authHeaders() });
         showAlert("Data berhasil dihapus.", "success");
         deleteModal.show = false;
         
-        if (deleteModal.type === 'schedule') fetchSchedules();
+        if (deleteModal.type === 'master') fetchSchedules();
+        else if (deleteModal.type === 'schedule_calendar') {
+            await fetchCalendarSchedules();
+            if(dayModal.show) dayModal.schedules = getSchedulesForDate(dayModal.date);
+        }
         else fetchReports();
     } catch (e) {
-        showAlert("Gagal menghapus data. Cek koneksi API.", "error");
-        console.error("Detail Delete Error:", e.response?.data);
+        showAlert("Gagal menghapus data.", "error");
     } finally { deleteModal.isDeleting = false; }
 };
 
@@ -546,8 +777,7 @@ const filteredSchedules = computed(() => {
     });
 });
 
-// --- COMPUTEDS (TAB 2) ---
-// Memisahkan filter agar Statiska menggunakan data yang sudah ter-filter Outlet
+// --- COMPUTEDS (TAB 3) ---
 const filteredReports = computed(() => {
     const query = searchReportQuery.value.toLowerCase();
     return shifts.value.filter(s => {
@@ -557,7 +787,6 @@ const filteredReports = computed(() => {
     });
 });
 
-// PERBAIKAN STATS: Semua Stats sekarang menggunakan filteredReports bukan shifts mentah
 const activeShiftsCount = computed(() => filteredReports.value.filter(s => s.status === 'active').length);
 const totalDifference = computed(() => filteredReports.value.reduce((acc, curr) => acc + (parseInt(curr.difference) || 0), 0));
 
@@ -569,23 +798,27 @@ const paginatedReports = computed(() => {
 
 // Fetch data when switching tabs
 watch(activeTab, (newVal) => {
-    if (newVal === 'jadwal' && schedules.value.length === 0) fetchSchedules();
+    if (newVal === 'master' && schedules.value.length === 0) fetchSchedules();
+    if (newVal === 'kalender' && allCalendarSchedules.value.length === 0) {
+        fetchSchedules();
+        fetchCalendarSchedules();
+    }
     if (newVal === 'laporan' && shifts.value.length === 0) fetchReports();
 });
 
 onMounted(async () => {
     await fetchInitialData();
     fetchSchedules(); 
+    fetchCalendarSchedules();
 });
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar { width: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4E4F4; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #8AAFCC; }
 
-/* Animasi Fade & Slide Down untuk Alert Float */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
