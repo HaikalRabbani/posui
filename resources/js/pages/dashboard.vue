@@ -61,11 +61,30 @@
 
             <div v-else class="space-y-6 pt-2">
                 
+                <div class="bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl shadow-sm p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                            <div class="flex bg-white border border-[#D4E4F4] rounded-lg overflow-hidden flex-row">
+                                <button @click="setFilter('hari_ini')" :class="['px-3 py-1.5 text-[13px] font-medium transition-colors', activeFilter === 'hari_ini' ? 'bg-[#2E7DD6] text-white' : 'text-[#5A7A9A] hover:bg-[#F7FAFD]']">Hari Ini</button>
+                                <button @click="setFilter('7_hari')" :class="['px-3 py-1.5 text-[13px] font-medium border-l border-[#D4E4F4] transition-colors', activeFilter === '7_hari' ? 'bg-[#2E7DD6] text-white border-transparent' : 'text-[#5A7A9A] hover:bg-[#F7FAFD]']">7 Hari</button>
+                                <button @click="setFilter('1_bulan')" :class="['px-3 py-1.5 text-[13px] font-medium border-l border-[#D4E4F4] transition-colors', activeFilter === '1_bulan' ? 'bg-[#2E7DD6] text-white border-transparent' : 'text-[#5A7A9A] hover:bg-[#F7FAFD]']">1 Bulan</button>
+                                <button @click="setFilter('1_tahun')" :class="['px-3 py-1.5 text-[13px] font-medium border-l border-[#D4E4F4] transition-colors', activeFilter === '1_tahun' ? 'bg-[#2E7DD6] text-white border-transparent' : 'text-[#5A7A9A] hover:bg-[#F7FAFD]']">1 Tahun</button>
+                                <button @click="setFilter('lifetime')" :class="['px-3 py-1.5 text-[13px] font-medium border-l border-[#D4E4F4] transition-colors', activeFilter === 'lifetime' ? 'bg-[#2E7DD6] text-white border-transparent' : 'text-[#5A7A9A] hover:bg-[#F7FAFD]']">Lifetime</button>
+                            </div>
+    
+                            <select v-if="userRole !== 'karyawan'" v-model="filters.outlet_id" @change="fetchAnalytics" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6] font-medium min-w-[150px]">
+                                <option value="">Semua Cabang</option>
+                                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+
                 <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
                     <div class="w-8 h-8 border-4 border-[#D4E4F4] border-t-[#2E7DD6] rounded-full animate-spin mb-4"></div>
                     <p class="text-[13px] font-medium text-[#8AAFCC] animate-pulse">Menarik data analitik...</p>
                 </div>
                 
+                
+
                 <div v-else class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-xl border border-[#D4E4F4] shadow-sm">
@@ -86,21 +105,6 @@
                         </div>
                     </div>
                     
-                    <div class="bg-[#F7FAFD] border border-[#D4E4F4] rounded-xl shadow-sm p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                            <div class="flex items-center gap-2 bg-white border border-[#D4E4F4] rounded-lg px-3 py-1.5">
-                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                <input type="date" v-model="filters.start_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
-                                <span class="text-[12px] text-[#8AAFCC] font-bold">-</span>
-                                <input type="date" v-model="filters.end_date" @change="fetchAnalytics" class="bg-transparent text-[13px] font-medium text-[#1A2332] outline-none">
-                            </div>
-    
-                            <select v-if="userRole !== 'karyawan'" v-model="filters.outlet_id" @change="fetchAnalytics" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6] font-medium min-w-[150px]">
-                                <option value="">Semua Cabang</option>
-                                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
-                            </select>
-                        </div>
-                    </div>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
@@ -163,13 +167,11 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-// URL API DIKEMBALIKAN KE SERVER PUBLIK (BUKAN LOCALHOST)
 const apiBase = 'https://api.etres.my.id/api/v1'; 
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 const userRole = ref(localStorage.getItem('user_role') || 'karyawan');
 
-// Notification State
 const alert = reactive({ show: false, message: '', type: 'success' });
 const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 4000); };
 
@@ -177,7 +179,6 @@ const isLoading = ref(true);
 const outlets = ref([]);
 const showExportMenu = ref(false);
 
-// State Data Metrik (Developer)
 const devData = reactive({
     totalUsers: 0,
     totalOutlets: 0,
@@ -186,21 +187,46 @@ const devData = reactive({
     totalTables: 0
 });
 
-// Format Tanggal
 const formatDateLocal = (date) => {
     const d = new Date(date);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const activeFilter = ref('hari_ini');
 const today = new Date();
-const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
 const filters = reactive({
-    start_date: formatDateLocal(firstDay),
+    start_date: formatDateLocal(today),
     end_date: formatDateLocal(today),
     outlet_id: ''
 });
 
-// State Data Analytics (Manager)
+const setFilter = (type) => {
+    activeFilter.value = type;
+    const current = new Date();
+    filters.end_date = formatDateLocal(current);
+    
+    if (type === 'hari_ini') {
+        filters.start_date = formatDateLocal(current);
+    } else if (type === '7_hari') {
+        const d = new Date(current);
+        d.setDate(d.getDate() - 7);
+        filters.start_date = formatDateLocal(d);
+    } else if (type === '1_bulan') {
+        const d = new Date(current);
+        d.setMonth(d.getMonth() - 1);
+        filters.start_date = formatDateLocal(d);
+    } else if (type === '1_tahun') {
+        const d = new Date(current);
+        d.setFullYear(d.getFullYear() - 1);
+        filters.start_date = formatDateLocal(d);
+    } else if (type === 'lifetime') {
+        filters.start_date = '2000-01-01'; 
+    }
+    
+    fetchAnalytics();
+};
+
 const analyticsData = reactive({
     summary: { revenue: 0, transactions: 0, avg_order: 0, items_sold: 0 },
     revenue_chart: [], 
@@ -216,14 +242,12 @@ const maxProductSold = computed(() => {
     return Math.max(...analyticsData.top_products.map(p => p.sold)) || 1;
 });
 
-// Utility
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID').format(angka || 0);
 const formatShortDate = (dateString) => {
     const d = new Date(dateString);
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 };
 
-// --- DATA FETCHING (DEVELOPER) ---
 const fetchDevData = async () => {
     isLoading.value = true;
     try {
@@ -249,7 +273,6 @@ const fetchDevData = async () => {
     }
 };
 
-// --- DATA FETCHING (MANAGER) ---
 const fetchAnalytics = async () => {
     isLoading.value = true;
     try {
