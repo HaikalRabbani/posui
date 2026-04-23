@@ -13,7 +13,6 @@
 
         <div class="space-y-6 font-['Poppins'] pb-10">
 
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white border border-[#D4E4F4] p-5 rounded-xl shadow-sm">
                     <p class="text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1">Total Promo Aktif</p>
@@ -48,7 +47,7 @@
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Nama Promo</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Tipe Diskon</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Tipe & Cakupan</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Masa Berlaku</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Status</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
@@ -65,10 +64,17 @@
                                 <td class="px-5 py-3">
                                     <p class="font-bold text-[#1A2332] text-[13px]">{{ promo.name }}</p>
                                     <p v-if="promo.min_purchase > 0" class="text-[11px] text-[#5A7A9A] mt-0.5">Min. Beli: Rp {{ formatRupiah(promo.min_purchase) }}</p>
+                                    <p v-if="promo.max_discount > 0 && promo.type === 'percentage'" class="text-[11px] text-[#B83B2A] mt-0.5">Maks. Potongan: Rp {{ formatRupiah(promo.max_discount) }}</p>
                                 </td>
                                 <td class="px-5 py-3">
-                                    <span :class="['px-2 py-0.5 rounded text-[11px] font-bold', promo.type === 'percentage' ? 'bg-[#EBF3FB] text-[#1B4F8A]' : 'bg-green-50 text-[#2A7A4B]']">
+                                    <span :class="['px-2 py-0.5 rounded text-[11px] font-bold mr-1', promo.type === 'percentage' ? 'bg-[#EBF3FB] text-[#1B4F8A]' : 'bg-green-50 text-[#2A7A4B]']">
                                         {{ promo.type === 'percentage' ? promo.value + '%' : 'Rp ' + formatRupiah(promo.value) }}
+                                    </span>
+                                    <span v-if="promo.scope === 'products'" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF4E5] text-[#D97706] border border-[#FFE0B2]">
+                                        PRODUK ({{ promo.product_ids?.length || 0 }})
+                                    </span>
+                                    <span v-else-if="promo.scope === 'categories'" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F3E8FF] text-[#7E22CE] border border-[#E9D5FF]">
+                                        KATEGORI ({{ promo.category_ids?.length || 0 }})
                                     </span>
                                 </td>
                                 <td class="px-5 py-3 text-[12px] text-[#5A7A9A]">
@@ -91,8 +97,8 @@
         </div>
 
         <div v-if="modal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-[#D4E4F4] animate-[fadeIn_0.2s_ease-out]">
-                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#D4E4F4] animate-[fadeIn_0.2s_ease-out]">
+                <div class="sticky top-0 px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD] z-10">
                     <h3 class="text-[16px] font-bold text-[#1A2332]">{{ modal.isEdit ? 'Edit Promo' : 'Buat Promo Baru' }}</h3>
                     <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
@@ -100,6 +106,39 @@
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nama Promo <span class="text-[#B83B2A]">*</span></label>
                         <input type="text" v-model="form.name" required placeholder="Contoh: Diskon Kemerdekaan" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6]">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Cakupan (Scope) <span class="text-[#B83B2A]">*</span></label>
+                            <select v-model="form.scope" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                                <option value="global">Seluruh Transaksi</option>
+                                <option value="products">Berdasarkan Produk</option>
+                                <option value="categories">Berdasarkan Kategori</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div v-if="form.scope === 'products'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Produk (Bisa lebih dari 1) <span class="text-[#B83B2A]">*</span></label>
+                        <div class="border border-[#EBF3FB] rounded-lg max-h-40 overflow-y-auto bg-white p-2 space-y-1">
+                            <label v-for="item in products" :key="item.id" class="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-[#F7FAFD] rounded text-[13px] text-[#1A2332]">
+                                <input type="checkbox" :value="item.id" v-model="form.product_ids" class="w-4 h-4 text-[#2E7DD6] rounded border-[#D4E4F4] focus:ring-[#2E7DD6]"> 
+                                {{ item.name }}
+                            </label>
+                            <div v-if="products.length === 0" class="text-[12px] text-center text-[#8AAFCC] py-2">Belum ada data produk.</div>
+                        </div>
+                    </div>
+
+                    <div v-if="form.scope === 'categories'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Kategori (Bisa lebih dari 1) <span class="text-[#B83B2A]">*</span></label>
+                        <div class="border border-[#EBF3FB] rounded-lg max-h-40 overflow-y-auto bg-white p-2 space-y-1">
+                            <label v-for="item in categories" :key="item.id" class="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-[#F7FAFD] rounded text-[13px] text-[#1A2332]">
+                                <input type="checkbox" :value="item.id" v-model="form.category_ids" class="w-4 h-4 text-[#2E7DD6] rounded border-[#D4E4F4] focus:ring-[#2E7DD6]"> 
+                                {{ item.name }}
+                            </label>
+                            <div v-if="categories.length === 0" class="text-[12px] text-center text-[#8AAFCC] py-2">Belum ada data kategori.</div>
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -114,6 +153,12 @@
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nilai Diskon <span class="text-[#B83B2A]">*</span></label>
                             <input type="number" v-model="form.value" required :placeholder="form.type === 'percentage' ? 'Contoh: 10' : 'Contoh: 15000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                         </div>
+                    </div>
+
+                    <div v-if="form.type === 'percentage'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
+                        <label class="block text-[12px] font-semibold text-[#1B4F8A] mb-1">Batas Maksimal Potongan (Rp)</label>
+                        <p class="text-[10px] text-[#5A7A9A] mb-2 leading-tight">Biarkan kosong jika persentase diskon tidak memiliki batas maksimal.</p>
+                        <input type="number" v-model="form.max_discount" placeholder="Contoh: 15000" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                     </div>
 
                     <div>
@@ -177,11 +222,17 @@ const alert = reactive({ show: false, message: '', type: 'success' });
 const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 3000); };
 
 const promos = ref([]);
+const products = ref([]);
+const categories = ref([]); // Tambahan untuk list kategori
 const isLoading = ref(true);
 const searchQuery = ref('');
 
 const modal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
-const form = reactive({ name: '', type: 'percentage', value: '', min_purchase: '', start_date: '', end_date: '', is_active: true });
+const form = reactive({ 
+    name: '', scope: 'global', product_ids: [], category_ids: [], type: 'percentage', 
+    value: '', max_discount: '', min_purchase: '', start_date: '', 
+    end_date: '', is_active: true 
+});
 
 const deleteModal = reactive({ show: false, id: null, promoName: '', isDeleting: false });
 
@@ -189,6 +240,19 @@ const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+// Fetch data pendukung untuk Multi-Select
+const fetchProductsAndCategories = async () => {
+    try {
+        const resProd = await axios.get(`${apiBase}/products`, { headers: authHeaders() });
+        products.value = resProd.data.data || resProd.data || [];
+        
+        const resCat = await axios.get(`${apiBase}/categories`, { headers: authHeaders() });
+        categories.value = resCat.data.data || resCat.data || [];
+    } catch (e) {
+        console.error('Gagal mengambil data produk/kategori', e);
+    }
 };
 
 const fetchPromos = async () => {
@@ -209,16 +273,22 @@ const openModal = (item = null) => {
     if (item) {
         modal.id = item.id;
         form.name = item.name;
+        form.scope = item.scope || 'global';
+        form.product_ids = item.product_ids || [];
+        form.category_ids = item.category_ids || [];
         form.type = item.type;
         form.value = item.value;
+        form.max_discount = item.max_discount || '';
         form.min_purchase = item.min_purchase || '';
         form.start_date = item.start_date;
         form.end_date = item.end_date;
         form.is_active = item.is_active;
     } else {
         modal.id = null;
-        form.name = ''; form.type = 'percentage'; form.value = ''; form.min_purchase = ''; 
-        form.start_date = new Date().toLocaleDateString('en-CA'); 
+        form.name = ''; form.scope = 'global'; 
+        form.product_ids = []; form.category_ids = []; 
+        form.type = 'percentage'; form.value = ''; form.max_discount = ''; 
+        form.min_purchase = ''; form.start_date = new Date().toLocaleDateString('en-CA'); 
         form.end_date = ''; form.is_active = true;
     }
     modal.show = true;
@@ -232,9 +302,24 @@ const submitForm = async () => {
         const payload = {
             ...form,
             value: Number(form.value),
+            product_ids: form.scope === 'products' ? form.product_ids : [],
+            category_ids: form.scope === 'categories' ? form.category_ids : [],
+            max_discount: form.max_discount ? Number(form.max_discount) : null,
             min_purchase: form.min_purchase ? Number(form.min_purchase) : 0,
             is_active: Boolean(form.is_active)
         };
+
+        // Cegah user yang milih scope tertentu tapi lupa ceklis produk/kategorinya
+        if (form.scope === 'products' && payload.product_ids.length === 0) {
+            showAlert('Pilih minimal satu produk', 'error');
+            modal.isSubmitting = false;
+            return;
+        }
+        if (form.scope === 'categories' && payload.category_ids.length === 0) {
+            showAlert('Pilih minimal satu kategori', 'error');
+            modal.isSubmitting = false;
+            return;
+        }
 
         if (modal.isEdit) {
             await axios.put(`${apiBase}/discounts/${modal.id}`, payload, { headers: authHeaders() });
@@ -273,31 +358,22 @@ const executeDelete = async () => {
     }
 };
 
-// ==========================================
-// AUTO-DELETE VISUAL (REALTIME FILTER)
-// ==========================================
 const filteredPromos = computed(() => {
-    // Ambil tanggal hari ini dalam format YYYY-MM-DD
     const today = new Date().toLocaleDateString('en-CA'); 
-    
     return promos.value.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase());
-        
-        // Cek apakah tanggal berakhir (end_date) masih lebih besar atau sama dengan hari ini.
-        // Jika sudah lebih kecil (kadaluarsa), maka akan otomatis disembunyikan (false).
         const isNotExpired = p.end_date >= today; 
-        
         return matchesSearch && isNotExpired;
     });
 });
 
-// Stats
 const activePromosCount = computed(() => filteredPromos.value.filter(p => p.is_active).length);
 const nominalPromosCount = computed(() => filteredPromos.value.filter(p => p.type === 'nominal').length);
 const percentagePromosCount = computed(() => filteredPromos.value.filter(p => p.type === 'percentage').length);
 
 onMounted(() => {
     fetchPromos();
+    fetchProductsAndCategories();
 });
 </script>
 
