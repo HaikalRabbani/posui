@@ -120,24 +120,40 @@
                     </div>
 
                     <div v-if="form.scope === 'products'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Produk (Bisa lebih dari 1) <span class="text-[#B83B2A]">*</span></label>
-                        <div class="border border-[#EBF3FB] rounded-lg max-h-40 overflow-y-auto bg-white p-2 space-y-1">
-                            <label v-for="item in products" :key="item.id" class="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-[#F7FAFD] rounded text-[13px] text-[#1A2332]">
-                                <input type="checkbox" :value="item.id" v-model="form.product_ids" class="w-4 h-4 text-[#2E7DD6] rounded border-[#D4E4F4] focus:ring-[#2E7DD6]"> 
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Produk <span class="text-[#B83B2A]">*</span></label>
+                        
+                        <select v-model="tempProduct" @change="addProduct" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                            <option value="" disabled>-- Pilih Produk untuk Ditambahkan --</option>
+                            <option v-for="item in availableProducts" :key="item.id" :value="item.id">{{ item.name }}</option>
+                        </select>
+
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <span v-for="item in selectedProductsList" :key="item.id" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] animate-[fadeIn_0.2s_ease-out]">
                                 {{ item.name }}
-                            </label>
-                            <div v-if="products.length === 0" class="text-[12px] text-center text-[#8AAFCC] py-2">Belum ada data produk.</div>
+                                <button type="button" @click="removeProduct(item.id)" class="text-[#8AAFCC] hover:text-[#B83B2A] focus:outline-none transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </span>
+                            <span v-if="form.product_ids.length === 0" class="text-[12px] text-[#8AAFCC] italic py-1">Belum ada produk yang dipilih.</span>
                         </div>
                     </div>
 
                     <div v-if="form.scope === 'categories'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
-                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Kategori (Bisa lebih dari 1) <span class="text-[#B83B2A]">*</span></label>
-                        <div class="border border-[#EBF3FB] rounded-lg max-h-40 overflow-y-auto bg-white p-2 space-y-1">
-                            <label v-for="item in categories" :key="item.id" class="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-[#F7FAFD] rounded text-[13px] text-[#1A2332]">
-                                <input type="checkbox" :value="item.id" v-model="form.category_ids" class="w-4 h-4 text-[#2E7DD6] rounded border-[#D4E4F4] focus:ring-[#2E7DD6]"> 
+                        <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Kategori <span class="text-[#B83B2A]">*</span></label>
+                        
+                        <select v-model="tempCategory" @change="addCategory" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                            <option value="" disabled>-- Pilih Kategori untuk Ditambahkan --</option>
+                            <option v-for="item in availableCategories" :key="item.id" :value="item.id">{{ item.name }}</option>
+                        </select>
+
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <span v-for="item in selectedCategoriesList" :key="item.id" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[#F3E8FF] text-[#7E22CE] border border-[#E9D5FF] animate-[fadeIn_0.2s_ease-out]">
                                 {{ item.name }}
-                            </label>
-                            <div v-if="categories.length === 0" class="text-[12px] text-center text-[#8AAFCC] py-2">Belum ada data kategori.</div>
+                                <button type="button" @click="removeCategory(item.id)" class="text-[#D8B4FE] hover:text-[#9333EA] focus:outline-none transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </span>
+                            <span v-if="form.category_ids.length === 0" class="text-[12px] text-[#8AAFCC] italic py-1">Belum ada kategori yang dipilih.</span>
                         </div>
                     </div>
                     
@@ -223,7 +239,7 @@ const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type =
 
 const promos = ref([]);
 const products = ref([]);
-const categories = ref([]); // Tambahan untuk list kategori
+const categories = ref([]); 
 const isLoading = ref(true);
 const searchQuery = ref('');
 
@@ -236,20 +252,73 @@ const form = reactive({
 
 const deleteModal = reactive({ show: false, id: null, promoName: '', isDeleting: false });
 
+// Variabel penampung dropdown (agar setelah dipilih formnya reset jadi kosong)
+const tempProduct = ref('');
+const tempCategory = ref('');
+
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Fetch data pendukung untuk Multi-Select
+// ======================================================================
+// FUNGSI LOGIKA LABEL (CHIPS) UNTUK PRODUK & KATEGORI
+// ======================================================================
+
+// 1. Tambah & Hapus Produk
+const addProduct = () => {
+    if (tempProduct.value && !form.product_ids.includes(tempProduct.value)) {
+        form.product_ids.push(tempProduct.value);
+    }
+    tempProduct.value = ''; // Reset select setelah dipilih
+};
+
+const removeProduct = (id) => {
+    form.product_ids = form.product_ids.filter(pId => pId !== id);
+};
+
+// Map ID ke Object Name untuk ditampilkan di Label
+const selectedProductsList = computed(() => {
+    return form.product_ids.map(id => products.value.find(p => p.id == id)).filter(Boolean);
+});
+
+// Filter produk yg tampil di dropdown (sembunyikan yang sudah dipilih)
+const availableProducts = computed(() => {
+    return products.value.filter(p => !form.product_ids.includes(p.id));
+});
+
+// 2. Tambah & Hapus Kategori
+const addCategory = () => {
+    if (tempCategory.value && !form.category_ids.includes(tempCategory.value)) {
+        form.category_ids.push(tempCategory.value);
+    }
+    tempCategory.value = ''; 
+};
+
+const removeCategory = (id) => {
+    form.category_ids = form.category_ids.filter(cId => cId !== id);
+};
+
+const selectedCategoriesList = computed(() => {
+    return form.category_ids.map(id => categories.value.find(c => c.id == id)).filter(Boolean);
+});
+
+const availableCategories = computed(() => {
+    return categories.value.filter(c => !form.category_ids.includes(c.id));
+});
+
+// ======================================================================
+
 const fetchProductsAndCategories = async () => {
     try {
-        const resProd = await axios.get(`${apiBase}/products`, { headers: authHeaders() });
-        products.value = resProd.data.data || resProd.data || [];
+        const resProd = await axios.get(`${apiBase}/products?limit=100`, { headers: authHeaders() });
+        const prodData = resProd.data.data || resProd.data;
+        products.value = Array.isArray(prodData?.data) ? prodData.data : (Array.isArray(prodData) ? prodData : []);
         
-        const resCat = await axios.get(`${apiBase}/categories`, { headers: authHeaders() });
-        categories.value = resCat.data.data || resCat.data || [];
+        const resCat = await axios.get(`${apiBase}/categories?limit=100`, { headers: authHeaders() });
+        const catData = resCat.data.data || resCat.data;
+        categories.value = Array.isArray(catData?.data) ? catData.data : (Array.isArray(catData) ? catData : []);
     } catch (e) {
         console.error('Gagal mengambil data produk/kategori', e);
     }
@@ -259,10 +328,12 @@ const fetchPromos = async () => {
     isLoading.value = true;
     try {
         const res = await axios.get(`${apiBase}/discounts`, { headers: authHeaders() });
-        promos.value = res.data.data || res.data || [];
+        const data = res.data.data || res.data;
+        promos.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error('Gagal mengambil data promo', e);
-        showAlert('Gagal memuat data promo', 'error');
+        showAlert('Gagal memuat data promo, pastikan migrasi database sudah dijalankan', 'error');
+        promos.value = []; 
     } finally {
         isLoading.value = false;
     }
@@ -270,10 +341,15 @@ const fetchPromos = async () => {
 
 const openModal = (item = null) => {
     modal.isEdit = !!item;
+    tempProduct.value = ''; // Reset state input temporal
+    tempCategory.value = '';
+
     if (item) {
         modal.id = item.id;
         form.name = item.name;
         form.scope = item.scope || 'global';
+        // Karena computed mapping ke List bergantung pada id yang ada di array ini,
+        // waktu modal edit terbuka, label akan langsung terbentuk otomatis
         form.product_ids = item.product_ids || [];
         form.category_ids = item.category_ids || [];
         form.type = item.type;
@@ -309,7 +385,6 @@ const submitForm = async () => {
             is_active: Boolean(form.is_active)
         };
 
-        // Cegah user yang milih scope tertentu tapi lupa ceklis produk/kategorinya
         if (form.scope === 'products' && payload.product_ids.length === 0) {
             showAlert('Pilih minimal satu produk', 'error');
             modal.isSubmitting = false;
@@ -360,6 +435,8 @@ const executeDelete = async () => {
 
 const filteredPromos = computed(() => {
     const today = new Date().toLocaleDateString('en-CA'); 
+    if (!Array.isArray(promos.value)) return [];
+
     return promos.value.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase());
         const isNotExpired = p.end_date >= today; 
