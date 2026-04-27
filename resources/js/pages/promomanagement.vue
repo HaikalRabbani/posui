@@ -160,26 +160,26 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Tipe Diskon <span class="text-[#B83B2A]">*</span></label>
-                            <select v-model="form.type" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
+                            <select v-model="form.type" @change="formatInputNumber('value')" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
                                 <option value="percentage">Persentase (%)</option>
                                 <option value="nominal">Nominal (Rp)</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Nilai Diskon <span class="text-[#B83B2A]">*</span></label>
-                            <input type="number" v-model="form.value" required :placeholder="form.type === 'percentage' ? 'Contoh: 10' : 'Contoh: 15000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
+                            <input type="text" v-model="form.value" @input="formatInputNumber('value')" required :placeholder="form.type === 'percentage' ? 'Contoh: 10' : 'Contoh: 15.000'" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                         </div>
                     </div>
 
                     <div v-if="form.type === 'percentage'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
                         <label class="block text-[12px] font-semibold text-[#1B4F8A] mb-1">Batas Maksimal Potongan (Rp)</label>
                         <p class="text-[10px] text-[#5A7A9A] mb-2 leading-tight">Biarkan kosong jika persentase diskon tidak memiliki batas maksimal.</p>
-                        <input type="number" v-model="form.max_discount" placeholder="Contoh: 15000" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
+                        <input type="text" v-model="form.max_discount" @input="formatInputNumber('max_discount')" placeholder="Contoh: 15.000" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                     </div>
 
                     <div>
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Minimum Pembelian (Rp)</label>
-                        <input type="number" v-model="form.min_purchase" placeholder="Biarkan kosong jika tidak ada" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
+                        <input type="text" v-model="form.min_purchase" @input="formatInputNumber('min_purchase')" placeholder="Biarkan kosong jika tidak ada" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] font-['JetBrains_Mono']">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -228,11 +228,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
+const authHeaders = () => ({ 
+    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+    'Accept': 'application/json'
+});
 
 const alert = reactive({ show: false, message: '', type: 'success' });
 const showAlert = (msg, type = 'success') => { alert.message = msg; alert.type = type; alert.show = true; setTimeout(() => alert.show = false, 3000); };
@@ -252,9 +254,28 @@ const form = reactive({
 
 const deleteModal = reactive({ show: false, id: null, promoName: '', isDeleting: false });
 
-// Variabel penampung dropdown (agar setelah dipilih formnya reset jadi kosong)
 const tempProduct = ref('');
 const tempCategory = ref('');
+
+// Auto Format saat diketik
+const formatInputNumber = (field) => {
+    // Hapus semua selain angka
+    let rawValue = String(form[field]).replace(/[^0-9]/g, '');
+    
+    if (!rawValue) {
+        form[field] = '';
+        return;
+    }
+
+    if (field === 'value' && form.type === 'percentage') {
+        if (parseInt(rawValue) > 100) rawValue = '100'; // Batasi maks 100%
+        form[field] = rawValue;
+        return;
+    }
+    
+    // Format ke ribuan Indonesia (contoh: 15.000)
+    form[field] = new Intl.NumberFormat('id-ID').format(rawValue);
+};
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const formatDate = (dateStr) => {
@@ -266,29 +287,25 @@ const formatDate = (dateStr) => {
 // FUNGSI LOGIKA LABEL (CHIPS) UNTUK PRODUK & KATEGORI
 // ======================================================================
 
-// 1. Tambah & Hapus Produk
 const addProduct = () => {
     if (tempProduct.value && !form.product_ids.includes(tempProduct.value)) {
         form.product_ids.push(tempProduct.value);
     }
-    tempProduct.value = ''; // Reset select setelah dipilih
+    tempProduct.value = ''; 
 };
 
 const removeProduct = (id) => {
     form.product_ids = form.product_ids.filter(pId => pId !== id);
 };
 
-// Map ID ke Object Name untuk ditampilkan di Label
 const selectedProductsList = computed(() => {
     return form.product_ids.map(id => products.value.find(p => p.id == id)).filter(Boolean);
 });
 
-// Filter produk yg tampil di dropdown (sembunyikan yang sudah dipilih)
 const availableProducts = computed(() => {
     return products.value.filter(p => !form.product_ids.includes(p.id));
 });
 
-// 2. Tambah & Hapus Kategori
 const addCategory = () => {
     if (tempCategory.value && !form.category_ids.includes(tempCategory.value)) {
         form.category_ids.push(tempCategory.value);
@@ -309,15 +326,19 @@ const availableCategories = computed(() => {
 });
 
 // ======================================================================
+// FETCH API
+// ======================================================================
 
 const fetchProductsAndCategories = async () => {
     try {
-        const resProd = await axios.get(`${apiBase}/products?limit=100`, { headers: authHeaders() });
-        const prodData = resProd.data.data || resProd.data;
+        const resProd = await fetch(`${apiBase}/products?limit=100`, { headers: authHeaders() });
+        const prodJson = await resProd.json();
+        const prodData = prodJson.data || prodJson;
         products.value = Array.isArray(prodData?.data) ? prodData.data : (Array.isArray(prodData) ? prodData : []);
         
-        const resCat = await axios.get(`${apiBase}/categories?limit=100`, { headers: authHeaders() });
-        const catData = resCat.data.data || resCat.data;
+        const resCat = await fetch(`${apiBase}/categories?limit=100`, { headers: authHeaders() });
+        const catJson = await resCat.json();
+        const catData = catJson.data || catJson;
         categories.value = Array.isArray(catData?.data) ? catData.data : (Array.isArray(catData) ? catData : []);
     } catch (e) {
         console.error('Gagal mengambil data produk/kategori', e);
@@ -327,8 +348,9 @@ const fetchProductsAndCategories = async () => {
 const fetchPromos = async () => {
     isLoading.value = true;
     try {
-        const res = await axios.get(`${apiBase}/discounts`, { headers: authHeaders() });
-        const data = res.data.data || res.data;
+        const res = await fetch(`${apiBase}/discounts`, { headers: authHeaders() });
+        const resJson = await res.json();
+        const data = resJson.data || resJson;
         promos.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error('Gagal mengambil data promo', e);
@@ -341,21 +363,22 @@ const fetchPromos = async () => {
 
 const openModal = (item = null) => {
     modal.isEdit = !!item;
-    tempProduct.value = ''; // Reset state input temporal
+    tempProduct.value = ''; 
     tempCategory.value = '';
 
     if (item) {
         modal.id = item.id;
         form.name = item.name;
         form.scope = item.scope || 'global';
-        // Karena computed mapping ke List bergantung pada id yang ada di array ini,
-        // waktu modal edit terbuka, label akan langsung terbentuk otomatis
         form.product_ids = item.product_ids || [];
         form.category_ids = item.category_ids || [];
         form.type = item.type;
-        form.value = item.value;
-        form.max_discount = item.max_discount || '';
-        form.min_purchase = item.min_purchase || '';
+        
+        // Memformat angka bawaan dari database agar ada titiknya di dalam input
+        form.value = item.type === 'percentage' ? item.value : new Intl.NumberFormat('id-ID').format(item.value);
+        form.max_discount = item.max_discount ? new Intl.NumberFormat('id-ID').format(item.max_discount) : '';
+        form.min_purchase = item.min_purchase ? new Intl.NumberFormat('id-ID').format(item.min_purchase) : '';
+        
         form.start_date = item.start_date;
         form.end_date = item.end_date;
         form.is_active = item.is_active;
@@ -375,13 +398,18 @@ const closeModal = () => { modal.show = false; };
 const submitForm = async () => {
     modal.isSubmitting = true;
     try {
+        // Hapus karakter non-angka (seperti titik) sebelum dikirim ke backend
+        const pureValue = Number(String(form.value).replace(/\./g, ''));
+        const pureMaxDiscount = form.max_discount ? Number(String(form.max_discount).replace(/\./g, '')) : null;
+        const pureMinPurchase = form.min_purchase ? Number(String(form.min_purchase).replace(/\./g, '')) : 0;
+
         const payload = {
             ...form,
-            value: Number(form.value),
+            value: pureValue,
             product_ids: form.scope === 'products' ? form.product_ids : [],
             category_ids: form.scope === 'categories' ? form.category_ids : [],
-            max_discount: form.max_discount ? Number(form.max_discount) : null,
-            min_purchase: form.min_purchase ? Number(form.min_purchase) : 0,
+            max_discount: pureMaxDiscount,
+            min_purchase: pureMinPurchase,
             is_active: Boolean(form.is_active)
         };
 
@@ -396,18 +424,31 @@ const submitForm = async () => {
             return;
         }
 
+        let url = `${apiBase}/discounts`;
+        let method = 'POST';
+
         if (modal.isEdit) {
-            await axios.put(`${apiBase}/discounts/${modal.id}`, payload, { headers: authHeaders() });
-            showAlert('Promo berhasil diperbarui', 'success');
-        } else {
-            await axios.post(`${apiBase}/discounts`, payload, { headers: authHeaders() });
-            showAlert('Promo baru berhasil dibuat', 'success');
+            url = `${apiBase}/discounts/${modal.id}`;
+            method = 'PUT';
         }
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Gagal menyimpan data promo');
+        }
+
+        showAlert(`Promo ${modal.isEdit ? 'diperbarui' : 'baru berhasil dibuat'}`, 'success');
         closeModal();
         fetchPromos();
     } catch (e) {
-        showAlert(e.response?.data?.message || 'Gagal menyimpan data promo', 'error');
-        console.error(e.response?.data);
+        showAlert(e.message, 'error');
+        console.error(e);
     } finally {
         modal.isSubmitting = false;
     }
@@ -422,12 +463,18 @@ const confirmDelete = (item) => {
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
-        await axios.delete(`${apiBase}/discounts/${deleteModal.id}`, { headers: authHeaders() });
+        const response = await fetch(`${apiBase}/discounts/${deleteModal.id}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        
+        if (!response.ok) throw new Error('Gagal menghapus promo');
+        
         showAlert('Promo berhasil dihapus', 'success');
         deleteModal.show = false;
         fetchPromos();
     } catch (e) {
-        showAlert('Gagal menghapus promo', 'error');
+        showAlert(e.message, 'error');
     } finally {
         deleteModal.isDeleting = false;
     }

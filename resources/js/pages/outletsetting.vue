@@ -194,7 +194,7 @@
 
                                 <div>
                                     <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Tipe Perhitungan <span class="text-[#B83B2A]">*</span></label>
-                                    <select v-model="formTax.type" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
+                                    <select v-model="formTax.type" @change="formatTaxRate" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white">
                                         <option value="percentage">Persentase (%)</option>
                                         <option value="fixed">Nominal Tetap (Rp)</option>
                                     </select>
@@ -204,7 +204,7 @@
                                     <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-1">Besaran <span class="text-[#B83B2A]">*</span></label>
                                     <div class="relative">
                                         <span v-if="formTax.type === 'fixed'" class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-['JetBrains_Mono'] text-[13px]">Rp</span>
-                                        <input type="number" step="any" v-model="formTax.rate" @input="formErrorsTax.rate = false" :placeholder="formTax.type === 'percentage' ? '10' : '5000'" 
+                                        <input type="text" v-model="formTax.rate" @input="formatTaxRate" :placeholder="formTax.type === 'percentage' ? '10' : '5.000'" 
                                             :class="['w-full py-2 text-[13px] font-[\'JetBrains_Mono\'] rounded-lg border focus:outline-none transition-colors text-[#1A2332]', formTax.type === 'fixed' ? 'pl-9 pr-3' : 'px-3', formErrorsTax.rate ? 'border-[#B83B2A] bg-red-50 focus:border-[#B83B2A]' : 'border-[#D4E4F4] focus:border-[#2E7DD6]']">
                                         <span v-if="formTax.type === 'percentage'" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8AAFCC] font-bold text-[13px]">%</span>
                                     </div>
@@ -395,11 +395,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
+const authHeaders = () => ({ 
+    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+    'Accept': 'application/json'
+});
 
 const currentUserRole = ref(localStorage.getItem('user_role') || 'manager');
 
@@ -444,6 +446,21 @@ const getStationName = (id) => {
     return st ? st.name : '';
 };
 
+// AUTO-FORMAT PAJAK/BIAYA (Real-time Typing)
+const formatTaxRate = () => {
+    formErrorsTax.rate = false;
+    
+    // Jika tipenya Nominal (Fixed) formatkan ke bentuk Rupiah (ribuan)
+    if (formTax.type === 'fixed') {
+        let rawValue = String(formTax.rate).replace(/[^0-9]/g, '');
+        formTax.rate = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
+    } else {
+        // Jika persentase, biarkan mengetik angka/desimal normal (contoh: 12.5)
+        let rawValue = String(formTax.rate).replace(/[^0-9.]/g, '');
+        formTax.rate = rawValue;
+    }
+};
+
 const paginatedOutlets = computed(() => {
     let filtered = outlets.value.filter(o => o.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
     const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -455,7 +472,7 @@ const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.v
 const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 
 const formatProductNumber = (originalIndex, field) => {
-    let rawValue = menuForm.value[originalIndex][field].toString().replace(/[^0-9]/g, '');
+    let rawValue = String(menuForm.value[originalIndex][field]).replace(/[^0-9]/g, '');
     menuForm.value[originalIndex][field] = rawValue ? new Intl.NumberFormat('id-ID').format(rawValue) : '';
 };
 
@@ -473,28 +490,28 @@ const toggleAllMenus = () => {
     });
 };
 
-// --- API CALLS MAIN ---
+// --- API CALLS MAIN (FETCH API) ---
 const fetchInitialData = async () => {
     isLoading.value = true;
     try {
         const reqs = [
-            axios.get(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() }),
-            axios.get(`${apiBase}/products?limit=1000`, { headers: authHeaders() }),
-            axios.get(`${apiBase}/stations?limit=100`, { headers: authHeaders() })
+            fetch(`${apiBase}/outlets?limit=1000`, { headers: authHeaders() }).then(res => res.json()),
+            fetch(`${apiBase}/products?limit=1000`, { headers: authHeaders() }).then(res => res.json()),
+            fetch(`${apiBase}/stations?limit=100`, { headers: authHeaders() }).then(res => res.json())
         ];
 
         if (currentUserRole.value === 'developer') {
-            reqs.push(axios.get(`${apiBase}/users?limit=1000`, { headers: authHeaders() }));
+            reqs.push(fetch(`${apiBase}/users?limit=1000`, { headers: authHeaders() }).then(res => res.json()));
         }
 
         const responses = await Promise.all(reqs);
 
-        outlets.value = responses[0].data.data?.data || responses[0].data.data || responses[0].data || [];
-        masterProducts.value = responses[1].data.data?.data || responses[1].data.data || responses[1].data || [];
-        stations.value = responses[2].data.data?.data || responses[2].data.data || responses[2].data || [];
+        outlets.value = responses[0].data?.data || responses[0].data || [];
+        masterProducts.value = responses[1].data?.data || responses[1].data || [];
+        stations.value = responses[2].data?.data || responses[2].data || [];
 
         if (currentUserRole.value === 'developer') {
-            const allUsers = responses[3].data.data?.data || responses[3].data.data || responses[3].data || [];
+            const allUsers = responses[3].data?.data || responses[3].data || [];
             managers.value = allUsers.filter(u => u.role === 'manager');
         }
 
@@ -535,17 +552,29 @@ const submitOutlet = async () => {
     try {
         const payload = { ...formOutlet }; 
         let endpoint = `${apiBase}/outlets`;
+        let method = 'POST';
+        
         if (outletModal.isEdit) {
             endpoint += `/${outletModal.id}`;
-            payload._method = 'PUT';
+            method = 'PUT';
         }
 
-        await axios.post(endpoint, payload, { headers: authHeaders() });
+        const response = await fetch(endpoint, {
+            method: method,
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Gagal menyimpan outlet.');
+        }
+
         showAlert(`Outlet berhasil ${outletModal.isEdit ? 'diperbarui' : 'ditambahkan'}!`, 'success');
         outletModal.show = false;
         fetchInitialData();
     } catch (error) {
-        showAlert(error.response?.data?.message || 'Gagal menyimpan outlet.', 'error');
+        showAlert(error.message, 'error');
     } finally { outletModal.isSubmitting = false; }
 };
 
@@ -573,9 +602,10 @@ const openTaxManager = async (outlet) => {
 const fetchTaxesForOutlet = async (outletId) => {
     taxModal.isLoading = true;
     try {
-        const res = await axios.get(`${apiBase}/taxes`, { headers: authHeaders() });
-        // Saring secara lokal berdasarkan ID Outlet (karena backend mengambil semua milik manager)
-        outletTaxes.value = res.data.filter(t => t.outlet_id === outletId);
+        const res = await fetch(`${apiBase}/taxes`, { headers: authHeaders() });
+        const resJson = await res.json();
+        // Saring secara lokal berdasarkan ID Outlet
+        outletTaxes.value = resJson.filter(t => t.outlet_id === outletId);
     } catch (e) {
         showAlert('Gagal mengambil pengaturan pajak/biaya.', 'error');
     } finally {
@@ -586,9 +616,12 @@ const fetchTaxesForOutlet = async (outletId) => {
 const editTax = (tax) => {
     formTax.id = tax.id;
     formTax.name = tax.name;
-    formTax.rate = parseFloat(tax.rate);
     formTax.type = tax.type;
     formTax.active = tax.active;
+    
+    // Format value jika fixed saat masuk edit mode
+    formTax.rate = tax.type === 'fixed' ? formatRupiah(tax.rate) : tax.rate;
+
     formErrorsTax.name = false;
     formErrorsTax.rate = false;
     taxModal.isEdit = true;
@@ -596,32 +629,50 @@ const editTax = (tax) => {
 
 const submitTax = async () => {
     formErrorsTax.name = !formTax.name.trim();
-    formErrorsTax.rate = formTax.rate === '' || isNaN(formTax.rate);
+    formErrorsTax.rate = formTax.rate === '';
 
     if (formErrorsTax.name || formErrorsTax.rate) return;
 
     taxModal.isSubmitting = true;
     try {
+        // Hilangkan titik jika Nominal (Fixed) lalu convert menjadi float/number untuk dikirim ke backend
+        const pureRate = formTax.type === 'fixed' 
+            ? parseFloat(String(formTax.rate).replace(/\./g, '')) 
+            : parseFloat(formTax.rate);
+
         const payload = {
             name: formTax.name,
-            rate: parseFloat(formTax.rate),
+            rate: pureRate,
             type: formTax.type,
             active: formTax.active,
             outlet_id: taxModal.outletId
         };
 
+        let url = `${apiBase}/taxes`;
+        let method = 'POST';
+
         if (taxModal.isEdit) {
-            await axios.put(`${apiBase}/taxes/${formTax.id}`, payload, { headers: authHeaders() });
-            showAlert('Pajak/Biaya berhasil diperbarui!', 'success');
-        } else {
-            await axios.post(`${apiBase}/taxes`, payload, { headers: authHeaders() });
-            showAlert('Pajak/Biaya berhasil ditambahkan!', 'success');
+            url += `/${formTax.id}`;
+            method = 'PUT';
         }
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Gagal menyimpan pengaturan pajak.');
+        }
+
+        showAlert(`Pajak/Biaya berhasil ${taxModal.isEdit ? 'diperbarui' : 'ditambahkan'}!`, 'success');
         
         resetTaxForm();
         await fetchTaxesForOutlet(taxModal.outletId);
     } catch (error) {
-        showAlert(error.response?.data?.message || 'Gagal menyimpan pengaturan pajak.', 'error');
+        showAlert(error.message, 'error');
     } finally { 
         taxModal.isSubmitting = false; 
     }
@@ -638,8 +689,9 @@ const openMenuManager = async (outlet) => {
     isAllSelected.value = false;
 
     try {
-        const res = await axios.get(`${apiBase}/outlets/${outlet.id}/products`, { headers: authHeaders() });
-        const outletProducts = res.data.data || []; 
+        const res = await fetch(`${apiBase}/outlets/${outlet.id}/products`, { headers: authHeaders() });
+        const resJson = await res.json();
+        const outletProducts = resJson.data || []; 
         
         const activeStationsSet = new Set();
 
@@ -680,7 +732,7 @@ const openMenuManager = async (outlet) => {
 const saveOutletMenu = async () => {
     let hasInvalidData = false;
     menuForm.value.forEach(m => {
-        if (m.selected && !m.price.toString().trim()) {
+        if (m.selected && !String(m.price).trim()) {
             m.error = true;
             hasInvalidData = true;
         } else {
@@ -708,12 +760,18 @@ const saveOutletMenu = async () => {
             })
         };
 
-        await axios.post(`${apiBase}/outlets/${menuModal.outletId}/sync-products`, payload, { headers: authHeaders() });
+        const response = await fetch(`${apiBase}/outlets/${menuModal.outletId}/sync-products`, {
+            method: 'POST',
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Gagal menyimpan katalog cabang.');
         
         showAlert('Konfigurasi menu cabang berhasil disimpan!', 'success');
         menuModal.show = false;
     } catch (error) {
-        showAlert('Gagal menyimpan katalog cabang.', 'error');
+        showAlert(error.message, 'error');
     } finally { menuModal.isSaving = false; }
 };
 
@@ -729,21 +787,31 @@ const confirmDelete = (item, type) => {
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
+        let url = '';
         if (deleteModal.type === 'outlet') {
-            await axios.delete(`${apiBase}/outlets/${deleteModal.id}`, { headers: authHeaders() });
-            showAlert('Outlet berhasil dihapus!', 'success');
-            deleteModal.show = false;
+            url = `${apiBase}/outlets/${deleteModal.id}`;
+        } else if (deleteModal.type === 'tax') {
+            url = `${apiBase}/taxes/${deleteModal.id}`;
+        }
+
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+
+        if (!response.ok) throw new Error('Gagal menghapus data.');
+
+        showAlert(`${deleteModal.type === 'outlet' ? 'Outlet' : 'Pajak/Biaya'} berhasil dihapus!`, 'success');
+        deleteModal.show = false;
+
+        if (deleteModal.type === 'outlet') {
             fetchInitialData();
-        } 
-        else if (deleteModal.type === 'tax') {
-            await axios.delete(`${apiBase}/taxes/${deleteModal.id}`, { headers: authHeaders() });
-            showAlert('Pajak/Biaya berhasil dihapus!', 'success');
-            deleteModal.show = false;
+        } else {
             // Refresh tabel tax tanpa menutup modal utamanya
             await fetchTaxesForOutlet(taxModal.outletId);
         }
     } catch (error) {
-        showAlert('Gagal menghapus data.', 'error');
+        showAlert(error.message, 'error');
     } finally { 
         deleteModal.isDeleting = false; 
     }
