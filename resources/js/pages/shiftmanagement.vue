@@ -223,14 +223,23 @@
                                     </td>
                                     <td class="px-5 py-3 text-[13px] text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(shift.opening_balance) }}</td>
                                     <td class="px-5 py-3 text-right">
-                                        <span v-if="shift.status === 'closed'" :class="['text-[12px] font-bold font-[JetBrains_Mono]', shift.difference < 0 ? 'text-[#B83B2A]' : 'text-[#2A7A4B]']">
+                                        <span v-if="shift.status === 'closed' && shift.closing_balance_actual !== null" :class="['text-[12px] font-bold font-[JetBrains_Mono]', shift.difference < 0 ? 'text-[#B83B2A]' : 'text-[#2A7A4B]']">
                                             {{ shift.difference > 0 ? '+' : '' }}{{ formatRupiah(shift.difference) }}
+                                        </span>
+                                        <span v-else-if="shift.status === 'closed' && shift.closing_balance_actual === null" class="text-[11px] font-bold text-[#B83B2A] italic">
+                                            Pending Verifikasi
                                         </span>
                                         <span v-else class="text-[11px] text-[#8AAFCC] italic">Belum dihitung</span>
                                     </td>
                                     <td class="px-5 py-3 text-center">
-                                        <span :class="['px-2 py-0.5 rounded text-[10px] font-bold uppercase border', shift.status === 'active' ? 'bg-orange-50 text-[#C4860A] border-orange-200' : 'bg-[#EBF3FB] text-[#1B4F8A] border-[#D4E4F4]']">
-                                            {{ shift.status === 'active' ? 'Open' : 'Closed' }}
+                                        <span v-if="shift.status === 'active'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-orange-50 text-[#C4860A] border-orange-200">
+                                            Open
+                                        </span>
+                                        <span v-else-if="shift.status === 'closed' && shift.closing_balance_actual === null" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-red-50 text-[#B83B2A] border-red-200">
+                                            Butuh Verifikasi
+                                        </span>
+                                        <span v-else class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-[#EBF3FB] text-[#1B4F8A] border-[#D4E4F4]">
+                                            Closed
                                         </span>
                                     </td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
@@ -385,7 +394,7 @@
                     <h3 class="text-[16px] font-bold text-[#1A2332]">Detail Laporan Shift</h3>
                     <button @click="selectedShift = null" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <div class="grid grid-cols-2 gap-y-2 text-[13px]">
                         <span class="text-[#5A7A9A]">Nama Kasir</span>
                         <span class="text-[#1A2332] font-bold text-right">{{ selectedShift.user?.name }}</span>
@@ -399,21 +408,44 @@
                         <span class="text-[#5A7A9A]">Selesai Kerja</span>
                         <span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ selectedShift.ended_at ? formatDateTime(selectedShift.ended_at) : 'Masih Aktif' }}</span>
                     </div>
+
+                    <div v-if="selectedShift.status === 'closed' && selectedShift.closing_balance_actual === null" class="mt-4 p-4 border border-red-200 bg-red-50 rounded-xl space-y-3 animate-[fadeIn_0.3s_ease-out]">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-[#B83B2A] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <div>
+                                <h4 class="text-[13px] font-bold text-[#B83B2A]">Butuh Verifikasi Manajer</h4>
+                                <p class="text-[11px] text-red-700 leading-relaxed mt-1">Laporan ini ditutup sistem karena kelalaian kasir. Masukkan jumlah fisik uang laci.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-red-800 uppercase mb-1">Uang Laci Aktual</label>
+                            <div class="flex gap-2">
+                                <input type="number" v-model="resolveForm.actual_closing_balance" class="w-full px-3 py-2 text-[13px] rounded-lg border border-red-200 outline-none focus:border-red-400 bg-white font-['JetBrains_Mono']" placeholder="Masukkan jumlah Rp">
+                                <button @click="setSameAsSystem" class="px-3 py-2 bg-white border border-red-200 text-red-700 text-[11px] font-bold rounded-lg hover:bg-red-100 transition-colors whitespace-nowrap">
+                                    Samakan Sistem
+                                </button>
+                            </div>
+                        </div>
+                        <button @click="resolveShift" :disabled="resolveForm.isSubmitting" class="w-full py-2 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors mt-2">
+                            {{ resolveForm.isSubmitting ? 'Memproses...' : 'Verifikasi Laporan' }}
+                        </button>
+                    </div>
+
                     <div class="p-4 bg-[#F7FAFD] rounded-lg border border-[#D4E4F4] space-y-2 font-['JetBrains_Mono'] text-[13px]">
                         <div class="flex justify-between text-[#5A7A9A]"><span>Modal Awal</span><span>Rp {{ formatRupiah(selectedShift.opening_balance) }}</span></div>
                         <div class="flex justify-between text-[#2A7A4B] font-bold"><span>Total Tunai Masuk</span><span>+ Rp {{ formatRupiah((selectedShift.closing_balance_system || 0) - (selectedShift.opening_balance || 0)) }}</span></div>
                         <div class="h-px bg-[#D4E4F4] my-1"></div>
                         <div class="flex justify-between text-[#1B4F8A] font-bold"><span>Seharusnya (Sistem)</span><span>Rp {{ formatRupiah(selectedShift.closing_balance_system) }}</span></div>
-                        <div v-if="selectedShift.status === 'closed'" class="flex justify-between pt-2 border-t border-dashed border-[#D4E4F4]">
+                        <div v-if="selectedShift.status === 'closed' && selectedShift.closing_balance_actual !== null" class="flex justify-between pt-2 border-t border-dashed border-[#D4E4F4]">
                             <span class="text-[#5A7A9A]">Uang Laci (Actual)</span><span class="text-[#1A2332] font-bold">Rp {{ formatRupiah(selectedShift.closing_balance_actual) }}</span>
                         </div>
                     </div>
-                    <div v-if="selectedShift.status === 'closed'" class="flex justify-between p-3 rounded-lg border font-bold" :class="selectedShift.difference < 0 ? 'bg-red-50 text-[#B83B2A] border-red-100' : 'bg-green-50 text-[#2A7A4B] border-green-100'">
+                    <div v-if="selectedShift.status === 'closed' && selectedShift.closing_balance_actual !== null" class="flex justify-between p-3 rounded-lg border font-bold" :class="selectedShift.difference < 0 ? 'bg-red-50 text-[#B83B2A] border-red-100' : 'bg-green-50 text-[#2A7A4B] border-green-100'">
                         <span>Selisih Laci</span><span class="font-['JetBrains_Mono']">Rp {{ formatRupiah(selectedShift.difference) }}</span>
                     </div>
                     <div v-if="selectedShift.notes" class="pt-2">
-                        <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Catatan Kasir</label>
-                        <p class="text-[12px] text-[#1A2332] bg-gray-50 p-2.5 rounded border border-dashed border-[#D4E4F4]">{{ selectedShift.notes }}</p>
+                        <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Catatan</label>
+                        <p class="text-[12px] text-[#1A2332] bg-gray-50 p-2.5 rounded border border-dashed border-[#D4E4F4] leading-relaxed">{{ selectedShift.notes }}</p>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-[#D4E4F4] bg-[#F7FAFD] flex justify-end">
@@ -495,7 +527,16 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedShift = ref(null);
 
+const resolveForm = reactive({ actual_closing_balance: '', isSubmitting: false });
+
 const deleteModal = reactive({ show: false, id: null, type: '', isDeleting: false });
+
+// Reset Form saat modal dibuka
+watch(selectedShift, (newVal) => {
+    if (newVal) {
+        resolveForm.actual_closing_balance = '';
+    }
+});
 
 // --- UTILS ---
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
@@ -575,7 +616,6 @@ const fetchCalendarSchedules = async () => {
             headers: authHeaders() 
         });
         
-        // Backend telah di-update untuk me-return flat array yang mudah dibaca Vue
         allCalendarSchedules.value = res.data.data || [];
     } catch (e) {
         console.error("Gagal menarik data kalender:", e);
@@ -737,6 +777,37 @@ const executeAutoGenerate = async () => {
     }
 };
 
+// --- VERIFIKASI AUTO-CLOSE (RESOLVE) LOGIC ---
+const setSameAsSystem = () => {
+    resolveForm.actual_closing_balance = selectedShift.value.closing_balance_system;
+};
+
+const resolveShift = async () => {
+    if (resolveForm.actual_closing_balance === '' || resolveForm.actual_closing_balance === null) {
+        showAlert('Silakan masukkan jumlah uang aktual di laci', 'error');
+        return;
+    }
+    resolveForm.isSubmitting = true;
+    try {
+        const payload = {
+            actual_closing_balance: parseInt(resolveForm.actual_closing_balance)
+        };
+        const res = await axios.put(`${apiBase}/shift-karyawans/${selectedShift.value.id}/resolve`, payload, { headers: authHeaders() });
+        showAlert('Laporan berhasil diverifikasi oleh Manajer.', 'success');
+        
+        // Update local object & table
+        selectedShift.value = res.data.data;
+        const index = shifts.value.findIndex(s => s.id === selectedShift.value.id);
+        if (index !== -1) {
+            shifts.value[index] = res.data.data;
+        }
+    } catch (e) {
+        showAlert(e.response?.data?.message || "Gagal memverifikasi laporan.", "error");
+    } finally {
+        resolveForm.isSubmitting = false;
+    }
+};
+
 // --- DELETE LOGIC ---
 const confirmDelete = (item, type) => { 
     deleteModal.id = item.id; 
@@ -788,7 +859,15 @@ const filteredReports = computed(() => {
 });
 
 const activeShiftsCount = computed(() => filteredReports.value.filter(s => s.status === 'active').length);
-const totalDifference = computed(() => filteredReports.value.reduce((acc, curr) => acc + (parseInt(curr.difference) || 0), 0));
+const totalDifference = computed(() => {
+    return filteredReports.value.reduce((acc, curr) => {
+        // Hanya hitung yang sudah punya actual balance
+        if (curr.closing_balance_actual !== null) {
+            return acc + (parseInt(curr.difference) || 0);
+        }
+        return acc;
+    }, 0);
+});
 
 const totalPages = computed(() => Math.ceil(filteredReports.value.length / itemsPerPage.value));
 const paginatedReports = computed(() => {
