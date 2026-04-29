@@ -12,7 +12,6 @@
         </transition>
 
         <div class="space-y-6 font-['Poppins'] pb-10">
-
             <div class="flex gap-4 border-b border-[#D4E4F4] overflow-x-auto custom-scrollbar">
                 <button @click="activeTab = 'master'" class="px-4 py-2.5 text-[14px] font-semibold transition-colors border-b-2 whitespace-nowrap" :class="activeTab === 'master' ? 'text-[#1B4F8A] border-[#1B4F8A]' : 'text-[#5A7A9A] border-transparent hover:text-[#1A2332]'">
                     Master Shift
@@ -260,7 +259,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div v-if="scheduleModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
@@ -419,11 +417,11 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-red-800 uppercase mb-1">Uang Laci Aktual</label>
-                            <div class="flex gap-2">
-                                <input type="number" v-model="resolveForm.actual_closing_balance" class="w-full px-3 py-2 text-[13px] rounded-lg border border-red-200 outline-none focus:border-red-400 bg-white font-['JetBrains_Mono']" placeholder="Masukkan jumlah Rp">
-                                <button @click="setSameAsSystem" class="px-3 py-2 bg-white border border-red-200 text-red-700 text-[11px] font-bold rounded-lg hover:bg-red-100 transition-colors whitespace-nowrap">
-                                    Samakan Sistem
-                                </button>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-[13px] font-bold text-[#B83B2A] font-['JetBrains_Mono']">Rp</span>
+                                </div>
+                                <input type="text" v-model="formattedActualBalance" class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-red-200 outline-none focus:border-red-400 bg-white font-['JetBrains_Mono']" placeholder="Contoh: 150.000">
                             </div>
                         </div>
                         <button @click="resolveShift" :disabled="resolveForm.isSubmitting" class="w-full py-2 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors mt-2">
@@ -506,10 +504,9 @@ const currentYear = computed(() => currentDate.value.getFullYear());
 const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const selectedCalendarOutlet = ref('');
 
-const allCalendarSchedules = ref([]); // Data kalender sekarang flat array dari endpoint schedules
+const allCalendarSchedules = ref([]); 
 const dayModal = reactive({ show: false, date: null, schedules: [], form: { shift_id: '', user_id: '' }, isSubmitting: false });
 
-// Warna dinamis untuk shift badges
 const shiftColors = [
     'bg-blue-50 text-[#1B4F8A] border-blue-200',
     'bg-green-50 text-[#2A7A4B] border-green-200',
@@ -528,7 +525,6 @@ const itemsPerPage = ref(10);
 const selectedShift = ref(null);
 
 const resolveForm = reactive({ actual_closing_balance: '', isSubmitting: false });
-
 const deleteModal = reactive({ show: false, id: null, type: '', isDeleting: false });
 
 // Reset Form saat modal dibuka
@@ -562,10 +558,7 @@ const getOutletName = (id) => {
 const getShiftColorClass = (shiftId, isDot = false) => {
     const index = schedules.value.findIndex(s => s.id === shiftId);
     if (index === -1) return isDot ? 'bg-gray-400' : 'bg-gray-50 text-gray-700 border-gray-200';
-    
-    if (isDot) {
-        return shiftColors[index % shiftColors.length].split(' ')[1].replace('text-', 'bg-');
-    }
+    if (isDot) { return shiftColors[index % shiftColors.length].split(' ')[1].replace('text-', 'bg-'); }
     return shiftColors[index % shiftColors.length];
 };
 
@@ -604,22 +597,13 @@ const fetchSchedules = async () => {
 const fetchCalendarSchedules = async () => {
     try {
         if (!calendarGrid.value || calendarGrid.value.length === 0) return;
-
         const startDate = formatDateForApi(calendarGrid.value[0].date);
         const endDate = formatDateForApi(calendarGrid.value[calendarGrid.value.length - 1].date);
-        
         const params = { start_date: startDate, end_date: endDate };
         if (selectedCalendarOutlet.value) params.outlet_id = selectedCalendarOutlet.value;
-
-        const res = await axios.get(`${apiBase}/schedules`, { 
-            params,
-            headers: authHeaders() 
-        });
-        
+        const res = await axios.get(`${apiBase}/schedules`, { params, headers: authHeaders() });
         allCalendarSchedules.value = res.data.data || [];
-    } catch (e) {
-        console.error("Gagal menarik data kalender:", e);
-    }
+    } catch (e) { console.error("Gagal menarik data kalender:", e); }
 };
 
 const fetchReports = async () => {
@@ -638,30 +622,16 @@ const calendarGrid = computed(() => {
     const firstDay = new Date(year, month, 1).getDay(); 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
-
     const grid = [];
-    for (let i = firstDay - 1; i >= 0; i--) {
-        grid.push({ date: new Date(year, month - 1, daysInPrevMonth - i), isCurrent: false });
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-        grid.push({ date: new Date(year, month, i), isCurrent: true });
-    }
+    for (let i = firstDay - 1; i >= 0; i--) { grid.push({ date: new Date(year, month - 1, daysInPrevMonth - i), isCurrent: false }); }
+    for (let i = 1; i <= daysInMonth; i++) { grid.push({ date: new Date(year, month, i), isCurrent: true }); }
     const remaining = 42 - grid.length;
-    for (let i = 1; i <= remaining; i++) {
-        grid.push({ date: new Date(year, month + 1, i), isCurrent: false });
-    }
+    for (let i = 1; i <= remaining; i++) { grid.push({ date: new Date(year, month + 1, i), isCurrent: false }); }
     return grid;
 });
 
-const prevMonth = () => {
-    currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1);
-    fetchCalendarSchedules();
-};
-const nextMonth = () => {
-    currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1);
-    fetchCalendarSchedules();
-};
-
+const prevMonth = () => { currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1); fetchCalendarSchedules(); };
+const nextMonth = () => { currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1); fetchCalendarSchedules(); };
 const getSchedulesForDate = (date) => {
     const dateStr = formatDateForApi(date);
     return allCalendarSchedules.value.filter(s => {
@@ -670,12 +640,10 @@ const getSchedulesForDate = (date) => {
         return matchDate && matchOutlet;
     });
 };
-
 const formattedModalDate = computed(() => {
     if (!dayModal.date) return '';
     return dayModal.date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 });
-
 const openDayModal = (dateObj) => {
     dayModal.date = dateObj;
     dayModal.schedules = getSchedulesForDate(dateObj);
@@ -683,7 +651,6 @@ const openDayModal = (dateObj) => {
     dayModal.form.user_id = '';
     dayModal.show = true;
 };
-
 const submitDaySchedule = async () => {
     dayModal.isSubmitting = true;
     try {
@@ -701,9 +668,7 @@ const submitDaySchedule = async () => {
         dayModal.form.user_id = '';
     } catch (e) {
         showAlert(e.response?.data?.message || "Gagal menambahkan jadwal karyawan.", "error");
-    } finally {
-        dayModal.isSubmitting = false;
-    }
+    } finally { dayModal.isSubmitting = false; }
 };
 
 // --- MASTER SHIFT LOGIC ---
@@ -720,67 +685,54 @@ const openScheduleModal = (item = null) => {
         formSchedule.name = ''; 
         formSchedule.start_time = '08:00'; 
         formSchedule.end_time = '16:00'; 
-        if (outlets.value.length === 1) {
-            formSchedule.outlet_id = outlets.value[0].id;
-        }
+        if (outlets.value.length === 1) { formSchedule.outlet_id = outlets.value[0].id; }
     }
     scheduleModal.show = true;
 };
-
 const submitSchedule = async () => {
     scheduleModal.isSubmitting = true;
     try {
         const url = scheduleModal.isEdit ? `${apiBase}/shifts/${scheduleModal.id}` : `${apiBase}/shifts`;
         const method = scheduleModal.isEdit ? 'put' : 'post';
-        
-        const payload = {
-            ...formSchedule,
-            start_time: formSchedule.start_time.substring(0, 5),
-            end_time: formSchedule.end_time.substring(0, 5),
-        };
-        
+        const payload = { ...formSchedule, start_time: formSchedule.start_time.substring(0, 5), end_time: formSchedule.end_time.substring(0, 5) };
         await axios[method](url, payload, { headers: authHeaders() });
         showAlert(`Master Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
         scheduleModal.show = false;
         fetchSchedules();
-    } catch (e) {
-        showAlert(e.response?.data?.message || "Gagal menyimpan master shift.", "error");
-    } finally { scheduleModal.isSubmitting = false; }
+    } catch (e) { showAlert(e.response?.data?.message || "Gagal menyimpan master shift.", "error"); } 
+    finally { scheduleModal.isSubmitting = false; }
 };
 
 // --- AUTO GENERATE LOGIC ---
 const openAutoGenerateModal = () => {
-    if (outlets.value.length === 1) {
-        autoGenModal.outlet_id = outlets.value[0].id;
-    } else {
-        autoGenModal.outlet_id = '';
-    }
+    if (outlets.value.length === 1) { autoGenModal.outlet_id = outlets.value[0].id; } 
+    else { autoGenModal.outlet_id = ''; }
     autoGenModal.show = true;
 };
-
 const executeAutoGenerate = async () => {
     if (!autoGenModal.outlet_id) return;
-    
     autoGenModal.isGenerating = true;
     try {
-        const res = await axios.post(`${apiBase}/shifts/auto-generate`, {
-            outlet_id: autoGenModal.outlet_id
-        }, { headers: authHeaders() });
-        
+        const res = await axios.post(`${apiBase}/shifts/auto-generate`, { outlet_id: autoGenModal.outlet_id }, { headers: authHeaders() });
         showAlert(res.data.message || 'Jadwal berhasil digenerate otomatis.', 'success');
         autoGenModal.show = false;
         fetchCalendarSchedules();
-    } catch (e) {
-        showAlert(e.response?.data?.message || "Gagal men-generate jadwal otomatis.", "error");
-    } finally {
-        autoGenModal.isGenerating = false;
-    }
+    } catch (e) { showAlert(e.response?.data?.message || "Gagal men-generate jadwal otomatis.", "error"); } 
+    finally { autoGenModal.isGenerating = false; }
 };
 
 // --- VERIFIKASI AUTO-CLOSE (RESOLVE) LOGIC ---
-const setSameAsSystem = () => {
-    resolveForm.actual_closing_balance = selectedShift.value.closing_balance_system;
-};
+// Computed property untuk memformat input secara otomatis (real-time ribuan)
+const formattedActualBalance = computed({
+    get: () => {
+        if (resolveForm.actual_closing_balance === '' || resolveForm.actual_closing_balance === null) return '';
+        return formatRupiah(resolveForm.actual_closing_balance);
+    },
+    set: (val) => {
+        const numericString = val.replace(/\D/g, '');
+        resolveForm.actual_closing_balance = numericString ? parseInt(numericString, 10) : '';
+    }
+});
 
 const resolveShift = async () => {
     if (resolveForm.actual_closing_balance === '' || resolveForm.actual_closing_balance === null) {
@@ -789,32 +741,18 @@ const resolveShift = async () => {
     }
     resolveForm.isSubmitting = true;
     try {
-        const payload = {
-            actual_closing_balance: parseInt(resolveForm.actual_closing_balance)
-        };
+        const payload = { actual_closing_balance: parseInt(resolveForm.actual_closing_balance) };
         const res = await axios.put(`${apiBase}/shift-karyawans/${selectedShift.value.id}/resolve`, payload, { headers: authHeaders() });
         showAlert('Laporan berhasil diverifikasi oleh Manajer.', 'success');
-        
-        // Update local object & table
         selectedShift.value = res.data.data;
         const index = shifts.value.findIndex(s => s.id === selectedShift.value.id);
-        if (index !== -1) {
-            shifts.value[index] = res.data.data;
-        }
-    } catch (e) {
-        showAlert(e.response?.data?.message || "Gagal memverifikasi laporan.", "error");
-    } finally {
-        resolveForm.isSubmitting = false;
-    }
+        if (index !== -1) { shifts.value[index] = res.data.data; }
+    } catch (e) { showAlert(e.response?.data?.message || "Gagal memverifikasi laporan.", "error"); } 
+    finally { resolveForm.isSubmitting = false; }
 };
 
 // --- DELETE LOGIC ---
-const confirmDelete = (item, type) => { 
-    deleteModal.id = item.id; 
-    deleteModal.type = type; 
-    deleteModal.show = true; 
-};
-
+const confirmDelete = (item, type) => { deleteModal.id = item.id; deleteModal.type = type; deleteModal.show = true; };
 const executeDelete = async () => {
     deleteModal.isDeleting = true;
     try {
@@ -822,23 +760,20 @@ const executeDelete = async () => {
         if (deleteModal.type === 'master') endpoint = `shifts/${deleteModal.id}`;
         else if (deleteModal.type === 'schedule_calendar') endpoint = `schedules/${deleteModal.id}`;
         else if (deleteModal.type === 'report') endpoint = `shift-karyawans/${deleteModal.id}`;
-
         await axios.delete(`${apiBase}/${endpoint}`, { headers: authHeaders() });
         showAlert("Data berhasil dihapus.", "success");
         deleteModal.show = false;
-        
         if (deleteModal.type === 'master') fetchSchedules();
         else if (deleteModal.type === 'schedule_calendar') {
             await fetchCalendarSchedules();
             if(dayModal.show) dayModal.schedules = getSchedulesForDate(dayModal.date);
         }
         else fetchReports();
-    } catch (e) {
-        showAlert("Gagal menghapus data.", "error");
-    } finally { deleteModal.isDeleting = false; }
+    } catch (e) { showAlert("Gagal menghapus data.", "error"); } 
+    finally { deleteModal.isDeleting = false; }
 };
 
-// --- COMPUTEDS (TAB 1) ---
+// --- COMPUTEDS (TAB 1 & 3) ---
 const filteredSchedules = computed(() => {
     const query = searchScheduleQuery.value.toLowerCase();
     return schedules.value.filter(s => {
@@ -847,8 +782,6 @@ const filteredSchedules = computed(() => {
         return matchName && matchOutlet;
     });
 });
-
-// --- COMPUTEDS (TAB 3) ---
 const filteredReports = computed(() => {
     const query = searchReportQuery.value.toLowerCase();
     return shifts.value.filter(s => {
@@ -857,39 +790,21 @@ const filteredReports = computed(() => {
         return matchSearch && matchOutlet;
     });
 });
-
 const activeShiftsCount = computed(() => filteredReports.value.filter(s => s.status === 'active').length);
-const totalDifference = computed(() => {
-    return filteredReports.value.reduce((acc, curr) => {
-        // Hanya hitung yang sudah punya actual balance
-        if (curr.closing_balance_actual !== null) {
-            return acc + (parseInt(curr.difference) || 0);
-        }
-        return acc;
-    }, 0);
-});
-
+const totalDifference = computed(() => filteredReports.value.reduce((acc, curr) => (curr.closing_balance_actual !== null ? acc + (parseInt(curr.difference) || 0) : acc), 0));
 const totalPages = computed(() => Math.ceil(filteredReports.value.length / itemsPerPage.value));
 const paginatedReports = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     return filteredReports.value.slice(start, start + itemsPerPage.value);
 });
 
-// Fetch data when switching tabs
 watch(activeTab, (newVal) => {
     if (newVal === 'master' && schedules.value.length === 0) fetchSchedules();
-    if (newVal === 'kalender' && allCalendarSchedules.value.length === 0) {
-        fetchSchedules();
-        fetchCalendarSchedules();
-    }
+    if (newVal === 'kalender' && allCalendarSchedules.value.length === 0) { fetchSchedules(); fetchCalendarSchedules(); }
     if (newVal === 'laporan' && shifts.value.length === 0) fetchReports();
 });
 
-onMounted(async () => {
-    await fetchInitialData();
-    fetchSchedules(); 
-    fetchCalendarSchedules();
-});
+onMounted(async () => { await fetchInitialData(); fetchSchedules(); fetchCalendarSchedules(); });
 </script>
 
 <style scoped>
@@ -897,19 +812,7 @@ onMounted(async () => {
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4E4F4; border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #8AAFCC; }
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-10px); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
