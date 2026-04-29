@@ -29,13 +29,13 @@
                     <div class="p-4 border-b border-[#D4E4F4] bg-[#F7FAFD] space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h3 class="text-[15px] font-bold text-[#1A2332]">Daftar Master Shift</h3>
+                                <h3 class="text-[15px] font-bold text-[#1A2332]">Daftar Shift</h3>
                                 <p class="text-[12px] text-[#5A7A9A] mt-0.5">Buat dan atur jam kerja dasar untuk outlet.</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button @click="openScheduleModal()" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap w-fit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                    Tambah Master Shift
+                                    Tambah Shift
                                 </button>
                             </div>
                         </div>
@@ -264,7 +264,7 @@
         <div v-if="scheduleModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-[#D4E4F4]">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-bold text-[#1A2332]">{{ scheduleModal.isEdit ? 'Edit Master Shift' : 'Buat Master Shift' }}</h3>
+                    <h3 class="text-[16px] font-bold text-[#1A2332]">{{ scheduleModal.isEdit ? 'Edit Shift' : 'Buat Shift' }}</h3>
                     <button @click="scheduleModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
                 <form @submit.prevent="submitSchedule" class="p-6 space-y-4">
@@ -299,62 +299,73 @@
             </div>
         </div>
 
-        <div v-if="dayModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-[#D4E4F4]">
-                <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-bold text-[#1A2332]">Jadwal: {{ formattedModalDate }}</h3>
-                    <button @click="dayModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-                </div>
+        <div v-if="dayModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm px-4 font-['Poppins']">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] border border-gray-100">
                 
-                <div class="p-6 space-y-6">
-                    <form @submit.prevent="submitDaySchedule" class="space-y-3 bg-[#F0F4F8] p-4 rounded-xl border border-[#D4E4F4]">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Pilih Shift</label>
-                                <select v-model="dayModal.form.shift_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
-                                    <option value="" disabled>Pilih shift...</option>
-                                    <option v-for="shift in filteredSchedules" :key="shift.id" :value="shift.id">{{ shift.name }} ({{ (shift.start_time||'').substring(0,5) }}-{{ (shift.end_time||'').substring(0,5) }})</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-[#5A7A9A] uppercase mb-1">Karyawan</label>
-                                <select v-model="dayModal.form.user_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
-                                    <option value="" disabled>Pilih karyawan...</option>
-                                    <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex justify-end pt-1">
-                            <button type="submit" :disabled="dayModal.isSubmitting" class="px-4 py-2 bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                {{ dayModal.isSubmitting ? 'Menyimpan...' : 'Tambahkan Karyawan' }}
-                            </button>
-                        </div>
-                    </form>
-
+                <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
                     <div>
-                        <h4 class="text-[13px] font-bold text-[#1A2332] border-b border-[#D4E4F4] pb-2 mb-3">Daftar Penugasan Hari Ini</h4>
-                        <div v-if="dayModal.schedules.length === 0" class="text-center text-[12px] text-[#8AAFCC] py-4 bg-gray-50 rounded-lg border border-dashed border-[#D4E4F4]">
-                            Belum ada jadwal penugasan untuk hari ini.
+                        <h3 class="text-[16px] font-bold text-gray-800">Penugasan Shift</h3>
+                        <p class="text-[12px] text-gray-500 mt-0.5">{{ formattedModalDate }}</p>
+                    </div>
+                    <button @click="dayModal.show = false" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 hover:bg-red-50 rounded-full focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 border-b border-gray-100 shrink-0 bg-blue-50/40 relative z-10">
+                    <form @submit.prevent="submitDaySchedule" class="flex flex-col sm:flex-row items-end gap-3">
+                        <div class="w-full">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1.5 tracking-wide">Pilih Shift</label>
+                            <select v-model="dayModal.form.shift_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-gray-200 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white cursor-pointer shadow-sm transition-all">
+                                <option value="" disabled>Pilih shift...</option>
+                                <option v-for="shift in filteredSchedules" :key="shift.id" :value="shift.id">{{ shift.name }} ({{ (shift.start_time||'').substring(0,5) }}-{{ (shift.end_time||'').substring(0,5) }})</option>
+                            </select>
                         </div>
-                        <div v-else class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                            <div v-for="sched in dayModal.schedules" :key="sched.id" class="flex items-center justify-between p-3 bg-white border border-[#D4E4F4] rounded-lg">
-                                <div class="flex items-center gap-3">
-                                    <div :class="`px-2 py-1 rounded text-[10px] font-bold border whitespace-nowrap ${getShiftColorClass(sched.shift_id, false)}`">
+                        <div class="w-full">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1.5 tracking-wide">Karyawan</label>
+                            <select v-model="dayModal.form.user_id" required class="w-full px-3 py-2 text-[13px] rounded-lg border border-gray-200 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white cursor-pointer shadow-sm transition-all">
+                                <option value="" disabled>Pilih karyawan...</option>
+                                <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
+                            </select>
+                        </div>
+                        <button type="submit" :disabled="dayModal.isSubmitting || !dayModal.form.shift_id || !dayModal.form.user_id" class="h-[38px] w-full sm:w-[46px] bg-[#2E7DD6] hover:bg-[#1B4F8A] disabled:opacity-50 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm shrink-0" title="Tambahkan ke Jadwal">
+                            <svg v-if="!dayModal.isSubmitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <svg v-else class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="p-5 bg-white overflow-y-auto custom-scrollbar grow">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-[13px] font-bold text-gray-800">Daftar Karyawan Bertugas</h4>
+                        <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded border tracking-wide">{{ dayModal.schedules.length }} ORANG</span>
+                    </div>
+
+                    <div v-if="dayModal.schedules.length === 0" class="flex flex-col items-center justify-center py-6 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                        <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <p class="text-[12px] font-medium text-gray-500">Belum ada karyawan dijadwalkan.</p>
+                    </div>
+                    
+                    <div v-else class="space-y-2">
+                        <div v-for="sched in dayModal.schedules" :key="sched.id" class="flex items-center justify-between p-2.5 bg-white border border-gray-200 rounded-lg hover:border-blue-300 transition-colors group">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 w-full mr-3 overflow-hidden">
+                                <p class="text-[13px] font-bold text-gray-800 truncate w-full sm:w-1/2">{{ sched.user?.name || 'User Terhapus' }}</p>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span :class="`px-2 py-0.5 rounded text-[10px] font-bold border whitespace-nowrap ${getShiftColorClass(sched.shift_id, false)}`">
                                         {{ sched.shift?.name || 'Unknown' }}
-                                    </div>
-                                    <div>
-                                        <p class="text-[13px] font-bold text-[#1A2332]">{{ sched.user?.name || 'User Terhapus' }}</p>
-                                        <p class="text-[11px] text-[#5A7A9A] font-['JetBrains_Mono']">{{ sched.shift?.start_time?.substring(0,5) }} - {{ sched.shift?.end_time?.substring(0,5) }}</p>
-                                    </div>
+                                    </span>
+                                    <span class="text-[11px] text-gray-500 font-['JetBrains_Mono']">
+                                        {{ sched.shift?.start_time?.substring(0,5) }} - {{ sched.shift?.end_time?.substring(0,5) }}
+                                    </span>
                                 </div>
-                                <button @click="confirmDelete(sched, 'schedule_calendar')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg shrink-0" title="Hapus Penugasan">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
                             </div>
+                            <button @click="confirmDelete(sched, 'schedule_calendar')" class="text-gray-400 hover:text-red-600 p-1.5 transition-colors bg-transparent hover:bg-red-50 rounded-md shrink-0 border border-transparent hover:border-red-100" title="Hapus Penugasan">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -696,7 +707,7 @@ const submitSchedule = async () => {
         const method = scheduleModal.isEdit ? 'put' : 'post';
         const payload = { ...formSchedule, start_time: formSchedule.start_time.substring(0, 5), end_time: formSchedule.end_time.substring(0, 5) };
         await axios[method](url, payload, { headers: authHeaders() });
-        showAlert(`Master Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
+        showAlert(`Shift berhasil ${scheduleModal.isEdit ? 'diperbarui' : 'dibuat'}.`, 'success');
         scheduleModal.show = false;
         fetchSchedules();
     } catch (e) { showAlert(e.response?.data?.message || "Gagal menyimpan master shift.", "error"); } 
