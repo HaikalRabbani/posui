@@ -43,9 +43,10 @@
                     <li class="text-[11px] font-semibold text-[#8AAFCC] uppercase tracking-wider px-3 mb-2" v-if="isMobileMenuOpen || !isSidebarMinimized">Main Menu</li>
 
                     <li>
+                        <!-- Dashboard -->
                         <router-link
                             to="/dashboard"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group mb-2"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             :class="[$route.path === '/dashboard' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
                         >
@@ -53,10 +54,11 @@
                             <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Dashboard</span>
                         </router-link>
 
+                        <!-- Laporan & Analitik -->
                         <router-link
                             v-if="userRole !== 'developer'"
                             to="/analytics"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group mb-2"
                             active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
                             :class="[$route.path === '/analytics' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
                         >
@@ -66,81 +68,101 @@
                             <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Laporan & Analitik</span>
                         </router-link>
 
-                        <router-link
-                            v-if="userRole === 'developer' || userRole === 'manager'"
-                            to="/users"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/users' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/users' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen User</span>
-                        </router-link>
+                        <!-- Accordion Manajemen -->
+                        <div class="mb-2">
+                            <button 
+                                @click="toggleManagement"
+                                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group"
+                                :class="[isManagementActive ? 'bg-[#EBF3FB] text-[#1B4F8A] font-semibold' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
+                            >
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[isManagementActive ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen</span>
+                                </div>
+                                <svg v-if="isMobileMenuOpen || !isSidebarMinimized" 
+                                    class="w-4 h-4 transition-transform duration-200" 
+                                    :class="{ 'rotate-180': isManagementOpen }" 
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
 
-                        <router-link
-                            v-if="userRole !== 'developer'"
-                            to="/menu"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/menu' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/menu' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Menu</span>
-                        </router-link>
+                            <!-- Sub-menu Manajemen -->
+                            <transition
+                                enter-active-class="transition-all ease-in-out duration-300 overflow-hidden"
+                                enter-from-class="max-h-0 opacity-0"
+                                enter-to-class="max-h-[500px] opacity-100"
+                                leave-active-class="transition-all ease-in-out duration-300 overflow-hidden"
+                                leave-from-class="max-h-[500px] opacity-100"
+                                leave-to-class="max-h-0 opacity-0"
+                            >
+                                <div v-show="isManagementOpen && (isMobileMenuOpen || !isSidebarMinimized)" class="pl-10 pr-3 py-2 space-y-1 bg-[#F7FAFD] rounded-b-lg">
+                                    <router-link
+                                        v-if="userRole === 'developer' || userRole === 'manager'"
+                                        to="/users"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/users' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen User
+                                    </router-link>
 
-                        <router-link
-                            v-if="userRole === 'developer' || userRole === 'manager'"
-                            to="/outlet-setting"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/outlet-setting' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/outlet-setting' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-4 9 4-9 4-9-4zm0 10l9 4 9-4M3 12l9 4 9-4" />
-                            </svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Outlet</span>
-                        </router-link>
+                                    <router-link
+                                        v-if="userRole !== 'developer'"
+                                        to="/menu"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/menu' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Menu
+                                    </router-link>
 
-                        <router-link
-                            v-if="userRole !== 'developer'"
-                            to="/promotions"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/promotions' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/promotions' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Promo</span>
-                        </router-link>
+                                    <router-link
+                                        v-if="userRole === 'developer' || userRole === 'manager'"
+                                        to="/outlet-setting"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/outlet-setting' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Outlet
+                                    </router-link>
 
-                        <router-link
-                            v-if="userRole !== 'developer'"
-                            to="/tables"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/tables' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/tables' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                            </svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Manajemen Meja</span>
-                        </router-link>
+                                    <router-link
+                                        v-if="userRole !== 'developer'"
+                                        to="/promotions"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/promotions' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Promo
+                                    </router-link>
 
-                        <router-link
-                            v-if="userRole !== 'developer'"
-                            to="/shift-management"
-                            class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
-                            active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                            :class="[$route.path === '/shift-management' ? '' : 'text-[#5A7A9A] hover:bg-[#F7FAFD] hover:text-[#1A2332]']"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0 transition-colors" :class="[$route.path === '/shift-management' ? 'text-[#1B4F8A]' : 'text-[#8AAFCC] group-hover:text-[#5A7A9A]']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span v-if="isMobileMenuOpen || !isSidebarMinimized" class="ml-3 text-[14px] whitespace-nowrap">Jadwal & Shift</span>
-                        </router-link>
+                                    <router-link
+                                        v-if="userRole !== 'developer'"
+                                        to="/tables"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/tables' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Meja
+                                    </router-link>
+
+                                    <router-link
+                                        v-if="userRole !== 'developer'"
+                                        to="/shift-management"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/shift-management' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Jadwal & Shift
+                                    </router-link>
+                                </div>
+                            </transition>
+                        </div>
                     </li>
                 </ul>
             </nav>
@@ -244,7 +266,25 @@ const route = useRoute();
 const isSidebarMinimized = ref(localStorage.getItem('sidebar_minimized') === 'true');
 const isMobileMenuOpen = ref(false); 
 const isProfileMenuOpen = ref(false);
+const isManagementOpen = ref(false); // State baru untuk accordion manajemen
 const isLoading = ref(true);
+
+// Array path yang termasuk dalam menu manajemen
+const managementPaths = [
+    '/users', '/menu', '/outlet-setting', '/promotions', '/tables', '/shift-management'
+];
+
+// Computed property untuk mengecek apakah salah satu sub-menu sedang aktif
+const isManagementActive = computed(() => {
+    return managementPaths.includes(route.path);
+});
+
+// Auto buka accordion jika user me-refresh halaman pada salah satu rute manajemen
+onMounted(() => {
+    if (isManagementActive.value) {
+        isManagementOpen.value = true;
+    }
+});
 
 // User State
 const currentOutlet = ref('');
@@ -252,9 +292,25 @@ const userRole = ref('');
 const user = ref({ name: '', email: '', image: null });
 
 // Auto close mobile menu when navigating
-watch(() => route.path, () => {
+watch(() => route.path, (newPath) => {
     isMobileMenuOpen.value = false;
+    
+    // Opsional: Buka accordion otomatis jika navigasi ke rute manajemen dari tempat lain
+    if (managementPaths.includes(newPath)) {
+        isManagementOpen.value = true;
+    }
 });
+
+const toggleManagement = () => {
+    // Jika sidebar sedang minimized, kita buka sidebar-nya sekalian saat menu di-klik
+    if (isSidebarMinimized.value) {
+        isSidebarMinimized.value = false;
+        localStorage.setItem('sidebar_minimized', 'false');
+        isManagementOpen.value = true;
+    } else {
+        isManagementOpen.value = !isManagementOpen.value;
+    }
+};
 
 const userInitials = computed(() => {
     if (!user.value.name) return '';
@@ -329,6 +385,11 @@ const silentFetchProfile = async () => {
 const toggleSidebar = () => { 
     isSidebarMinimized.value = !isSidebarMinimized.value; 
     localStorage.setItem('sidebar_minimized', isSidebarMinimized.value.toString());
+    
+    // Jika sidebar di-minimize, tutup accordion manajemen agar lebih rapi
+    if (isSidebarMinimized.value) {
+        isManagementOpen.value = false;
+    }
 };
 
 const toggleProfileMenu = () => { isProfileMenuOpen.value = !isProfileMenuOpen.value; };
