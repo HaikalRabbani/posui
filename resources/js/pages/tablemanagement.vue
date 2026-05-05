@@ -75,7 +75,7 @@
                                 </td>
                                 <td class="px-5 py-3 text-center">
                                     <div v-if="table.qr_token && table.is_active" class="inline-block p-1 bg-white border border-[#D4E4F4] rounded-lg">
-                                        <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://pos.etres.my.id/menu/${table.qr_token}`" 
+                                        <img :src="`http://api.qrserver.com/v1/create-qr-code/?size=80x80&data=http://192.168.1.99:5173/menu/${table.qr_token}`" 
                                              class="w-14 h-14 object-contain" 
                                              alt="QR Meja" />
                                     </div>
@@ -317,7 +317,7 @@ const executeDelete = async () => {
 
 // FITUR PRINT QR
 const printQr = (table) => {
-    const frontEndUrl = `https://pos.etres.my.id/menu/${table.qr_token}`;
+    const frontEndUrl = `http:/192.168.1.99:5173//menu/${table.qr_token}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(frontEndUrl)}`;
     
     const printWindow = window.open('', '_blank');
