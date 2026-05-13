@@ -418,25 +418,36 @@
                         <span class="text-[#1A2332] text-right font-['JetBrains_Mono']">{{ selectedShift.ended_at ? formatDateTime(selectedShift.ended_at) : 'Masih Aktif' }}</span>
                     </div>
 
-                    <div v-if="selectedShift.status === 'closed' && selectedShift.closing_balance_actual === null" class="mt-4 p-4 border border-red-200 bg-red-50 rounded-xl space-y-3 animate-[fadeIn_0.3s_ease-out]">
+                    <div v-if="(selectedShift.status === 'closed' && selectedShift.closing_balance_actual === null) || selectedShift.status === 'active'" 
+                         class="mt-4 p-4 rounded-xl space-y-3 animate-[fadeIn_0.3s_ease-out]"
+                         :class="selectedShift.status === 'active' ? 'border border-orange-200 bg-orange-50' : 'border border-red-200 bg-red-50'">
+                        
                         <div class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#B83B2A] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <svg v-if="selectedShift.status === 'active'" class="w-5 h-5 text-[#C4860A] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <svg v-else class="w-5 h-5 text-[#B83B2A] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            
                             <div>
-                                <h4 class="text-[13px] font-bold text-[#B83B2A]">Butuh Verifikasi Manajer</h4>
-                                <p class="text-[11px] text-red-700 leading-relaxed mt-1">Laporan ini ditutup sistem karena kelalaian kasir. Masukkan jumlah fisik uang laci.</p>
+                                <h4 class="text-[13px] font-bold" :class="selectedShift.status === 'active' ? 'text-[#C4860A]' : 'text-[#B83B2A]'">
+                                    {{ selectedShift.status === 'active' ? 'Shift Masih Berjalan (Lupa Tutup)' : 'Butuh Verifikasi Manajer' }}
+                                </h4>
+                                <p class="text-[11px] leading-relaxed mt-1" :class="selectedShift.status === 'active' ? 'text-orange-700' : 'text-red-700'">
+                                    {{ selectedShift.status === 'active' ? 'Kasir belum menutup shift ini. Masukkan uang fisik di laci untuk menutup paksa shift.' : 'Laporan ini ditutup sistem karena kelalaian kasir. Masukkan jumlah fisik uang laci.' }}
+                                </p>
                             </div>
                         </div>
+                        
                         <div>
-                            <label class="block text-[11px] font-bold text-red-800 uppercase mb-1">Uang Laci Aktual</label>
+                            <label class="block text-[11px] font-bold uppercase mb-1" :class="selectedShift.status === 'active' ? 'text-orange-800' : 'text-red-800'">Uang Laci Aktual</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-[13px] font-bold text-[#B83B2A] font-['JetBrains_Mono']">Rp</span>
+                                    <span class="text-[13px] font-bold font-['JetBrains_Mono']" :class="selectedShift.status === 'active' ? 'text-[#C4860A]' : 'text-[#B83B2A]'">Rp</span>
                                 </div>
-                                <input type="text" v-model="formattedActualBalance" class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-red-200 outline-none focus:border-red-400 bg-white font-['JetBrains_Mono']" placeholder="Contoh: 150.000">
+                                <input type="text" v-model="formattedActualBalance" class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border outline-none bg-white font-['JetBrains_Mono']" :class="selectedShift.status === 'active' ? 'border-orange-200 focus:border-orange-400' : 'border-red-200 focus:border-red-400'" placeholder="Contoh: 150.000">
                             </div>
                         </div>
-                        <button @click="resolveShift" :disabled="resolveForm.isSubmitting" class="w-full py-2 bg-[#B83B2A] hover:bg-red-800 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors mt-2">
-                            {{ resolveForm.isSubmitting ? 'Memproses...' : 'Verifikasi Laporan' }}
+                        
+                        <button @click="resolveShift" :disabled="resolveForm.isSubmitting" class="w-full py-2 disabled:opacity-50 text-white text-[13px] font-semibold rounded-lg transition-colors mt-2" :class="selectedShift.status === 'active' ? 'bg-[#C4860A] hover:bg-orange-800' : 'bg-[#B83B2A] hover:bg-red-800'">
+                            {{ resolveForm.isSubmitting ? 'Memproses...' : (selectedShift.status === 'active' ? 'Tutup Paksa Shift' : 'Verifikasi Laporan') }}
                         </button>
                     </div>
 
@@ -754,11 +765,18 @@ const resolveShift = async () => {
     try {
         const payload = { actual_closing_balance: parseInt(resolveForm.actual_closing_balance) };
         const res = await axios.put(`${apiBase}/shift-karyawans/${selectedShift.value.id}/resolve`, payload, { headers: authHeaders() });
-        showAlert('Laporan berhasil diverifikasi oleh Manajer.', 'success');
+        
+        const successMessage = selectedShift.value.status === 'active' 
+            ? 'Shift berhasil ditutup paksa.' 
+            : 'Laporan berhasil diverifikasi oleh Manajer.';
+            
+        showAlert(successMessage, 'success');
         selectedShift.value = res.data.data;
         const index = shifts.value.findIndex(s => s.id === selectedShift.value.id);
         if (index !== -1) { shifts.value[index] = res.data.data; }
-    } catch (e) { showAlert(e.response?.data?.message || "Gagal memverifikasi laporan.", "error"); } 
+    } catch (e) { 
+        showAlert(e.response?.data?.message || "Gagal memproses shift.", "error"); 
+    } 
     finally { resolveForm.isSubmitting = false; }
 };
 
