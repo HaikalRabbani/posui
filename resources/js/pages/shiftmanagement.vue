@@ -97,58 +97,63 @@
                 </div>
             </div>
 
-            <div v-else-if="activeTab === 'kalender'" class="animate-[fadeIn_0.3s_ease-out] space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#D4E4F4] shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <button @click="prevMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
-                        <h2 class="text-[16px] font-bold text-[#1A2332] w-40 text-center">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
-                        <button @click="nextMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <select v-model="selectedCalendarOutlet" @change="fetchCalendarSchedules" class="border border-[#D4E4F4] bg-[#F7FAFD] text-[#1A2332] text-[13px] font-medium rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6]">
-                            <option value="">Semua Outlet</option>
-                            <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
-                        </select>
-                        <button @click="openAutoGenerateModal()" class="px-4 py-2 bg-[#EBF3FB] border border-[#D4E4F4] hover:bg-[#D4E4F4] text-[#1B4F8A] text-[13px] font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                            Auto Generate
-                        </button>
+<div v-else-if="activeTab === 'kalender'" class="animate-[fadeIn_0.3s_ease-out] space-y-4">
+    
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#D4E4F4] shadow-sm">
+        <div class="flex items-center justify-between xl:justify-start gap-2 sm:gap-4 w-full xl:w-auto">
+            <button @click="prevMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+            <h2 class="text-[15px] sm:text-[16px] font-bold text-[#1A2332] w-32 sm:w-40 text-center">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
+            <button @click="nextMonth" class="p-2 text-[#5A7A9A] hover:text-[#1B4F8A] hover:bg-[#F7FAFD] rounded-lg border border-transparent hover:border-[#D4E4F4] transition-all"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+            <select v-model="selectedCalendarOutlet" @change="fetchCalendarSchedules" class="w-full sm:w-auto border border-[#D4E4F4] bg-[#F7FAFD] text-[#1A2332] text-[13px] font-medium rounded-lg px-3 py-2 focus:outline-none focus:border-[#2E7DD6]">
+                <option value="">Semua Outlet</option>
+                <option v-for="out in outlets" :key="out.id" :value="out.id">{{ out.name }}</option>
+            </select>
+            <button @click="openAutoGenerateModal()" class="w-full sm:w-auto px-4 py-2 bg-[#EBF3FB] border border-[#D4E4F4] hover:bg-[#D4E4F4] text-[#1B4F8A] text-[13px] font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                Auto Generate
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <div class="min-w-[800px]">
+                <div class="grid grid-cols-7 bg-[#F7FAFD] border-b border-[#D4E4F4]">
+                    <div v-for="day in ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']" :key="day" class="py-3 text-center text-[12px] font-bold text-[#5A7A9A] uppercase tracking-wider border-r border-[#D4E4F4] last:border-r-0">
+                        {{ day }}
                     </div>
                 </div>
-
-                <div class="bg-white border border-[#D4E4F4] rounded-xl shadow-sm overflow-hidden">
-                    <div class="grid grid-cols-7 bg-[#F7FAFD] border-b border-[#D4E4F4]">
-                        <div v-for="day in ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']" :key="day" class="py-3 text-center text-[12px] font-bold text-[#5A7A9A] uppercase tracking-wider border-r border-[#D4E4F4] last:border-r-0">
-                            {{ day }}
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-7 bg-[#D4E4F4] gap-px border-t-0">
-                        <div v-for="(cell, idx) in calendarGrid" :key="idx" 
-                             @click="openDayModal(cell.date)"
-                             :class="[
-                                'min-h-[120px] p-2 bg-white hover:bg-[#F7FAFD] transition-colors cursor-pointer group',
-                                !cell.isCurrent ? 'opacity-50' : '',
-                                isToday(cell.date) ? 'ring-2 ring-inset ring-[#2E7DD6]' : ''
-                             ]">
-                            <div class="flex justify-between items-start mb-2">
-                                <span :class="['text-[13px] font-bold w-6 h-6 flex items-center justify-center rounded-full', isToday(cell.date) ? 'bg-[#2E7DD6] text-white' : 'text-[#1A2332]']">
-                                    {{ cell.date.getDate() }}
-                                </span>
-                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                </div>
+                <div class="grid grid-cols-7 bg-[#D4E4F4] gap-px border-t-0">
+                    <div v-for="(cell, idx) in calendarGrid" :key="idx" 
+                         @click="openDayModal(cell.date)"
+                         :class="[
+                            'min-h-[120px] p-2 bg-white hover:bg-[#F7FAFD] transition-colors cursor-pointer group',
+                            !cell.isCurrent ? 'opacity-50' : '',
+                            isToday(cell.date) ? 'ring-2 ring-inset ring-[#2E7DD6]' : ''
+                         ]">
+                        <div class="flex justify-between items-start mb-2">
+                            <span :class="['text-[13px] font-bold w-6 h-6 flex items-center justify-center rounded-full', isToday(cell.date) ? 'bg-[#2E7DD6] text-white' : 'text-[#1A2332]']">
+                                {{ cell.date.getDate() }}
+                            </span>
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             </div>
-                            <div class="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar pr-1">
-                                <div v-for="sched in getSchedulesForDate(cell.date)" :key="sched.id" 
-                                     :class="`text-[10px] px-1.5 py-1 rounded border truncate font-medium ${getShiftColorClass(sched.shift_id, false)}`">
-                                    <div class="font-bold truncate text-[11px]">{{ sched.user?.name || 'Karyawan' }}</div>
-                                    <div class="truncate opacity-90 text-[9px]">{{ sched.shift?.name }}</div>
-                                </div>
+                        </div>
+                        <div class="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar pr-1">
+                            <div v-for="sched in getSchedulesForDate(cell.date)" :key="sched.id" 
+                                 :class="`text-[10px] px-1.5 py-1 rounded border truncate font-medium ${getShiftColorClass(sched.shift_id, false)}`">
+                                <div class="font-bold truncate text-[11px]">{{ sched.user?.name || 'Karyawan' }}</div>
+                                <div class="truncate opacity-90 text-[9px]">{{ sched.shift?.name }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
             <div v-else-if="activeTab === 'laporan'" class="space-y-6 animate-[fadeIn_0.3s_ease-out]">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
