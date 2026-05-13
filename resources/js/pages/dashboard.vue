@@ -112,23 +112,49 @@
                             <div class="p-5 border-b border-[#D4E4F4] bg-[#F7FAFD] rounded-t-xl">
                                 <h3 class="text-[14px] font-bold text-[#1A2332]">Tren Penjualan</h3>
                             </div>
-                            <div class="p-6 flex-1 flex flex-col h-64">
+                            <div class="p-5 flex-1 flex flex-col h-[300px] relative">
                                 <div v-if="analyticsData.revenue_chart.length === 0" class="flex-1 flex items-center justify-center text-[13px] text-[#8AAFCC]">Tidak ada data di periode ini.</div>
-                                
-                                <div v-else class="relative flex-1 flex items-end gap-2 h-full pt-8 pb-2">
-                                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 pt-8">
-                                        <div class="border-b border-dashed border-[#D4E4F4] w-full h-0" v-for="i in 3" :key="i"></div>
-                                        <div class="border-b border-[#D4E4F4] w-full h-0"></div>
+
+                                <div v-else class="relative w-full h-full flex flex-col" @mouseleave="hoveredPoint = null">
+                                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none z-0 pb-6 pt-2">
+                                        <div class="border-b border-dashed border-[#D4E4F4] w-full h-0" v-for="i in 4" :key="i"></div>
                                     </div>
-                                    
-                                    <div v-for="(day, idx) in analyticsData.revenue_chart" :key="idx" class="relative flex-1 flex flex-col items-center justify-end h-full group z-10">
-                                        <div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1A2332] text-white text-[11px] py-1 px-2 rounded whitespace-nowrap pointer-events-none font-['JetBrains_Mono']">
-                                            Rp {{ formatRupiah(day.revenue) }}
+
+                                    <div class="relative flex-1 w-full z-10 mt-2">
+                                        <svg viewBox="0 0 1000 300" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                                            <defs>
+                                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stop-color="#2E7DD6" stop-opacity="0.5"/>
+                                                    <stop offset="100%" stop-color="#2E7DD6" stop-opacity="0.0"/>
+                                                </linearGradient>
+                                            </defs>
+                                            <path :d="chartAreaPath" fill="url(#chartGradient)" />
+                                            <path :d="chartLinePath" fill="none" stroke="#2E7DD6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+
+                                            <circle v-for="(p, idx) in chartPoints" :key="idx"
+                                                    :cx="p.x" :cy="p.y" r="7"
+                                                    :fill="hoveredPoint === idx ? '#1A2332' : '#ffffff'"
+                                                    :stroke="hoveredPoint === idx ? '#ffffff' : '#2E7DD6'"
+                                                    stroke-width="3"
+                                                    class="cursor-pointer transition-all duration-200"
+                                                    @mouseenter="hoveredPoint = idx"
+                                                    @touchstart.passive="hoveredPoint = idx" />
+                                        </svg>
+
+                                        <div v-if="hoveredPoint !== null"
+                                            class="absolute bg-[#1A2332] text-white text-[11px] p-3 rounded-xl shadow-2xl whitespace-nowrap z-50 text-center pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-200"
+                                            :style="{ left: `${(chartPoints[hoveredPoint].x / 1000) * 100}%`, top: `calc(${(chartPoints[hoveredPoint].y / 300) * 100}% - 16px)` }">
+                                            <span class="font-bold border-b border-white/20 pb-1.5 mb-1.5 block text-[12px]">{{ formatShortDate(chartPoints[hoveredPoint].date) }}</span>
+                                            <span class="font-['JetBrains_Mono'] block text-[#60A5FA] font-bold text-[14px]">Rp {{ formatRupiah(chartPoints[hoveredPoint].revenue) }}</span>
+                                            <span class="text-[#8AAFCC] text-[10px] mt-1 block">Transaksi: {{ chartPoints[hoveredPoint].transactions || 0 }}</span>
+                                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1A2332]"></div>
                                         </div>
-                                        <div class="w-full max-w-[36px] bg-[#2E7DD6] rounded-t-sm transition-colors duration-300" 
-                                             :style="`height: ${(day.revenue / maxRevenueChart) * 100}%`">
-                                        </div>
-                                        <span class="text-[10px] text-[#5A7A9A] font-medium mt-3 whitespace-nowrap">{{ formatShortDate(day.date) }}</span>
+                                    </div>
+
+                                    <div class="flex justify-between text-[10px] text-[#5A7A9A] font-bold mt-3 px-1">
+                                        <span>{{ formatShortDate(analyticsData.revenue_chart[0].date) }}</span>
+                                        <span v-if="analyticsData.revenue_chart.length > 2">{{ formatShortDate(analyticsData.revenue_chart[Math.floor(analyticsData.revenue_chart.length / 2)].date) }}</span>
+                                        <span v-if="analyticsData.revenue_chart.length > 1">{{ formatShortDate(analyticsData.revenue_chart[analyticsData.revenue_chart.length - 1].date) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -237,6 +263,30 @@ const maxRevenueChart = computed(() => {
     if (analyticsData.revenue_chart.length === 0) return 1;
     return Math.max(...analyticsData.revenue_chart.map(d => d.revenue)) || 1;
 });
+
+const hoveredPoint = ref(null);
+
+const chartPoints = computed(() => {
+    const data = analyticsData.revenue_chart;
+    if (!data || data.length === 0) return [];
+    const max = maxRevenueChart.value || 1;
+    return data.map((day, idx) => {
+        const x = (idx / Math.max(data.length - 1, 1)) * 1000;
+        const y = 270 - ((day.revenue / max) * 240); // Skala tinggi otomatis
+        return { x, y, ...day };
+    });
+});
+
+const chartLinePath = computed(() => {
+    if (chartPoints.value.length === 0) return '';
+    return `M ${chartPoints.value.map(p => `${p.x},${p.y}`).join(' L ')}`;
+});
+
+const chartAreaPath = computed(() => {
+    if (chartPoints.value.length === 0) return '';
+    return `${chartLinePath.value} L 1000,300 L 0,300 Z`;
+});
+
 const maxProductSold = computed(() => {
     if (analyticsData.top_products.length === 0) return 1;
     return Math.max(...analyticsData.top_products.map(p => p.sold)) || 1;
