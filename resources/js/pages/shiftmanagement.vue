@@ -218,7 +218,9 @@
                                     <td class="px-5 py-3">
                                         <p class="text-[12px] text-[#1A2332]">{{ formatDateTime(shift.started_at) }}</p>
                                         <p v-if="shift.ended_at" class="text-[11px] text-[#8AAFCC] font-['JetBrains_Mono']">s/d {{ formatDateTime(shift.ended_at) }}</p>
-                                        <p v-else class="text-[10px] text-[#C4860A] font-bold italic mt-0.5">Masih Aktif</p>
+                                        <p v-else :class="['text-[10px] font-bold italic mt-0.5', isPastShift(shift.started_at) ? 'text-[#B83B2A]' : 'text-[#C4860A]']">
+                                            {{ isPastShift(shift.started_at) ? 'Lewat Hari (Lupa Tutup)' : 'Masih Berjalan' }}
+                                        </p>
                                     </td>
                                     <td class="px-5 py-3 text-[13px] text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(shift.opening_balance) }}</td>
                                     <td class="px-5 py-3 text-right">
@@ -226,16 +228,23 @@
                                             {{ shift.difference > 0 ? '+' : '' }}{{ formatRupiah(shift.difference) }}
                                         </span>
                                         <span v-else-if="shift.status === 'closed' && shift.closing_balance_actual === null" class="text-[11px] font-bold text-[#B83B2A] italic">
-                                            Pending Verifikasi
+                                            Menunggu Manager
                                         </span>
-                                        <span v-else class="text-[11px] text-[#8AAFCC] italic">Belum dihitung</span>
+                                        <span v-else :class="['text-[11px] italic font-medium', isPastShift(shift.started_at) ? 'text-[#B83B2A]' : 'text-[#8AAFCC]']">
+                                            {{ isPastShift(shift.started_at) ? 'Segera Tutup Paksa' : 'Belum dihitung' }}
+                                        </span>
                                     </td>
                                     <td class="px-5 py-3 text-center">
-                                        <span v-if="shift.status === 'active'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-orange-50 text-[#C4860A] border-orange-200">
+                                        <span v-if="shift.status === 'active' && !isPastShift(shift.started_at)" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-orange-50 text-[#C4860A] border-orange-200">
                                             Open
                                         </span>
-                                        <span v-else-if="shift.status === 'closed' && shift.closing_balance_actual === null" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-red-50 text-[#B83B2A] border-red-200">
-                                            Butuh Verifikasi
+                                        <span v-else-if="shift.status === 'active' && isPastShift(shift.started_at)" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-red-50 text-[#B83B2A] border-red-200 flex items-center justify-center gap-1 w-fit mx-auto">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#B83B2A] animate-pulse"></span>
+                                            LUPA TUTUP
+                                        </span>
+                                        <span v-else-if="shift.status === 'closed' && shift.closing_balance_actual === null" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-red-50 text-[#B83B2A] border-red-200 flex items-center justify-center gap-1 w-fit mx-auto">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#B83B2A] animate-pulse"></span>
+                                            VERIFIKASI
                                         </span>
                                         <span v-else class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-[#EBF3FB] text-[#1B4F8A] border-[#D4E4F4]">
                                             Closed
@@ -572,6 +581,14 @@ const formatDateForApi = (date) => {
 const isToday = (date) => {
     const today = new Date();
     return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+};
+const isPastShift = (dateStr) => {
+    if (!dateStr) return false;
+    const shiftDate = new Date(dateStr);
+    shiftDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return shiftDate < today;
 };
 const getOutletName = (id) => {
     const out = outlets.value.find(o => o.id === id);
