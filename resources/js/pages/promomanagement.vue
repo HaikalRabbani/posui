@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <div v-if="modal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
+        <div v-if="modal.show" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#D4E4F4] animate-[fadeIn_0.2s_ease-out]">
                 <div class="sticky top-0 px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD] z-10">
                     <h3 class="text-[16px] font-bold text-[#1A2332]">{{ modal.isEdit ? 'Edit Promo' : 'Buat Promo Baru' }}</h3>
@@ -122,10 +122,21 @@
                     <div v-if="form.scope === 'products'" class="bg-[#F7FAFD] p-3 rounded-lg border border-[#D4E4F4]">
                         <label class="block text-[12px] font-semibold text-[#5A7A9A] mb-2">Pilih Produk <span class="text-[#B83B2A]">*</span></label>
                         
-                        <select v-model="tempProduct" @change="addProduct" class="w-full px-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white">
-                            <option value="" disabled>-- Pilih Produk untuk Ditambahkan --</option>
-                            <option v-for="item in availableProducts" :key="item.id" :value="item.id">{{ item.name }}</option>
-                        </select>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <input type="text" v-model="searchProductQuery" @focus="showProductDropdown = true" @blur="hideProductDropdown" placeholder="Ketik nama produk untuk mencari..." class="w-full pl-9 pr-3 py-2 text-[13px] rounded-lg border border-[#D4E4F4] outline-none focus:border-[#2E7DD6] bg-white text-[#1A2332]">
+                            
+                            <ul v-if="showProductDropdown && filteredAvailableProducts.length > 0" class="absolute z-[100] w-full mt-1 bg-white border border-[#D4E4F4] rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar">
+                                <li v-for="item in filteredAvailableProducts" :key="item.id" @mousedown.prevent="addProductById(item.id)" class="px-3 py-2 text-[13px] text-[#1A2332] hover:bg-[#F7FAFD] cursor-pointer border-b border-[#EBF3FB] last:border-b-0">
+                                    {{ item.name }}
+                                </li>
+                            </ul>
+                            <div v-else-if="showProductDropdown && searchProductQuery && filteredAvailableProducts.length === 0" class="absolute z-[100] w-full mt-1 bg-white border border-[#D4E4F4] rounded-lg shadow-lg p-3 text-[13px] text-[#8AAFCC] text-center">
+                                Produk tidak ditemukan.
+                            </div>
+                        </div>
 
                         <div class="flex flex-wrap gap-2 mt-3">
                             <span v-for="item in selectedProductsList" :key="item.id" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] animate-[fadeIn_0.2s_ease-out]">
@@ -208,7 +219,7 @@
             </div>
         </div>
 
-        <div v-if="deleteModal.show" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
+        <div v-if="deleteModal.show" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4 font-['Poppins']">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-sm overflow-hidden border border-[#D4E4F4] text-center p-6 animate-[fadeIn_0.2s_ease-out]">
                 <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-100">
                     <svg class="w-6 h-6 text-[#B83B2A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -254,26 +265,42 @@ const form = reactive({
 
 const deleteModal = reactive({ show: false, id: null, promoName: '', isDeleting: false });
 
-const tempProduct = ref('');
 const tempCategory = ref('');
+
+// === STATE BARU UNTUK PENCARIAN PRODUK ===
+const searchProductQuery = ref('');
+const showProductDropdown = ref(false);
+
+const filteredAvailableProducts = computed(() => {
+    const q = searchProductQuery.value.toLowerCase();
+    return availableProducts.value.filter(p => p.name.toLowerCase().includes(q));
+});
+
+const hideProductDropdown = () => {
+    // Timeout agar klik pada dropdown sempat dieksekusi sebelum dropdown menghilang
+    setTimeout(() => { showProductDropdown.value = false; }, 150);
+};
+
+const addProductById = (id) => {
+    if (!form.product_ids.includes(id)) {
+        form.product_ids.push(id);
+    }
+    searchProductQuery.value = ''; 
+    showProductDropdown.value = false;
+};
 
 // Auto Format saat diketik
 const formatInputNumber = (field) => {
-    // Hapus semua selain angka
     let rawValue = String(form[field]).replace(/[^0-9]/g, '');
-    
     if (!rawValue) {
         form[field] = '';
         return;
     }
-
     if (field === 'value' && form.type === 'percentage') {
-        if (parseInt(rawValue) > 100) rawValue = '100'; // Batasi maks 100%
+        if (parseInt(rawValue) > 100) rawValue = '100'; 
         form[field] = rawValue;
         return;
     }
-    
-    // Format ke ribuan Indonesia (contoh: 15.000)
     form[field] = new Intl.NumberFormat('id-ID').format(rawValue);
 };
 
@@ -281,17 +308,6 @@ const formatRupiah = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-};
-
-// ======================================================================
-// FUNGSI LOGIKA LABEL (CHIPS) UNTUK PRODUK & KATEGORI
-// ======================================================================
-
-const addProduct = () => {
-    if (tempProduct.value && !form.product_ids.includes(tempProduct.value)) {
-        form.product_ids.push(tempProduct.value);
-    }
-    tempProduct.value = ''; 
 };
 
 const removeProduct = (id) => {
@@ -325,13 +341,9 @@ const availableCategories = computed(() => {
     return categories.value.filter(c => !form.category_ids.includes(c.id));
 });
 
-// ======================================================================
-// FETCH API
-// ======================================================================
-
 const fetchProductsAndCategories = async () => {
     try {
-        const resProd = await fetch(`${apiBase}/products?limit=100`, { headers: authHeaders() });
+        const resProd = await fetch(`${apiBase}/products?limit=1000`, { headers: authHeaders() });
         const prodJson = await resProd.json();
         const prodData = prodJson.data || prodJson;
         products.value = Array.isArray(prodData?.data) ? prodData.data : (Array.isArray(prodData) ? prodData : []);
@@ -363,7 +375,7 @@ const fetchPromos = async () => {
 
 const openModal = (item = null) => {
     modal.isEdit = !!item;
-    tempProduct.value = ''; 
+    searchProductQuery.value = ''; 
     tempCategory.value = '';
 
     if (item) {
@@ -374,7 +386,6 @@ const openModal = (item = null) => {
         form.category_ids = item.category_ids || [];
         form.type = item.type;
         
-        // Memformat angka bawaan dari database agar ada titiknya di dalam input
         form.value = item.type === 'percentage' ? item.value : new Intl.NumberFormat('id-ID').format(item.value);
         form.max_discount = item.max_discount ? new Intl.NumberFormat('id-ID').format(item.max_discount) : '';
         form.min_purchase = item.min_purchase ? new Intl.NumberFormat('id-ID').format(item.min_purchase) : '';
@@ -398,7 +409,6 @@ const closeModal = () => { modal.show = false; };
 const submitForm = async () => {
     modal.isSubmitting = true;
     try {
-        // Hapus karakter non-angka (seperti titik) sebelum dikirim ke backend
         const pureValue = Number(String(form.value).replace(/\./g, ''));
         const pureMaxDiscount = form.max_discount ? Number(String(form.max_discount).replace(/\./g, '')) : null;
         const pureMinPurchase = form.min_purchase ? Number(String(form.min_purchase).replace(/\./g, '')) : 0;
@@ -502,6 +512,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #D4E4F4; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #8AAFCC; }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
