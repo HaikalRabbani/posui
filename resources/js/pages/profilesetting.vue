@@ -75,6 +75,13 @@
                                 </div>
                             </div>
 
+                            <div class="md:col-span-2">
+                                <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Midtrans Server Key</label>
+                                <input v-model="formProfile.midtrans_server_key" type="text" 
+                                    placeholder="Masukkan Midtrans Server Key Anda"
+                                    class="w-full px-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] transition-colors font-['JetBrains_Mono']">
+                            </div>
+
                             <div>
                                 <label class="block text-[12px] font-semibold text-[#5A7A9A] uppercase tracking-wider mb-1.5">Role / Jabatan</label>
                                 <input v-model="formProfile.role" type="text" disabled class="w-full px-4 py-2.5 text-[14px] rounded-lg border border-[#D4E4F4] bg-[#F0F4F8] text-[#8AAFCC] cursor-not-allowed capitalize">
@@ -146,7 +153,7 @@ const isSavingSecurity = ref(false);
 const alert = reactive({ show: false, message: '', type: 'success' });
 
 // State Form & Validasi
-const formProfile = ref({ name: '', email: '', phone_number: '', role: '' });
+const formProfile = ref({ name: '', email: '', phone_number: '', role: '', midtrans_server_key: '' });
 const formSecurity = ref({ newPassword: '', confirmPassword: '' });
 const formErrorsProfile = reactive({ name: false, email: false });
 
@@ -221,7 +228,8 @@ const fetchProfile = async () => {
             name: userData.name || '',
             email: userData.email || '',
             phone_number: userData.phone_number || '', 
-            role: userData.role || 'karyawan'
+            role: userData.role || 'karyawan',
+            midtrans_server_key: userData.midtrans_server_key || ''
         };
         
         existingImage.value = userData.image || null;
@@ -250,6 +258,7 @@ const saveProfile = async () => {
         formData.append('name', formProfile.value.name);
         formData.append('email', formProfile.value.email);
         if (formProfile.value.phone_number) formData.append('phone_number', formProfile.value.phone_number);
+        if (formProfile.value.midtrans_server_key) formData.append('midtrans_server_key', formProfile.value.midtrans_server_key);
         if (imageFile.value) formData.append('image', imageFile.value);
         
         formData.append('_method', 'PUT'); // Trick method PUT Laravel untuk FormData

@@ -32,7 +32,7 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             </div>
-                            <input type="text" v-model="searchQuery" placeholder="Cari master menu..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
+                            <input type="text" v-model="searchQuery" placeholder="Cari menu..." class="w-full pl-9 pr-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] placeholder-[#8AAFCC] transition-colors">
                         </div>
 
                         <select v-model="filterCategory" class="px-3 py-1.5 text-[13px] rounded-lg border border-[#D4E4F4] focus:outline-none focus:border-[#2E7DD6] text-[#1A2332] bg-white flex-shrink-0">
@@ -55,7 +55,7 @@
 
                             <button @click="openModal()" class="bg-[#2E7DD6] hover:bg-[#1B4F8A] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                Buat Master Menu
+                                Buat Menu
                             </button>
                         </template>
                     </div>
@@ -65,16 +65,16 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-[#D4E4F4] bg-[#F7FAFD]">
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-1/3">Master Produk</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-1/3">Produk</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Kategori</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Station</th>
-                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Harga Modal (Pusat)</th>
+                                <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Harga Modal</th>
                                 <th class="px-5 py-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="isLoadingData" class="border-b border-[#EBF3FB]">
-                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat master katalog...</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium animate-pulse">Memuat katalog...</td>
                             </tr>
                             <tr v-else-if="paginatedProducts.length === 0" class="border-b border-[#EBF3FB]">
                                 <td colspan="5" class="px-5 py-8 text-center text-[13px] text-[#8AAFCC] font-medium">Tidak ada data menu ditemukan.</td>
@@ -115,10 +115,10 @@
                                     </button>
                                     
                                     <template v-if="userRole === 'manager' || userRole === 'developer'">
-                                        <button @click="openModal(item)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit Master">
+                                        <button @click="openModal(item)" class="text-[#2E7DD6] hover:text-[#1B4F8A] p-1.5 transition-colors bg-[#EBF3FB] hover:bg-[#D4E4F4] rounded-lg mr-1" title="Edit">
                                             <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                         </button>
-                                        <button @click="confirmDelete(item, 'product')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus Master">
+                                        <button @click="confirmDelete(item, 'product')" class="text-[#B83B2A] hover:text-red-800 p-1.5 transition-colors bg-red-50 hover:bg-red-100 rounded-lg" title="Hapus">
                                             <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
                                     </template>
@@ -145,7 +145,7 @@
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
                     <h3 class="text-[16px] font-semibold text-[#1A2332] flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#1B4F8A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        Detail Master Menu
+                        Detail Menu
                     </h3>
                     <button @click="viewModal.show = false" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -174,7 +174,7 @@
                         </div>
 
                         <div class="p-3 bg-[#F7FAFD] rounded-lg border border-[#D4E4F4] mb-4 flex justify-between items-center">
-                            <p class="text-[12px] font-medium text-[#5A7A9A]">Harga Modal (Master)</p>
+                            <p class="text-[12px] font-medium text-[#5A7A9A]">Harga Modal</p>
                             <p class="text-[16px] font-bold text-[#1B4F8A] font-['JetBrains_Mono']">Rp {{ formatRupiah(viewModal.data.cost_price || 0) }}</p>
                         </div>
 
@@ -192,7 +192,7 @@
         <div v-if="isModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-[#1A2332]/50 backdrop-blur-sm px-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-xl overflow-hidden border border-[#D4E4F4] max-h-[90vh] flex flex-col">
                 <div class="px-6 py-4 border-b border-[#D4E4F4] flex justify-between items-center bg-[#F7FAFD]">
-                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Master Menu' : 'Tambah Master Menu Baru' }}</h3>
+                    <h3 class="text-[16px] font-semibold text-[#1A2332]">{{ isEditMode ? 'Edit Menu' : 'Tambah Menu Baru' }}</h3>
                     <button @click="closeModal" class="text-[#8AAFCC] hover:text-[#B83B2A] transition-colors focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -390,7 +390,7 @@ const currentPage = ref(1);
 // Ref input file untuk reset manual
 const fileInput = ref(null);
 
-// State Form Master Menu
+// State Form Menu
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedProductId = ref(null);
@@ -604,7 +604,7 @@ const submitForm = async () => {
         closeModal();
         await fetchAllData(); 
     } catch (error) {
-        modalAlert.message = error.response?.data?.message || 'Gagal menyimpan master menu.';
+        modalAlert.message = error.response?.data?.message || 'Gagal menyimpan menu.';
         modalAlert.show = true;
     } finally { isSubmitting.value = false; }
 };
