@@ -431,6 +431,10 @@ const formatLongDate = (dateString) => {
     const d = new Date(dateString);
     return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 };
+const formatShortDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+};
 
 // API Fetching
 const fetchOutlets = async () => {
