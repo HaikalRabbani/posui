@@ -33,9 +33,9 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('user_role');
             localStorage.removeItem('user_profile_cache');
             
-            if (window.location.pathname !== '/') {
-                window.location.href = '/'; 
-            }
+            sessionStorage.setItem('login_error', 'Sesi telah habis. Silakan login kembali.');
+            
+            window.dispatchEvent(new CustomEvent('auth:logout'));
         }
         return Promise.reject(error);
     }

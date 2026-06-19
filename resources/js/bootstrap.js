@@ -8,5 +8,4 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-// Ambil token dari localStorage (sesuaikan dengan cara kamu menyimpan token login di vue)
-const token = localStorage.getItem('access_token');
+const token = localStorage.getItem('auth_token');

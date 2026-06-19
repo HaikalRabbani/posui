@@ -366,8 +366,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 // ================= STATE GLOBAL =================
@@ -386,6 +386,10 @@ const searchQuery = ref('');
 const filterCategory = ref('');
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
+
+watch([searchQuery, filterCategory], () => {
+    currentPage.value = 1;
+});
 
 // Ref input file untuk reset manual
 const fileInput = ref(null);

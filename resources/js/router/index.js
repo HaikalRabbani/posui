@@ -157,10 +157,11 @@ router.beforeEach((to, from, next) => {
 
     // 3. CEK ROLE: Karyawan tidak boleh masuk ke panel admin
     if (userRole === 'karyawan' && !guestRoutes.includes(to.name)) {
-        alert('Akses Ditolak: Akun Karyawan tidak diizinkan masuk ke Panel Admin.');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_role');
         localStorage.removeItem('user_profile_cache');
+        
+        sessionStorage.setItem('login_error', 'Akses Ditolak: Akun Karyawan tidak diizinkan masuk ke Panel Admin.');
         return next({ name: 'Login' });
     }
 

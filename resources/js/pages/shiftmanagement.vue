@@ -509,7 +509,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
-import axios from 'axios';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
@@ -559,6 +559,10 @@ const selectedReportOutlet = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedShift = ref(null);
+
+watch(searchReportQuery, () => {
+    currentPage.value = 1;
+});
 
 const resolveForm = reactive({ actual_closing_balance: '', isSubmitting: false });
 const deleteModal = reactive({ show: false, id: null, type: '', isDeleting: false });

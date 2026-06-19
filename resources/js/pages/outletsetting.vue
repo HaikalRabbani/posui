@@ -323,7 +323,7 @@
                                         <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider">Menu & Station</th>
                                         <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-40">Harga Jual (Rp)</th>
                                         <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider w-28">Stok</th>
-                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-center w-24">Status</th>
+                                        <th class="p-3 text-[11px] font-semibold text-[#5A7A9A] uppercase tracking-wider text-center w-32">Status Aktif</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-[#EBF3FB]">
@@ -350,9 +350,9 @@
                                             <input type="text" v-model="prod.stock" @input="formatProductNumber(prod.indexInOriginal, 'stock')" :disabled="!prod.selected" class="w-full px-2 py-1.5 text-[12px] font-['JetBrains_Mono'] font-semibold text-[#1A2332] border border-[#D4E4F4] rounded outline-none focus:border-[#2A7A4B] disabled:bg-transparent disabled:border-transparent text-center">
                                         </td>
                                         <td class="p-3 text-center">
-                                            <span v-if="prod.selected" :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', getRawNumber(prod.stock) > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                                                {{ getRawNumber(prod.stock) > 0 ? 'Tersedia' : 'Habis' }}
-                                            </span>
+                                            <button v-if="prod.selected" @click="prod.is_active = !prod.is_active" :class="['px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors', prod.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200']">
+                                                {{ prod.is_active ? 'Aktif' : 'Nonaktif' }}
+                                            </button>
                                             <span v-else class="text-[10px] text-[#8AAFCC]">-</span>
                                         </td>
                                     </tr>
@@ -394,7 +394,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
@@ -416,6 +416,10 @@ const isLoading = ref(true);
 const searchQuery = ref('');
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
+
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
 
 const outletModal = reactive({ show: false, isEdit: false, id: null, isSubmitting: false });
 const formOutlet = reactive({ name: '', address_outlet: '', phone_number_outlet: '', user_id: '' });
@@ -708,12 +712,13 @@ const openMenuManager = async (outlet) => {
                     error: false,
                     price: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.price),
                     stock: new Intl.NumberFormat('id-ID').format(existingPivot.pivot.stock),
+                    is_active: existingPivot.pivot.is_active !== undefined ? existingPivot.pivot.is_active : true,
                 };
             } else {
                 return {
                     indexInOriginal: idx,
                     id: master.id, name: master.name, cost_price: master.cost_price, station_id: master.station_id,
-                    selected: false, error: false, price: '', stock: '0'
+                    selected: false, error: false, price: '', stock: '0', is_active: true
                 };
             }
         });
@@ -755,7 +760,7 @@ const saveOutletMenu = async () => {
                     product_id: m.id,
                     price: getRawNumber(m.price),
                     stock: pureStock,
-                    is_active: pureStock > 0 
+                    is_active: m.is_active
                 };
             })
         };

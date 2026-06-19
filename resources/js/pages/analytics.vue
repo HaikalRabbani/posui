@@ -328,7 +328,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, markRaw } from 'vue';
-import axios from 'axios';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 // --- SVG Icons for Tabs ---

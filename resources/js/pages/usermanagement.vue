@@ -365,7 +365,7 @@
                     </div>
 
                     <div class="pt-4 flex justify-end gap-2 border-t border-[#D4E4F4]">
-                        <button type="button" @click="karyawanFormModal.show = false" class="px-4 py-2 text-[12px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
+                        <button type="button" @click="closeKaryawanModal" class="px-4 py-2 text-[12px] font-medium text-[#5A7A9A] hover:bg-[#F0F4F8] rounded-lg transition-colors">Batal</button>
                         <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-[#2A7A4B] hover:bg-green-800 disabled:opacity-50 text-white text-[12px] font-semibold rounded-lg transition-colors">
                             {{ isSubmitting ? 'Loading...' : 'Simpan' }}
                         </button>
@@ -394,8 +394,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
-import axios from 'axios';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 // --- STATE GLOBAL ---
@@ -511,6 +511,9 @@ const getOutletName = (usr) => {
 const onMainImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
+        if (imagePreviewMain.value && imagePreviewMain.value.startsWith('blob:')) {
+            URL.revokeObjectURL(imagePreviewMain.value);
+        }
         form.image_file = file;
         imagePreviewMain.value = URL.createObjectURL(file);
     }
@@ -519,6 +522,9 @@ const onMainImageSelect = (e) => {
 const onKarImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
+        if (imagePreviewKar.value && imagePreviewKar.value.startsWith('blob:')) {
+            URL.revokeObjectURL(imagePreviewKar.value);
+        }
         formKaryawan.image_file = file;
         imagePreviewKar.value = URL.createObjectURL(file);
     }
@@ -592,7 +598,12 @@ const openModal = (user = null) => {
     }
     isModalOpen.value = true;
 };
-const closeModal = () => { isModalOpen.value = false; };
+const closeModal = () => { 
+    if (imagePreviewMain.value && imagePreviewMain.value.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewMain.value);
+    }
+    isModalOpen.value = false; 
+};
 
 // --- SUBMIT LOGIC ---
 const submitForm = async (type) => {
@@ -655,7 +666,7 @@ const submitForm = async (type) => {
             closeModal();
             fetchData();
         } else {
-            karyawanFormModal.show = false;
+            closeKaryawanModal();
             fetchManagerKaryawan(karyawanListModal.managerId); 
         }
 
@@ -720,6 +731,13 @@ const openModalKaryawan = (kar = null) => {
     karyawanFormModal.show = true;
 };
 
+const closeKaryawanModal = () => {
+    if (imagePreviewKar.value && imagePreviewKar.value.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewKar.value);
+    }
+    karyawanFormModal.show = false;
+};
+
 const confirmDelete = (user, type) => {
     deleteModal.id = user.id;
     deleteModal.name = user.name;
@@ -744,6 +762,15 @@ const executeDelete = async () => {
 
 onMounted(() => {
     fetchData();
+});
+
+onUnmounted(() => {
+    if (imagePreviewMain.value && imagePreviewMain.value.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewMain.value);
+    }
+    if (imagePreviewKar.value && imagePreviewKar.value.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewKar.value);
+    }
 });
 </script>
 

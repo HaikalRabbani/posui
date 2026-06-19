@@ -138,6 +138,12 @@ onMounted(() => {
     if (savedEmail) {
         form.email = savedEmail;
     }
+    
+    const loginError = sessionStorage.getItem('login_error');
+    if (loginError) {
+        showAlert(loginError, 'error');
+        sessionStorage.removeItem('login_error');
+    }
 });
 
 const handleLogin = async () => {
@@ -159,12 +165,20 @@ const handleLogin = async () => {
             password: form.password
         });
 
-        const token = response.data.token || response.data.access_token;
+        const token = response.data?.token || response.data?.access_token;
+        
+        if (!token) {
+            throw new Error('Token tidak ditemukan dalam response');
+        }
         
         // 2. Tarik Data Profil untuk validasi role
         const meResponse = await axios.get('https://api.etres.my.id/api/v1/me', {
             headers: { Authorization: `Bearer ${token}` }
         });
+        
+        if (!meResponse.data || !meResponse.data.user) {
+            throw new Error('Data user tidak ditemukan');
+        }
         
         const userData = meResponse.data.user;
         const userRole = userData.role;

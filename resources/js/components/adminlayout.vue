@@ -221,7 +221,7 @@
                         <button @click="toggleProfileMenu" class="flex items-center gap-2 sm:gap-3 focus:outline-none rounded-lg p-1 hover:bg-[#F7FAFD] transition-colors text-left">
                             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center font-semibold text-[13px] sm:text-[14px] flex-shrink-0 overflow-hidden">
                                 <svg v-if="isLoading" class="w-4 h-4 animate-spin text-[#1B4F8A]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <img v-else-if="user.image" :src="user.image.startsWith('http') ? user.image : `https://api.etres.my.id/storage/${user.image}`" class="w-full h-full object-cover" alt="Profile" />
+                                <img v-else-if="userImageUrl" :src="userImageUrl" class="w-full h-full object-cover" alt="Profile" />
                                 <span v-else>{{ userInitials }}</span>
                             </div>
                             <div class="hidden md:block">
@@ -319,6 +319,11 @@ const userInitials = computed(() => {
     return names[0].charAt(0).toUpperCase();
 });
 
+const userImageUrl = computed(() => {
+    if (!user.value.image) return null;
+    return user.value.image.startsWith('http') ? user.value.image : `https://api.etres.my.id/storage/${user.value.image}`;
+});
+
 const fetchUserProfile = async () => {
     const cachedUser = localStorage.getItem('user_profile_cache');
     
@@ -343,6 +348,10 @@ const silentFetchProfile = async () => {
         if (!localStorage.getItem('auth_token')) return router.push('/');
 
         const response = await axios.get('/api/v1/me');
+
+        if (!response.data || !response.data.user) {
+            throw new Error('Invalid response format');
+        }
 
         const userData = response.data.user;
         user.value.name = userData.name || 'Admin';

@@ -190,7 +190,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import axios from 'axios';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1'; 

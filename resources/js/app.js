@@ -8,3 +8,9 @@ const app = createApp(App);
 app.use(router);
 
 app.mount('#app');
+
+window.addEventListener('auth:logout', () => {
+    if (router.currentRoute.value.name !== 'Login') {
+        router.push({ name: 'Login' });
+    }
+});

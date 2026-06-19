@@ -29,7 +29,7 @@
                             >
                         </div>
 
-                        <select v-model="filterStatus" @change="fetchTransactions" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
+                        <select v-model="filterStatus" @change="onFilterChange" class="border border-[#D4E4F4] bg-white text-[#1A2332] text-[13px] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#2E7DD6]">
                             <option value="all">Semua Status</option>
                             <option value="paid">Selesai (Paid)</option>
                             <option value="pending">Menunggu (Pending)</option>
@@ -282,7 +282,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import axios from 'axios';
+import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 const apiBase = 'https://api.etres.my.id/api/v1';
@@ -381,6 +381,11 @@ const debounceSearch = () => {
         currentPage.value = 1;
         fetchTransactions();
     }, 500);
+};
+
+const onFilterChange = () => {
+    currentPage.value = 1;
+    fetchTransactions();
 };
 
 const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; fetchTransactions(); } };
