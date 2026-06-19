@@ -1,66 +1,318 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# POS F&B Admin Panel 🍽️
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Modern Point of Sale Admin Panel untuk Bisnis Food & Beverage
 
-## About Laravel
+Panel administrasi berbasis web untuk mengelola sistem POS restoran/cafe dengan fitur lengkap mulai dari manajemen menu, outlet, transaksi, hingga laporan analitik real-time.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Tentang Proyek
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**POS F&B Admin Panel** adalah aplikasi Single Page Application (SPA) yang dibangun dengan Laravel (backend API) dan Vue.js 3 (frontend) untuk memudahkan pengelolaan bisnis food & beverage. Panel ini menyediakan interface yang intuitif untuk owner, manager, dan kasir dalam menjalankan operasional harian.
 
-## Learning Laravel
+**Backend API**: [posapi](https://api.etres.my.id) (Repository terpisah)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🛠️ Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Frontend
+- **Vue.js 3.5.31** - Progressive JavaScript Framework
+- **Vue Router 4.4.5** - Official routing
+- **Vite 6.0.11** - Build tool & dev server
+- **Tailwind CSS 4.0.0** - Utility-first CSS framework
+- **Chart.js 4.5.1** + **Vue-ChartJS 5.3.3** - Data visualization
+- **Axios 1.7.4** - HTTP client with interceptors
+- **Laravel Echo 2.3.4** + **Pusher JS 8.5.0** - Real-time features
+- **vue3-toastify 0.2.9** - Toast notifications
 
-## Laravel Sponsors
+### Backend
+- **Laravel 11.x** - PHP framework
+- **MySQL** - Database
+- **JWT Authentication** - Secure token-based auth
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## ✨ Fitur Utama
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 🔐 Authentication & Authorization
+- Multi-role system (Developer/Super Admin, Manager/Owner, Karyawan/Kasir)
+- JWT token-based authentication
+- Auto-logout saat token expired
+- Role-based access control (RBAC)
 
-## Contributing
+### 🏪 Manajemen Outlet
+- CRUD outlet/cabang
+- Konfigurasi menu per outlet (harga & stok berbeda per cabang)
+- Manajemen pajak & biaya per outlet
+- Multi-outlet support untuk franchise
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 🍔 Manajemen Menu
+- CRUD produk/menu dengan foto
+- Kategori produk dinamis
+- Station/dapur management
+- Harga modal & harga jual
+- Status aktif/nonaktif independen dari stok
+- Konfigurasi ketersediaan menu per outlet
 
-## Code of Conduct
+### 👥 Manajemen User
+- CRUD user (Manager & Karyawan)
+- Manager bisa kelola karyawan di outlet-nya
+- Developer/Super Admin kelola semua manager
+- PIN 6 digit untuk kasir
+- Upload foto profil
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 📅 Jadwal & Shift
+- Master shift management
+- Kalender jadwal karyawan
+- Laporan audit kasir per shift
+- Tracking opening/closing balance
+- Deteksi selisih kas
 
-## Security Vulnerabilities
+### 🪑 Manajemen Meja
+- CRUD meja/table
+- Status ketersediaan meja
+- Assignment ke outlet
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 🎉 Manajemen Promo
+- CRUD promo/diskon
+- Tipe diskon: persentase atau nominal
+- Periode aktif promo
+- Assignment ke outlet
 
-## License
+### 📊 Laporan & Analitik
+- Dashboard metrics (pendapatan, transaksi, rata-rata order, item terjual)
+- Filter periode: hari ini, 7 hari, 1 bulan, 1 tahun, lifetime
+- Filter per outlet
+- Grafik tren penjualan interaktif (SVG custom chart)
+- Top produk terlaris
+- Export laporan (CSV/PDF)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 🧾 Riwayat Transaksi
+- View history transaksi dari kasir
+- Detail pesanan per transaksi
+- Search by invoice number
+- Filter by status (paid, pending, cancelled)
+- Edit/cancel transaksi (dengan alasan)
+- Server-side pagination
+
+### ⚙️ Profile Setting
+- Update profil (nama, email, foto)
+- Change password
+- Cache profile untuk performa
+
+---
+
+## 📦 Prerequisites
+
+Pastikan sistem sudah terinstall:
+
+- **PHP >= 8.2** dengan extensions: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
+- **Composer 2.x**
+- **Node.js >= 18.x** dan **npm >= 9.x**
+- **MySQL >= 8.0** atau **MariaDB >= 10.3**
+- **Git**
+
+---
+
+## 🚀 Instalasi
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url> posui
+cd posui
+```
+
+### 2. Install Dependencies
+
+#### Backend (Laravel)
+```bash
+composer install
+```
+
+#### Frontend (Vue.js)
+```bash
+npm install
+```
+
+### 3. Environment Configuration
+
+#### Copy file .env
+```bash
+cp .env.example .env
+```
+
+#### Generate Application Key
+```bash
+php artisan key:generate
+```
+
+#### Konfigurasi Database di `.env`
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=posui_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+#### Konfigurasi API Backend
+Pastikan di `.env` atau langsung di `resources/js/axios.js` dan file lain, API base URL sudah sesuai:
+
+```javascript
+// Contoh di axios.js
+baseURL: 'https://api.etres.my.id'
+```
+
+Atau buat `.env` variable:
+```env
+VITE_API_BASE_URL=https://api.etres.my.id
+```
+
+### 4. Run Migration (jika perlu)
+
+```bash
+php artisan migrate
+```
+
+> **Note**: Project ini menggunakan API external (`https://api.etres.my.id`), sehingga database lokal hanya untuk session/cache Laravel. Data utama diambil dari API.
+
+### 5. Build Frontend Assets
+
+#### Development Mode (Hot Reload)
+```bash
+npm run dev
+```
+
+#### Production Build
+```bash
+npm run build
+```
+
+### 6. Run Laravel Development Server
+
+```bash
+php artisan serve
+```
+
+Aplikasi akan berjalan di `http://localhost:8000`
+
+---
+
+## 🗂️ Struktur Proyek
+
+```
+posui/
+├── app/                    # Laravel backend logic
+├── resources/
+│   ├── css/
+│   │   └── app.css        # Tailwind CSS config
+│   ├── js/
+│   │   ├── app.js         # Vue app entry point
+│   │   ├── axios.js       # Axios instance dengan interceptor
+│   │   ├── bootstrap.js   # Laravel Echo setup
+│   │   ├── components/
+│   │   │   ├── app.vue    # Root component
+│   │   │   └── adminlayout.vue  # Admin layout dengan sidebar
+│   │   ├── pages/         # Vue SFC pages (14 pages)
+│   │   │   ├── login.vue
+│   │   │   ├── register.vue
+│   │   │   ├── dashboard.vue
+│   │   │   ├── menumanagement.vue
+│   │   │   ├── outletsetting.vue
+│   │   │   ├── usermanagement.vue
+│   │   │   ├── shiftmanagement.vue
+│   │   │   ├── tablemanagement.vue
+│   │   │   ├── promomanagement.vue
+│   │   │   ├── transactionhistory.vue
+│   │   │   ├── analytics.vue
+│   │   │   ├── profilesetting.vue
+│   │   │   ├── forgotpassword.vue
+│   │   │   └── resetpassword.vue
+│   │   └── router/
+│   │       └── index.js   # Vue Router config
+│   └── views/
+│       └── welcome.blade.php  # SPA shell
+├── routes/
+│   └── web.php            # Laravel routes
+├── public/                # Public assets
+├── .env                   # Environment config
+├── package.json           # NPM dependencies
+├── vite.config.js         # Vite configuration
+└── composer.json          # Composer dependencies
+```
+
+---
+
+## 🔧 Development
+
+### Menjalankan Dev Server
+
+Terminal 1 (Laravel):
+```bash
+php artisan serve
+```
+
+Terminal 2 (Vite - Hot Module Replacement):
+```bash
+npm run dev
+```
+
+### Linting & Code Quality
+
+```bash
+# Check code style
+npm run lint
+
+# Auto-fix linting issues
+npm run lint:fix
+```
+
+### Build untuk Production
+
+```bash
+npm run build
+php artisan optimize
+```
+
+---
+
+## 👨‍💻 User Roles
+
+| Role | Akses |
+|------|-------|
+| **Developer (Super Admin)** | Full access, kelola semua manager & outlet |
+| **Manager/Owner** | Kelola outlet sendiri, CRUD menu/user/shift/promo/table |
+| **Karyawan/Kasir** | Tidak bisa akses Admin Panel (login ditolak otomatis) |
+
+---
+
+## 🔑 Default Credentials
+
+Sesuaikan dengan data dari backend API:
+
+```
+Developer/Super Admin:
+Email: developer@example.com
+Password: password
+
+Manager/Owner:
+Email: manager1@example.com
+Password: password
+```
+
+---
+
+## 📡 API Integration
+
+Panel ini berkomunikasi dengan backend API di `https://api.etres.my.id`
+
+### Authentication Flow
+1. User login → API return JWT token
+2. Token disimpan di `localStorage.getItem('auth_token')`
+3. Setiap request menambahkan header: `Authorization: Bearer {token}`
+4. Axios interceptor auto-handle 401 (expired token) → redirect ke login
+
+---
