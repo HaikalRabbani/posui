@@ -217,7 +217,7 @@
 
                     <div class="w-px h-8 bg-[#D4E4F4] hidden sm:block" v-if="userRole !== 'developer'"></div>
 
-                    <div class="relative">
+                    <div class="relative" id="profile-dropdown-wrapper">
                         <button @click="toggleProfileMenu" class="flex items-center gap-2 sm:gap-3 focus:outline-none rounded-lg p-1 hover:bg-[#F7FAFD] transition-colors text-left">
                             <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EBF3FB] border border-[#D4E4F4] text-[#1B4F8A] flex items-center justify-center font-semibold text-[13px] sm:text-[14px] flex-shrink-0 overflow-hidden">
                                 <svg v-if="isLoading" class="w-4 h-4 animate-spin text-[#1B4F8A]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -257,7 +257,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import axios from '@/axios';
 
 const router = useRouter();
 const route = useRoute();
@@ -340,12 +340,9 @@ const fetchUserProfile = async () => {
 
 const silentFetchProfile = async () => {
     try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return router.push('/');
+        if (!localStorage.getItem('auth_token')) return router.push('/');
 
-        const response = await axios.get('https://api.etres.my.id/api/v1/me', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get('/api/v1/me');
 
         const userData = response.data.user;
         user.value.name = userData.name || 'Admin';
@@ -376,6 +373,8 @@ const silentFetchProfile = async () => {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user_profile_cache');
             router.push('/');
+        } else {
+            console.error('Gagal memuat profil:', error.message || error);
         }
     } finally {
         isLoading.value = false;
@@ -401,10 +400,8 @@ const openProfileSetting = () => {
 const handleLogout = async () => {
     isProfileMenuOpen.value = false;
     try {
-        const token = localStorage.getItem('auth_token');
-        await axios.post('https://api.etres.my.id/api/v1/logout', {}, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.post('/api/v1/logout');
+        
     } catch (e) { console.error('Logout API gagal', e); }
     finally {
         localStorage.removeItem('auth_token');
@@ -415,7 +412,7 @@ const handleLogout = async () => {
 };
 
 const closeDropdown = (e) => {
-    if (isProfileMenuOpen.value && !e.target.closest('.relative')) {
+    if (isProfileMenuOpen.value && !e.target.closest('#profile-dropdown-wrapper')) {
         isProfileMenuOpen.value = false;
     }
 };

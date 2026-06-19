@@ -137,20 +137,26 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title ? `${to.meta.title} - POS F&B` : 'POS F&B';
 
+    const token = localStorage.getItem('auth_token');
     const userRole = localStorage.getItem('user_role');
-    
-    // Daftar route yang diperbolehkan tanpa perlu login panel admin
     const guestRoutes = ['Login', 'Register', 'ForgotPassword', 'ResetPassword'];
 
-    // Jika yang login adalah role karyawan dan mengakses route selain guestRoutes
+    // 1. CEK AUTENTIKASI: Jika belum login dan mencoba akses rute selain Guest Routes
+    if (!token && !guestRoutes.includes(to.name)) {
+        return next({ name: 'Login' });
+    }
+
+    // 2. MENCEGAH DOUBLE LOGIN: Jika sudah login tapi mencoba akses halaman Login/Register
+    if (token && guestRoutes.includes(to.name)) {
+        return next({ name: 'Dashboard' }); // Tendang balik ke dashboard
+    }
+
+    // 3. CEK ROLE: Karyawan tidak boleh masuk ke panel admin
     if (userRole === 'karyawan' && !guestRoutes.includes(to.name)) {
         alert('Akses Ditolak: Akun Karyawan tidak diizinkan masuk ke Panel Admin.');
-        
-        // Hapus token dan cache agar kembali terlogout secara otomatis
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_role');
         localStorage.removeItem('user_profile_cache');
-        
         return next({ name: 'Login' });
     }
 
