@@ -194,7 +194,8 @@ const handleLogin = async () => {
             name: userData.name,
             email: userData.email,
             role: userRole,
-            outlet: outletName
+            outlet: outletName,
+            image: userData.image || null,
         }));
         
         showAlert('Login berhasil! Mengalihkan...', 'success');

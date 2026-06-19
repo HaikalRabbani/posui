@@ -228,6 +228,7 @@ const filters = reactive({
 });
 
 const setFilter = (type) => {
+    hoveredPoint.value = null;
     activeFilter.value = type;
     const current = new Date();
     filters.end_date = formatDateLocal(current);

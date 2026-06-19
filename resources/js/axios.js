@@ -1,16 +1,14 @@
 import axios from 'axios';
 
-// Membuat instance global untuk axios
-const myAxios = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.etres.my.id',
+const apiClient = axios.create({
+    baseURL: 'https://api.etres.my.id',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
 });
 
-// Interceptor: Otomatis menyisipkan Bearer Token ke setiap request jika tokennya ada
-myAxios.interceptors.request.use(
+apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('auth_token');
         if (token) {
@@ -23,4 +21,24 @@ myAxios.interceptors.request.use(
     }
 );
 
-export default myAxios;
+apiClient.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            console.warn('Sesi telah habis. Mengeluarkan pengguna...');
+            
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('user_profile_cache');
+            
+            if (window.location.pathname !== '/') {
+                window.location.href = '/'; 
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
+export default apiClient;

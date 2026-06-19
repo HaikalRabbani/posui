@@ -116,7 +116,11 @@ const routes = [
     {
         path: '/shift-management',
         name: 'ShiftManagement',
-        component: Shiftmanagement
+        component: Shiftmanagement,
+        meta: {
+            title: 'Jadwal & Shift',
+            desc: 'Kelola jadwal kerja dan pembagian shift karyawan outlet.'
+        }
     },
     {
         path: '/transactions',

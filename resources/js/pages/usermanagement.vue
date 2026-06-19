@@ -394,7 +394,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../components/adminlayout.vue';
 
@@ -407,6 +407,10 @@ const isLoading = ref(true);
 const isSubmitting = ref(false);
 
 const searchQuery = ref('');
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
+
 const filterRole = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -605,7 +609,7 @@ const submitForm = async (type) => {
     // Password wajib jika form baru dan bukan karyawan
     if (!isEdit && currentForm.role !== 'karyawan') {
         errObj.password = !currentForm.password || currentForm.password.length < 8;
-    } else if (isEdit && currentForm.role !== 'karyawan' && currentForm.password) {
+    } else if (isEdit && currentForm.password) {
         // Jika edit tapi password diisi, minimal 8 karakter
         errObj.password = currentForm.password.length < 8;
     } else {
