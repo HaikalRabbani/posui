@@ -315,14 +315,19 @@ const executeDelete = async () => {
     finally { deleteModal.isDeleting = false; }
 };
 
+// Escape nilai dinamis sebelum disisipkan ke HTML window cetak (cegah XSS).
+const escapeHtml = (val) => String(val ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]));
+
 // FITUR PRINT QR
 const printQr = (table) => {
     const frontEndUrl = `https://pos.etres.my.id/menu/${table.qr_token}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(frontEndUrl)}`;
-    
+
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
-        <html><head><title>Print QR ${table.name}</title>
+        <html><head><title>Print QR ${escapeHtml(table.name)}</title>
         <style>
             body { font-family: 'popins', sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
             .card { background: white; border: 2px dashed #8AAFCC; border-radius: 20px; padding: 40px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -332,10 +337,10 @@ const printQr = (table) => {
             .footer { color: #8AAFCC; font-size: 14px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;}
         </style></head><body>
         <div class="card">
-            <h1>${table.name}</h1>
+            <h1>${escapeHtml(table.name)}</h1>
             <h2>Scan QR untuk Memesan</h2>
             <img src="${qrUrl}" />
-            <div class="footer">${table.outlet?.name || 'POS Restaurant'}</div>
+            <div class="footer">${escapeHtml(table.outlet?.name || 'POS Restaurant')}</div>
         </div>
         <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); }<\/script>
         </body></html>

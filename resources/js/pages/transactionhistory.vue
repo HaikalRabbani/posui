@@ -456,19 +456,26 @@ const saveEdit = async () => {
     }
 };
 
+// Escape nilai dinamis sebelum disisipkan ke HTML window cetak.
+// Data seperti customer_name & item.name bisa berasal dari input pelanggan
+// (pemesanan via QR), jadi tanpa escape ini rawan XSS saat document.write.
+const escapeHtml = (val) => String(val ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]));
+
 // Cetak Struk
 const printReceipt = () => {
     if (!selectedTx.value) return;
     const tx = selectedTx.value;
-    const total = tx.total_price; 
+    const total = tx.total_price;
     let itemsHtml = '';
-    
+
     // Rincian Item
     tx.items.forEach(item => {
         const validQty = item.qty - (item.cancelled_qty || 0);
         if (validQty > 0) {
             itemsHtml += `<div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
-                <div><div>${item.name}</div><div style="color: #555;">${validQty} x ${formatRupiah(item.price)}</div></div>
+                <div><div>${escapeHtml(item.name)}</div><div style="color: #555;">${validQty} x ${formatRupiah(item.price)}</div></div>
                 <div>${formatRupiah(validQty * item.price)}</div></div>`;
         }
     });
@@ -484,10 +491,10 @@ const printReceipt = () => {
 
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     printWindow.document.write(`
-        <html><head><title>Struk - ${tx.invoice}</title>
+        <html><head><title>Struk - ${escapeHtml(tx.invoice)}</title>
         <style>body { font-family: monospace; width: 300px; padding: 20px; } .line { border-top: 1px dashed #000; margin: 10px 0; }</style>
         </head><body><h2 style="text-align:center; margin:0;">POS F&B</h2><div class="line"></div>
-        <p style="font-size:12px;">Outlet: ${tx.outlet}<br>No: ${tx.invoice}<br>Pelanggan: ${tx.customer_name}<br>Kasir: ${tx.cashier}</p><div class="line"></div>
+        <p style="font-size:12px;">Outlet: ${escapeHtml(tx.outlet)}<br>No: ${escapeHtml(tx.invoice)}<br>Pelanggan: ${escapeHtml(tx.customer_name)}<br>Kasir: ${escapeHtml(tx.cashier)}</p><div class="line"></div>
         ${itemsHtml}<div class="line"></div>
         ${summaryHtml}<div class="line"></div>
         <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL AKHIR</span><span>Rp ${formatRupiah(total)}</span></div>
