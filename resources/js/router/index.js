@@ -19,25 +19,25 @@ const routes = [
         path: '/',
         name: 'Login',
         component: Login,
-        meta: { title: 'Login' }
+        meta: { title: 'Login', guest: true }
     },
     {
         path: '/register',
         name: 'Register',
         component: Register,
-        meta: { title: 'Pendaftaran Akun' }
+        meta: { title: 'Pendaftaran Akun', guest: true }
     },
     {
         path: '/forgot-password',
         name: 'ForgotPassword',
         component: ForgotPassword,
-        meta: { title: 'Lupa Password' }
+        meta: { title: 'Lupa Password', guest: true }
     },
     {
         path: '/reset-password',
         name: 'ResetPassword',
         component: ResetPassword,
-        meta: { title: 'Reset Password' }
+        meta: { title: 'Reset Password', guest: true }
     },
     {
         path: '/dashboard',
