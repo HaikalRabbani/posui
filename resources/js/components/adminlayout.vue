@@ -103,6 +103,16 @@
                                 <div v-show="isManagementOpen && (isMobileMenuOpen || !isSidebarMinimized)" class="pl-10 pr-3 py-2 space-y-1 bg-[#F7FAFD] rounded-b-lg">
                                     <router-link
                                         v-if="userRole === 'developer' || userRole === 'manager'"
+                                        to="/outlet-setting"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/outlet-setting' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Outlet
+                                    </router-link>
+                                    
+                                    <router-link
+                                        v-if="userRole === 'developer' || userRole === 'manager'"
                                         to="/users"
                                         class="block px-3 py-2 rounded-md text-[13px] transition-colors"
                                         active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
@@ -119,26 +129,6 @@
                                         :class="[$route.path === '/menu' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
                                     >
                                         Manajemen Menu
-                                    </router-link>
-
-                                    <router-link
-                                        v-if="userRole === 'developer' || userRole === 'manager'"
-                                        to="/outlet-setting"
-                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
-                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                                        :class="[$route.path === '/outlet-setting' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
-                                    >
-                                        Manajemen Outlet
-                                    </router-link>
-
-                                    <router-link
-                                        v-if="userRole !== 'developer'"
-                                        to="/promotions"
-                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
-                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
-                                        :class="[$route.path === '/promotions' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
-                                    >
-                                        Manajemen Promo
                                     </router-link>
 
                                     <router-link
@@ -159,6 +149,16 @@
                                         :class="[$route.path === '/shift-management' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
                                     >
                                         Jadwal & Shift
+                                    </router-link>
+
+                                    <router-link
+                                        v-if="userRole !== 'developer'"
+                                        to="/promotions"
+                                        class="block px-3 py-2 rounded-md text-[13px] transition-colors"
+                                        active-class="bg-[#EBF3FB] text-[#1B4F8A] font-semibold"
+                                        :class="[$route.path === '/promotions' ? '' : 'text-[#5A7A9A] hover:text-[#1A2332]']"
+                                    >
+                                        Manajemen Promo
                                     </router-link>
                                 </div>
                             </transition>
