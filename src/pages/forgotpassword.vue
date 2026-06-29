@@ -91,7 +91,7 @@ const handleForgot = async () => {
     isLoading.value = true;
     
     try {
-        const response = await axios.post('https://api.etres.my.id/api/v1/forgot-password', {
+        const response = await axios.post('http://103.197.190.23:9010/api/v1/forgot-password', {
             email: email.value
         });
 

@@ -339,7 +339,7 @@ const IconStaff = markRaw({ template: '<svg fill="none" stroke="currentColor" vi
 const IconShift = markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' }); // Icon Baru untuk Shift
 
 // Gunakan URL env untuk development, fallback ke production / localhost
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://api.etres.my.id/api/v1'; 
+const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://103.197.190.23:9010/api/v1'; 
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 const userRole = ref(localStorage.getItem('user_role') || 'karyawan');

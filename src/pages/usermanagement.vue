@@ -55,7 +55,7 @@
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-full bg-[#EBF3FB] text-[#1B4F8A] border border-[#D4E4F4] flex items-center justify-center font-bold text-[12px] flex-shrink-0 overflow-hidden shadow-sm">
-                                            <img v-if="user.image" :src="user.image.startsWith('http') ? user.image : `https://api.etres.my.id/storage/${user.image}`" class="w-full h-full object-cover" />
+                                            <img v-if="user.image" :src="user.image.startsWith('http') ? user.image : `http://103.197.190.23:9010/storage/${user.image}`" class="w-full h-full object-cover" />
                                             <span v-else>{{ user.name.charAt(0).toUpperCase() }}</span>
                                         </div>
                                         <div>
@@ -262,7 +262,7 @@
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-[#EBF3FB] text-[#2A7A4B] border border-[#D4E4F4] flex items-center justify-center font-bold text-[11px] flex-shrink-0 overflow-hidden shadow-sm">
-                                                <img v-if="kar.image" :src="kar.image.startsWith('http') ? kar.image : `https://api.etres.my.id/storage/${kar.image}`" class="w-full h-full object-cover" />
+                                                <img v-if="kar.image" :src="kar.image.startsWith('http') ? kar.image : `http://103.197.190.23:9010/storage/${kar.image}`" class="w-full h-full object-cover" />
                                                 <span v-else>{{ kar.name.charAt(0).toUpperCase() }}</span>
                                             </div>
                                             <div>
@@ -399,7 +399,7 @@ import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
 // --- STATE GLOBAL ---
-const apiBase = 'https://api.etres.my.id/api/v1';
+const apiBase = 'http://103.197.190.23:9010/api/v1';
 const currentUserRole = ref(localStorage.getItem('user_role') || 'manager');
 const users = ref([]);
 const outlets = ref([]); 
@@ -532,7 +532,7 @@ const onKarImageSelect = (e) => {
 
 const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    return imagePath.startsWith('http') ? imagePath : `https://api.etres.my.id/storage/${imagePath}`;
+    return imagePath.startsWith('http') ? imagePath : `http://103.197.190.23:9010/storage/${imagePath}`;
 };
 
 const filteredUsers = computed(() => {

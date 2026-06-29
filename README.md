@@ -79,7 +79,7 @@ Semua environment variable **wajib diawali `VITE_`** agar terbaca oleh Vite di s
 
 ```env
 # Base URL REST API
-VITE_API_BASE_URL=https://api.etres.my.id/api/v1
+VITE_API_BASE_URL=http://103.197.190.23:9010/api/v1
 
 # Konfigurasi realtime (Laravel Reverb / Pusher)
 VITE_REVERB_APP_KEY=app-key-reverb-posapi

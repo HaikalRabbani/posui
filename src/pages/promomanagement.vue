@@ -241,7 +241,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import AdminLayout from '../components/adminlayout.vue';
 
-const apiBase = 'https://api.etres.my.id/api/v1';
+const apiBase = 'http://103.197.190.23:9010/api/v1';
 const authHeaders = () => ({ 
     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
     'Accept': 'application/json'

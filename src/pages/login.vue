@@ -160,7 +160,7 @@ const handleLogin = async () => {
     
     try {
         // 1. Eksekusi Login
-        const response = await axios.post('https://api.etres.my.id/api/v1/login', {
+        const response = await axios.post('http://103.197.190.23:9010/api/v1/login', {
             email: form.email,
             password: form.password
         });
@@ -172,7 +172,7 @@ const handleLogin = async () => {
         }
         
         // 2. Tarik Data Profil untuk validasi role
-        const meResponse = await axios.get('https://api.etres.my.id/api/v1/me', {
+        const meResponse = await axios.get('http://103.197.190.23:9010/api/v1/me', {
             headers: { Authorization: `Bearer ${token}` }
         });
         

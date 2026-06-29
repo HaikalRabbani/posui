@@ -321,7 +321,7 @@ const userInitials = computed(() => {
 
 const userImageUrl = computed(() => {
     if (!user.value.image) return null;
-    return user.value.image.startsWith('http') ? user.value.image : `https://api.etres.my.id/storage/${user.value.image}`;
+    return user.value.image.startsWith('http') ? user.value.image : `http://103.197.190.23:9010/storage/${user.value.image}`;
 });
 
 const fetchUserProfile = async () => {
