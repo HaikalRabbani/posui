@@ -144,7 +144,7 @@ import { ref, computed, reactive, onMounted } from 'vue';
 import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-const apiBase = 'http://103.197.190.23:9010/api/v1';
+const apiBase = 'https://api.etres.my.id/api/v1';
 
 // State UI
 const activeTab = ref('profil');
@@ -166,7 +166,7 @@ const existingImage = ref(null);
 const displayImage = computed(() => {
     if (imagePreview.value) return imagePreview.value;
     if (existingImage.value) {
-        return existingImage.value.startsWith('http') ? existingImage.value : `http://103.197.190.23:9010/storage/${existingImage.value}`;
+        return existingImage.value.startsWith('http') ? existingImage.value : `https://api.etres.my.id/storage/${existingImage.value}`;
     }
     return null;
 });

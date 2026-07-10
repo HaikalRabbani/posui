@@ -285,7 +285,7 @@ import { ref, reactive, onMounted } from 'vue';
 import axios from '@/axios';
 import AdminLayout from '../components/adminlayout.vue';
 
-const apiBase = 'http://103.197.190.23:9010/api/v1';
+const apiBase = 'https://api.etres.my.id/api/v1';
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
 // Notification & Form States

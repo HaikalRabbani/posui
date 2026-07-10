@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="min-h-screen flex items-center justify-center bg-[#F0F4F8] font-['Poppins'] py-10 px-4">
         <div class="bg-[#F7FAFD] p-8 rounded-xl shadow-sm border border-[#D4E4F4] w-full max-w-md">
             
@@ -141,7 +141,7 @@ const handleRegister = async () => {
     isLoading.value = true;
     
     try {
-        const response = await axios.post('http://103.197.190.23:9010/api/v1/register', {
+        const response = await axios.post('https://api.etres.my.id/api/v1/register', {
             name: form.name,
             email: form.email,
             password: form.password,

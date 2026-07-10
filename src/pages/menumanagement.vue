@@ -83,7 +83,7 @@
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 rounded-lg bg-[#D4E4F4] overflow-hidden flex-shrink-0 border border-[#D4E4F4] flex items-center justify-center">
-                                            <img v-if="item.image" :src="item.image.startsWith('http') ? item.image : `http://103.197.190.23:9010/storage/${item.image}`" class="w-full h-full object-cover" />
+                                            <img v-if="item.image" :src="item.image.startsWith('http') ? item.image : `https://api.etres.my.id/storage/${item.image}`" class="w-full h-full object-cover" />
                                             <svg v-else class="w-6 h-6 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </div>
                                         <p class="text-[14px] text-[#1A2332] font-semibold leading-tight">{{ item.name }}</p>
@@ -154,7 +154,7 @@
                 <div class="p-6 flex flex-col sm:flex-row gap-6">
                     <div class="w-full sm:w-1/3 flex-shrink-0">
                         <div class="aspect-square rounded-xl bg-[#F0F4F8] border border-[#D4E4F4] overflow-hidden flex items-center justify-center">
-                            <img v-if="viewModal.data.image" :src="viewModal.data.image.startsWith('http') ? viewModal.data.image : `http://103.197.190.23:9010/storage/${viewModal.data.image}`" class="w-full h-full object-cover" />
+                            <img v-if="viewModal.data.image" :src="viewModal.data.image.startsWith('http') ? viewModal.data.image : `https://api.etres.my.id/storage/${viewModal.data.image}`" class="w-full h-full object-cover" />
                             <svg v-else class="w-12 h-12 text-[#8AAFCC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
                     </div>
@@ -372,7 +372,7 @@ import AdminLayout from '../components/adminlayout.vue';
 
 // ================= STATE GLOBAL =================
 const userRole = ref(localStorage.getItem('user_role') || 'karyawan');
-const apiBase = 'http://103.197.190.23:9010/api/v1';
+const apiBase = 'https://api.etres.my.id/api/v1';
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('auth_token')}` });
 
 const products = ref([]);
@@ -555,7 +555,7 @@ const openModal = (item = null) => {
             if (item.image.startsWith('http')) {
                 imagePreview.value = item.image;
             } else {
-                imagePreview.value = `http://103.197.190.23:9010/storage/${item.image}`;
+                imagePreview.value = `https://api.etres.my.id/storage/${item.image}`;
             }
         } else {
             imagePreview.value = null;

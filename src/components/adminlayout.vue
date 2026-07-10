@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="flex h-screen bg-[#F0F4F8] font-['Poppins'] text-[#1A2332] overflow-hidden">
 
         <transition enter-active-class="transition-opacity ease-linear duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition-opacity ease-linear duration-300" leave-from-class="opacity-100" leave-to-class="opacity-0">
@@ -321,7 +321,7 @@ const userInitials = computed(() => {
 
 const userImageUrl = computed(() => {
     if (!user.value.image) return null;
-    return user.value.image.startsWith('http') ? user.value.image : `http://103.197.190.23:9010/storage/${user.value.image}`;
+    return user.value.image.startsWith('http') ? user.value.image : `https://api.etres.my.id/storage/${user.value.image}`;
 });
 
 const fetchUserProfile = async () => {
